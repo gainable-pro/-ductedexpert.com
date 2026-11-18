@@ -1,0 +1,760 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useRouter, useParams } from "next/navigation";
+import Link from "next/link";
+import { Save, ArrowLeft, Loader2, Euro, CheckCircle, Trash2, Mail } from "lucide-react";
+
+export default function EditProspect() {
+    const router = useRouter();
+    const params = useParams();
+    const id = params?.id as string | undefined;
+    const [loading, setLoading] = useState(true);
+    const [saving, setSaving] = useState(false);
+    const [error, setError] = useState("");
+    const [success, setSuccess] = useState("");
+    
+    const [generatingLink, setGeneratingLink] = useState(false);
+    const [paymentLink, setPaymentLink] = useState("");
+    const [emailSentStatus, setEmailSentStatus] = useState<boolean | null>(null);
+    const [emailErrorDetails, setEmailErrorDetails] = useState("");
+    const [copiedLink, setCopiedLink] = useState(false);
+
+    const [sendingPresentation, setSendingPresentation] = useState(false);
+    const [presentationStatus, setPresentationStatus] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+
+    const handleSendPresentationEmail = async () => {
+        if (!formData.email) {
+            setPresentationStatus({ type: 'error', message: 'Veuillez renseigner une adresse e-mail valide.' });
+            return;
+        }
+
+        setSendingPresentation(true);
+        setPresentationStatus(null);
+
+        try {
+            const res = await fetch('/api/commercial/prospects/send-presentation', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    prospectId: id,
+                    email: formData.email,
+                    nomEntreprise: formData.nomEntreprise
+                })
+            });
+
+            const data = await res.json();
+
+            if (res.ok && data.success) {
+                setPresentationStatus({
+                    type: 'success',
+                    message: `✓ E-mail de présentation envoyé avec succès à ${formData.email} !`
+                });
+            } else {
+                setPresentationStatus({
+                    type: 'error',
+                    message: data.error || "Erreur lors de l'envoi de la présentation."
+                });
+            }
+        } catch (err) {
+            setPresentationStatus({
+                type: 'error',
+                message: "Erreur technique lors de l'envoi."
+            });
+        } finally {
+            setSendingPresentation(false);
+        }
+    };
+
+    const handleGeneratePaymentLink = async () => {
+        setGeneratingLink(true);
+        setError("");
+        setSuccess("");
+        setPaymentLink("");
+        setEmailSentStatus(null);
+        setEmailErrorDetails("");
+
+        try {
+            const planId = basePrice === 1200 ? "cvc" : "diag";
+            const res = await fetch("/api/commercial/payment-link", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    prospectId: id,
+                    planId: planId,
+                    discountRate: discount,
+                    email: formData.email
+                })
+            });
+
+            const data = await res.json();
+            if (res.ok && data.url) {
+                setPaymentLink(data.url);
+                setEmailSentStatus(data.emailSent);
+                if (!data.emailSent && data.emailError) {
+                    setEmailErrorDetails(typeof data.emailError === "string" ? data.emailError : JSON.stringify(data.emailError));
+                }
+                setSuccess("Lien de paiement Stripe généré avec succès !");
+            } else {
+                setError(data.message || "Erreur lors de la génération du lien Stripe");
+            }
+        } catch (err) {
+            setError("Erreur technique lors de la génération du lien");
+        } finally {
+            setGeneratingLink(false);
+        }
+    };
+
+    const handleCopyLink = () => {
+        if (paymentLink) {
+            navigator.clipboard.writeText(paymentLink);
+            setCopiedLink(true);
+            setTimeout(() => setCopiedLink(false), 2000);
+        }
+    };
+    
+    const [formData, setFormData] = useState({
+        nomEntreprise: "",
+        nomContact: "",
+        prenomContact: "",
+        email: "",
+        telephone: "",
+        siret: "",
+        adresse: "",
+        siteWeb: "",
+        status: "",
+        commentaire: "",
+        dateRdv: "",
+        heureRdv: "",
+        noteRdv: ""
+    });
+
+    const [saleData, setSaleData] = useState({
+        dateVente: new Date().toISOString().split("T")[0]
+    });
+
+    const [basePrice, setBasePrice] = useState<1200 | 750>(1200);
+    const [discount, setDiscount] = useState<0 | 0.05 | 0.10>(0);
+
+    const [sales, setSales] = useState<any[]>([]);
+    const [expiryInfo, setExpiryInfo] = useState<{
+        assignedAt: string;
+        daysRemaining: number;
+        daysElapsed: number;
+        percentElapsed: number;
+        isExpired: boolean;
+        isSold: boolean;
+        expiryDate: string;
+    } | null>(null);
+
+    useEffect(() => {
+        const fetchProspect = async () => {
+            try {
+                const res = await fetch(`/api/commercial/prospects/${id}`);
+                if (res.ok) {
+                    const data = await res.json();
+                    setFormData({
+                        nomEntreprise: data.prospect.nomEntreprise || "",
+                        nomContact: data.prospect.nomContact || "",
+                        prenomContact: data.prospect.prenomContact || "",
+                        email: data.prospect.email || "",
+                        telephone: data.prospect.telephone || "",
+                        siret: data.prospect.siret || "",
+                        adresse: data.prospect.adresse || "",
+                        siteWeb: data.prospect.siteWeb || "",
+                        status: data.prospect.status || "",
+                        commentaire: data.prospect.commentaire || "",
+                        dateRdv: data.prospect.dateRdv ? new Date(data.prospect.dateRdv).toISOString().split('T')[0] : "",
+                        heureRdv: data.prospect.heureRdv || "",
+                        noteRdv: data.prospect.noteRdv || ""
+                    });
+                    setSales(data.prospect.sales || []);
+                    if (data.prospect.assignedAt) {
+                        setExpiryInfo({
+                            assignedAt: data.prospect.assignedAt,
+                            daysRemaining: data.prospect.daysRemaining,
+                            daysElapsed: data.prospect.daysElapsed,
+                            percentElapsed: data.prospect.percentElapsed,
+                            isExpired: data.prospect.isExpired,
+                            isSold: data.prospect.isSold,
+                            expiryDate: data.prospect.expiryDate
+                        });
+                    }
+                } else {
+                    setError("Prospect introuvable ou accès refusé.");
+                }
+            } catch (err) {
+                setError("Erreur de chargement.");
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        if (id) {
+            fetchProspect();
+        }
+    }, [id]);
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setSaving(true);
+        setError("");
+        setSuccess("");
+
+        try {
+            const res = await fetch(`/api/commercial/prospects/${id}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(formData)
+            });
+
+            if (res.ok) {
+                setSuccess("Prospect mis à jour avec succès.");
+                router.refresh();
+            } else {
+                const data = await res.json();
+                setError(data.message || "Erreur lors de la mise à jour");
+            }
+        } catch (err) {
+            setError("Erreur serveur");
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    const handleLogSale = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setSaving(true);
+        setError("");
+        setSuccess("");
+
+        const finalMontant = basePrice * (1 - discount);
+
+        try {
+            const res = await fetch(`/api/commercial/sales`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    prospectId: id,
+                    paiementType: "EN_LIGNE",
+                    dateVente: saleData.dateVente,
+                    montant: finalMontant
+                })
+            });
+
+            if (res.ok) {
+                setSuccess("Vente enregistrée avec succès !");
+                setFormData(prev => ({ ...prev, status: "VENTE_EFFECTUEE" }));
+                setExpiryInfo(prev => prev ? ({ ...prev, isSold: true, isExpired: false }) : null);
+                const data = await res.json();
+                setSales([...sales, data.sale]);
+            } else {
+                const data = await res.json();
+                setError(data.message || "Erreur lors de l'enregistrement de la vente");
+            }
+        } catch (err) {
+            setError("Erreur serveur");
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    const handleDeleteSale = async (saleId: string) => {
+        if (!confirm("Voulez-vous vraiment supprimer cette vente ?")) return;
+
+        setSaving(true);
+        setError("");
+        setSuccess("");
+
+        try {
+            const res = await fetch(`/api/commercial/sales/${saleId}`, {
+                method: "DELETE"
+            });
+
+            if (res.ok) {
+                setSuccess("Vente supprimée avec succès.");
+                setSales(sales.filter(s => s.id !== saleId));
+            } else {
+                const data = await res.json();
+                setError(data.message || "Erreur lors de la suppression");
+            }
+        } catch (err) {
+            setError("Erreur serveur");
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    if (loading) {
+        return <div className="animate-pulse space-y-6 max-w-3xl mx-auto"><div className="h-8 bg-slate-200 rounded w-1/3"></div><div className="h-64 bg-slate-200 rounded-xl"></div></div>;
+    }
+
+    if (error && !formData.nomEntreprise) {
+        return <div className="max-w-3xl mx-auto p-4 bg-red-50 text-red-600 rounded-lg">{error}</div>;
+    }
+
+    return (
+        <div className="max-w-4xl mx-auto space-y-6">
+            <div className="flex items-center gap-4">
+                <Link href="/commercial/prospects" className="p-2 hover:bg-slate-200 rounded-full transition-colors text-slate-500">
+                    <ArrowLeft className="h-5 w-5" />
+                </Link>
+                <div>
+                    <h1 className="text-2xl font-bold text-slate-900">{formData.nomEntreprise}</h1>
+                    <p className="text-slate-500">Gérez ce prospect ou déclarez une vente.</p>
+                </div>
+            </div>
+
+            {error && <div className="p-4 bg-red-50 text-red-600 rounded-lg">{error}</div>}
+            {success && <div className="p-4 bg-emerald-50 text-emerald-600 rounded-lg flex items-center gap-2"><CheckCircle className="h-5 w-5" /> {success}</div>}
+
+            {/* Chrono 40 Jours & Date d'attribution */}
+            {expiryInfo && (
+                <div className={`p-5 rounded-2xl border transition-all ${
+                    expiryInfo.isSold 
+                        ? "bg-emerald-50/90 border-emerald-300 text-emerald-950 shadow-sm"
+                        : expiryInfo.daysRemaining <= 5
+                            ? "bg-red-50/90 border-red-300 text-red-950 shadow-sm"
+                            : expiryInfo.daysRemaining <= 15
+                                ? "bg-amber-50/90 border-amber-300 text-amber-950 shadow-sm"
+                                : "bg-blue-50/80 border-blue-200 text-blue-950 shadow-sm"
+                }`}>
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div className="space-y-1.5">
+                            <div className="flex flex-wrap items-center gap-2">
+                                <span className="text-2xl">⏱️</span>
+                                <span className="font-extrabold text-base tracking-tight">
+                                    {expiryInfo.isSold 
+                                        ? "Client Gagné Définitivement (Vente Validée)" 
+                                        : `Chrono d'Exclusivité Commerciale : ${expiryInfo.daysRemaining} jour${expiryInfo.daysRemaining > 1 ? 's' : ''} restant${expiryInfo.daysRemaining > 1 ? 's' : ''}`}
+                                </span>
+                                {!expiryInfo.isSold && (
+                                    <span className={`px-2.5 py-0.5 rounded-full text-xs font-black uppercase tracking-wider ${
+                                        expiryInfo.daysRemaining <= 5 
+                                            ? "bg-red-600 text-white animate-pulse" 
+                                            : expiryInfo.daysRemaining <= 15
+                                                ? "bg-amber-600 text-white"
+                                                : "bg-blue-600 text-white"
+                                    }`}>
+                                        J-{expiryInfo.daysRemaining} / 40j
+                                    </span>
+                                )}
+                            </div>
+                            <div className="text-xs text-slate-600 flex flex-wrap items-center gap-x-3 gap-y-1">
+                                <span>
+                                    📅 Date d'attribution : <strong className="text-slate-900 font-bold">{new Date(expiryInfo.assignedAt).toLocaleDateString("fr-FR", { day: 'numeric', month: 'long', year: 'numeric' })}</strong>
+                                </span>
+                                {!expiryInfo.isSold && (
+                                    <span>
+                                        ⏳ Date limite de conclusion : <strong className="text-slate-900 font-bold">{new Date(expiryInfo.expiryDate).toLocaleDateString("fr-FR", { day: 'numeric', month: 'long', year: 'numeric' })}</strong>
+                                    </span>
+                                )}
+                            </div>
+                        </div>
+
+                        {!expiryInfo.isSold && (
+                            <div className="w-full md:w-64 space-y-1.5 shrink-0">
+                                <div className="flex justify-between text-[11px] font-bold text-slate-600">
+                                    <span>Délai de prospection (40j)</span>
+                                    <span>{expiryInfo.percentElapsed}% écoulé</span>
+                                </div>
+                                <div className="w-full h-2.5 bg-slate-200 rounded-full overflow-hidden">
+                                    <div 
+                                        className={`h-full transition-all duration-500 rounded-full ${
+                                            expiryInfo.daysRemaining <= 5 
+                                                ? "bg-red-500" 
+                                                : expiryInfo.daysRemaining <= 15 
+                                                    ? "bg-amber-500" 
+                                                    : "bg-blue-600"
+                                        }`}
+                                        style={{ width: `${Math.max(5, expiryInfo.percentElapsed)}%` }}
+                                    />
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    {!expiryInfo.isSold ? (
+                        <div className="mt-3.5 pt-3 border-t border-slate-200/80 text-[11px] text-slate-700 flex items-center gap-1.5">
+                            <span className="font-extrabold text-amber-800">⚠️ Règle de libération automatique :</span>
+                            <span>Vous disposez d'un délai strict de 40 jours pour contacter le prospect et conclure la vente. Au-delà de 40 jours sans vente conclue, cette fiche est automatiquement libérée et remise dans la base commune pour l'ensemble des commerciaux.</span>
+                        </div>
+                    ) : (
+                        <div className="mt-2.5 pt-2 border-t border-emerald-200 text-xs font-semibold text-emerald-800">
+                            ✓ Vente validée : cette entreprise est désormais un client partenaire affilié à votre portefeuille.
+                        </div>
+                    )}
+                </div>
+            )}
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div className="lg:col-span-2 space-y-6">
+                    <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 space-y-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            {/* Infos Entreprise */}
+                            <div className="space-y-4">
+                                <h2 className="text-lg font-semibold text-slate-800 border-b pb-2">Entreprise</h2>
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-700 mb-1">Nom de l'entreprise *</label>
+                                    <input required type="text" value={formData.nomEntreprise} onChange={e => setFormData({...formData, nomEntreprise: e.target.value})} className="w-full p-2 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500" />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-700 mb-1">SIRET *</label>
+                                    <input required type="text" value={formData.siret} onChange={e => setFormData({...formData, siret: e.target.value})} className="w-full p-2 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500" />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-700 mb-1">Adresse</label>
+                                    <input type="text" value={formData.adresse} onChange={e => setFormData({...formData, adresse: e.target.value})} className="w-full p-2 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500" />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-700 mb-1">Site Web</label>
+                                    <input type="text" value={formData.siteWeb} onChange={e => setFormData({...formData, siteWeb: e.target.value})} className="w-full p-2 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500" placeholder="ex: www.gainable.fr" />
+                                </div>
+                            </div>
+
+                            {/* Infos Contact */}
+                            <div className="space-y-4">
+                                <h2 className="text-lg font-semibold text-slate-800 border-b pb-2">Contact</h2>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-slate-700 mb-1">Nom *</label>
+                                        <input required type="text" value={formData.nomContact} onChange={e => setFormData({...formData, nomContact: e.target.value})} className="w-full p-2 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500" />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-slate-700 mb-1">Prénom</label>
+                                        <input type="text" value={formData.prenomContact} onChange={e => setFormData({...formData, prenomContact: e.target.value})} className="w-full p-2 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500" />
+                                    </div>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-700 mb-1">Email</label>
+                                    <input type="email" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} className="w-full p-2 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500" />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-700 mb-1">Téléphone</label>
+                                    <input type="text" value={formData.telephone} onChange={e => setFormData({...formData, telephone: e.target.value})} className="w-full p-2 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="border-t pt-6 space-y-4">
+                            <h2 className="text-lg font-semibold text-slate-800">Suivi</h2>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-700 mb-1">Statut</label>
+                                    <select 
+                                        value={formData.status} 
+                                        onChange={e => setFormData({...formData, status: e.target.value})} 
+                                        className={`w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 ${formData.status === 'NE_PLUS_DEMARCHER' ? 'bg-red-50 text-red-700 border-red-300 font-bold' : 'border-slate-300'}`}
+                                        disabled={formData.status === "VENTE_EFFECTUEE"} // Empêcher le changement si vente actée
+                                    >
+                                        <option value="NON_CONTACTE">Non contacté</option>
+                                        <option value="CONTACTE">Contacté</option>
+                                        <option value="INTERESSE">Intéressé</option>
+                                        <option value="REFUSE">Refusé</option>
+                                        <option value="VENTE_EFFECTUEE" disabled>Vente effectuée</option>
+                                        <option value="NE_PLUS_DEMARCHER">Ne plus démarcher</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-700 mb-1">Commentaire libre</label>
+                                    <textarea 
+                                        rows={3} 
+                                        value={formData.commentaire} 
+                                        onChange={e => setFormData({...formData, commentaire: e.target.value})} 
+                                        className="w-full p-2 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500"
+                                    ></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Planificateur de RDV & Rappel */}
+                        <div className="border-t pt-6 space-y-4">
+                            <div className="flex items-center justify-between">
+                                <h2 className="text-lg font-semibold text-slate-800 flex items-center gap-2">
+                                    <span>📅</span> Planificateur de RDV & Relance Téléphonique
+                                </h2>
+                                {formData.dateRdv && (
+                                    <span className="bg-amber-100 border border-amber-300 text-amber-900 text-xs font-extrabold px-3 py-1 rounded-full">
+                                        ⏱️ RDV prévu le {new Date(formData.dateRdv).toLocaleDateString("fr-FR")} {formData.heureRdv ? `à ${formData.heureRdv}` : ''}
+                                    </span>
+                                )}
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-50 p-4 rounded-xl border border-slate-200">
+                                <div>
+                                    <label className="block text-xs font-bold text-slate-700 mb-1">Date du RDV / Rappel</label>
+                                    <input 
+                                        type="date" 
+                                        value={formData.dateRdv} 
+                                        onChange={e => setFormData({...formData, dateRdv: e.target.value})} 
+                                        className="w-full p-2.5 bg-white border border-slate-300 rounded-lg text-sm text-slate-900 font-medium"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-bold text-slate-700 mb-1">Heure du RDV</label>
+                                    <input 
+                                        type="time" 
+                                        value={formData.heureRdv} 
+                                        onChange={e => setFormData({...formData, heureRdv: e.target.value})} 
+                                        className="w-full p-2.5 bg-white border border-slate-300 rounded-lg text-sm text-slate-900 font-medium"
+                                    />
+                                </div>
+                                <div className="md:col-span-2">
+                                    <label className="block text-xs font-bold text-slate-700 mb-1">Motif / Note du RDV</label>
+                                    <input 
+                                        type="text" 
+                                        placeholder="ex: Rappeler M. Martin pour valider l'adhésion CVC..."
+                                        value={formData.noteRdv} 
+                                        onChange={e => setFormData({...formData, noteRdv: e.target.value})} 
+                                        className="w-full p-2.5 bg-white border border-slate-300 rounded-lg text-sm text-slate-900 font-medium"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="flex justify-end pt-4 border-t">
+                            <button 
+                                type="submit" 
+                                disabled={saving}
+                                className="flex items-center gap-2 bg-slate-800 text-white px-6 py-2.5 rounded-lg hover:bg-slate-900 transition-colors font-medium disabled:opacity-50"
+                            >
+                                {saving ? <Loader2 className="h-5 w-5 animate-spin" /> : <Save className="h-5 w-5" />}
+                                Enregistrer les modifications
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                {/* Section Vente & Paiement Stripe */}
+                <div className="space-y-6">
+                    {/* Envoyer la présentation Gainable.fr (Bouton Orange) */}
+                    <div className="bg-gradient-to-br from-amber-950/40 via-slate-900 to-slate-900 text-white rounded-xl shadow-lg border border-amber-500/40 p-6 space-y-4">
+                        <div className="flex items-center gap-3">
+                            <div className="h-10 w-10 bg-[#D59B2B] text-slate-950 rounded-full flex items-center justify-center font-bold text-xl shadow-md">
+                                ✉️
+                            </div>
+                            <div>
+                                <h2 className="text-base font-bold text-white">Présentation Gainable.fr</h2>
+                                <p className="text-xs text-slate-400">Envoyer l'email officiel de présentation au prospect</p>
+                            </div>
+                        </div>
+
+                        <button 
+                            type="button" 
+                            onClick={handleSendPresentationEmail}
+                            disabled={sendingPresentation}
+                            className="w-full flex items-center justify-center gap-2 bg-[#D59B2B] hover:bg-[#b88622] text-white font-bold py-3 px-4 rounded-xl transition-all shadow-md hover:shadow-lg disabled:opacity-50 text-sm"
+                        >
+                            {sendingPresentation ? <Loader2 className="h-4 w-4 animate-spin" /> : <Mail className="h-4 w-4" />}
+                            Envoi de présentation mail
+                        </button>
+
+                        {presentationStatus && (
+                            <div className={`text-xs p-3 rounded-lg border font-medium ${
+                                presentationStatus.type === 'success' 
+                                    ? 'bg-emerald-950/80 border-emerald-600/50 text-emerald-300' 
+                                    : 'bg-rose-950/80 border-rose-600/50 text-rose-300'
+                            }`}>
+                                {presentationStatus.message}
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Demande de Paiement Stripe */}
+                    <div className="bg-gradient-to-br from-slate-900 to-slate-800 text-white rounded-xl shadow-lg border border-slate-700 p-6 space-y-4">
+                        <div className="flex items-center gap-3">
+                            <div className="h-10 w-10 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-lg">
+                                💳
+                            </div>
+                            <div>
+                                <h2 className="text-lg font-bold text-white">Demande de Paiement Stripe</h2>
+                                <p className="text-xs text-slate-400">Générer un lien & envoyer par e-mail au client</p>
+                            </div>
+                        </div>
+
+                        <div className="space-y-3 pt-2">
+                            <div>
+                                <label className="block text-xs font-semibold text-slate-300 mb-1">Formule d'adhésion</label>
+                                <select 
+                                    value={basePrice} 
+                                    onChange={e => setBasePrice(Number(e.target.value) as any)}
+                                    className="w-full p-2 bg-slate-800 border border-slate-700 rounded text-sm text-white font-medium focus:ring-2 focus:ring-blue-500"
+                                >
+                                    <option value={1200}>Expert CVC (1 200 € HT)</option>
+                                    <option value={750}>Diag Immo (750 € HT)</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label className="block text-xs font-semibold text-slate-300 mb-1">Code Promo / Remise</label>
+                                <select 
+                                    value={discount} 
+                                    onChange={e => setDiscount(Number(e.target.value) as any)}
+                                    className="w-full p-2 bg-slate-800 border border-slate-700 rounded text-sm text-white font-medium focus:ring-2 focus:ring-blue-500"
+                                >
+                                    <option value={0}>Tarif plein (0% remise)</option>
+                                    <option value={0.05}>Code Promo -5% de remise</option>
+                                    <option value={0.10}>Code Promo -10% de remise</option>
+                                </select>
+                            </div>
+
+                            <div className="bg-slate-950/60 rounded-lg p-3 text-xs space-y-1.5 border border-slate-800">
+                                <div className="flex justify-between text-slate-300">
+                                    <span>Montant final à facturer :</span>
+                                    <span className="font-bold text-white text-sm">{(basePrice * (1 - discount)).toFixed(2)} € HT</span>
+                                </div>
+                                <div className="flex justify-between text-emerald-400 font-semibold pt-1 border-t border-slate-800">
+                                    <span>Votre commission fixe (17%) :</span>
+                                    <span>+ {(basePrice * (1 - discount) * 0.17).toFixed(2)} € HT</span>
+                                </div>
+                            </div>
+
+                            <button 
+                                type="button" 
+                                onClick={handleGeneratePaymentLink}
+                                disabled={generatingLink}
+                                className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-xl transition-all shadow-md disabled:opacity-50 text-sm"
+                            >
+                                {generatingLink ? <Loader2 className="h-4 w-4 animate-spin" /> : <Euro className="h-4 w-4" />}
+                                Envoyer la demande de paiement Stripe
+                            </button>
+
+                            {paymentLink && (
+                                <div className="bg-slate-950 border border-blue-500/50 rounded-xl p-3 space-y-2 mt-3 animate-fadeIn">
+                                    <div className="flex items-center justify-between text-xs text-emerald-400 font-bold">
+                                        <span>✓ Lien Stripe prêt !</span>
+                                        {emailSentStatus ? (
+                                            <span className="text-[10px] bg-emerald-900/60 text-emerald-300 px-2 py-0.5 rounded border border-emerald-700">E-mail envoyé ✉️</span>
+                                        ) : emailErrorDetails ? (
+                                            <span className="text-[10px] bg-amber-950 text-amber-300 px-2 py-0.5 rounded border border-amber-800" title={emailErrorDetails}>E-mail non envoyé (Transmettre le lien ci-dessous)</span>
+                                        ) : null}
+                                    </div>
+                                    <input 
+                                        type="text" 
+                                        readOnly 
+                                        value={paymentLink} 
+                                        className="w-full p-2 bg-slate-900 border border-slate-800 rounded text-xs text-slate-200 font-mono select-all" 
+                                    />
+                                    <button 
+                                        type="button" 
+                                        onClick={handleCopyLink}
+                                        className="w-full py-2 bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold rounded-lg flex items-center justify-center gap-1.5 transition-colors border border-slate-700"
+                                    >
+                                        {copiedLink ? "Lien copié dans le presse-papier ! ✓" : "Copier le lien de paiement"}
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    <div className="bg-emerald-50 rounded-xl shadow-sm border border-emerald-100 p-6">
+                        <div className="flex items-center gap-3 mb-4">
+                            <div className="h-10 w-10 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center">
+                                <Euro className="h-6 w-6" />
+                            </div>
+                            <h2 className="text-lg font-bold text-emerald-800">Déclarer une vente manuelle</h2>
+                        </div>
+                        
+                        <form onSubmit={handleLogSale} className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-emerald-900 mb-1">Date de la vente</label>
+                                <input 
+                                    type="date" 
+                                    required
+                                    value={saleData.dateVente}
+                                    onChange={e => setSaleData({...saleData, dateVente: e.target.value})}
+                                    className="w-full p-2 border border-emerald-200 rounded focus:ring-2 focus:ring-emerald-500 bg-white text-slate-800" 
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-emerald-900 mb-1">Type d'abonnement / Offre</label>
+                                <select 
+                                    value={basePrice} 
+                                    onChange={e => setBasePrice(Number(e.target.value) as any)}
+                                    className="w-full p-2 border border-emerald-200 rounded focus:ring-2 focus:ring-emerald-500 bg-white text-slate-800 font-medium"
+                                >
+                                    <option value={1200}>Expert CVC (1 200 € HT)</option>
+                                    <option value={750}>Diag Immo (750 € HT)</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-emerald-900 mb-1">Code Promo / Remise</label>
+                                <select 
+                                    value={discount} 
+                                    onChange={e => setDiscount(Number(e.target.value) as any)}
+                                    className="w-full p-2 border border-emerald-200 rounded focus:ring-2 focus:ring-emerald-500 bg-white text-slate-800 font-medium"
+                                >
+                                    <option value={0}>Aucun code promo (Tarif plein)</option>
+                                    <option value={0.05}>Code Promo -5% de remise</option>
+                                    <option value={0.10}>Code Promo -10% de remise</option>
+                                </select>
+                            </div>
+
+                            <div className="bg-white/50 rounded p-3 text-sm text-emerald-900 border border-emerald-200/50 space-y-1.5">
+                                <div className="flex justify-between">
+                                    <span>Montant de base :</span>
+                                    <span className="font-semibold">{basePrice} € HT</span>
+                                </div>
+                                {discount > 0 && (
+                                    <div className="flex justify-between text-red-600 font-medium">
+                                        <span>Remise ({discount * 100}%) :</span>
+                                        <span>- {(basePrice * discount).toFixed(2)} € HT</span>
+                                    </div>
+                                )}
+                                <div className="flex justify-between pt-1.5 border-t border-emerald-200/50 font-bold text-emerald-950">
+                                    <span>Montant final à facturer :</span>
+                                    <span>{(basePrice * (1 - discount)).toFixed(2)} € HT</span>
+                                </div>
+                                <div className="flex justify-between text-xs text-emerald-700/80 pt-1">
+                                    <span>Commission fixe (17%) :</span>
+                                    <span className="font-bold">+ {(basePrice * (1 - discount) * 0.17).toFixed(2)} € HT</span>
+                                </div>
+                            </div>
+
+                            <button 
+                                type="submit" 
+                                disabled={saving || sales.length > 0}
+                                className={`w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg transition-colors font-bold mt-2 ${
+                                    sales.length > 0 
+                                    ? "bg-slate-100 text-slate-400 cursor-not-allowed" 
+                                    : "bg-emerald-600 text-white hover:bg-emerald-700"
+                                }`}
+                            >
+                                {saving ? <Loader2 className="h-5 w-5 animate-spin" /> : <CheckCircle className="h-5 w-5" />}
+                                {sales.length > 0 ? "Vente déjà enregistrée" : "Valider la vente manuelle"}
+                            </button>
+                        </form>
+                    </div>
+
+                    {sales.length > 0 && (
+                        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+                            <h3 className="font-bold text-slate-800 mb-4">Ventes réalisées ({sales.length})</h3>
+                            <div className="space-y-3">
+                                {sales.map((sale: any, idx: number) => (
+                                    <div key={sale.id || idx} className="p-3 bg-slate-50 border border-slate-100 rounded-lg text-sm relative group">
+                                        <div className="flex justify-between font-medium text-slate-900 pr-10">
+                                            <span>{sale.montant} € HT</span>
+                                            <span>{new Date(sale.dateVente).toLocaleDateString("fr-FR")}</span>
+                                        </div>
+                                        <div className="text-slate-500 mt-1">
+                                            Paiement en ligne via le site
+                                        </div>
+                                        <button 
+                                            onClick={() => handleDeleteSale(sale.id)}
+                                            className="absolute top-1/2 -translate-y-1/2 right-2 p-2 text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                                            title="Supprimer la vente"
+                                        >
+                                            <Trash2 className="h-5 w-5" />
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+}

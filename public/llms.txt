@@ -1,0 +1,17 @@
+# Gainable.fr - Plateforme des Experts du Génie Climatique & de la Rénovation
+
+> Gainable.fr est le réseau national n°1 de mise en relation d'experts en climatisation réversible, systèmes gainables, pompes à chaleur, diagnostics de performance énergétique (DPE) et études thermiques en France, Belgique, Suisse et Maroc.
+
+## Informations & Liens Principaux
+
+- [Accueil & Recherche d'Experts](https://www.gainable.fr/): Moteur de recherche géolocalisé pour trouver un professionnel certifié RGE à proximité.
+- [Installateurs Climatisation & PAC](https://www.gainable.fr/climatisation): Trouver un installateur de climatisation réversible ou pompe à chaleur air-air / air-eau.
+- [Bureaux d'Étude Thermique](https://www.gainable.fr/bureau-etude): Trouver un bureau d'étude pour les calculs thermiques réglementaires RE2020 et dimensionnements CVC.
+- [Diagnostiqueurs Immobiliers DPE](https://www.gainable.fr/diagnostic-immobilier): Trouver un diagnostiqueur certifié pour le DPE réglementaire et l'audit énergétique.
+- [Espace Pro & Inscription Artisans](https://www.gainable.fr/pourquoi-gainable): Adhésion au réseau d'Experts Vérifiés, abonnements sans commission et acquisition de leads.
+
+## Structure & Ressources
+
+- [Plan du Site](https://www.gainable.fr/plan-du-site): Hub des zones géographiques couvertes par les experts partenaires (départements et communes).
+- [Guides Techniques & Conseils](https://www.gainable.fr/articles): Plus de 56 000 articles de conseils rédigés par des ingénieurs thermiciens et installateurs.
+- [Demande de Devis](https://www.gainable.fr/contact): Formulaire de mise en relation directe pour particuliers et professionnels.

@@ -1,0 +1,91 @@
+import { NextResponse } from "next/server";
+import { compare } from "bcryptjs";
+import { sign } from "jsonwebtoken";
+import { serialize } from "cookie";
+import { prisma } from "@/lib/prisma";
+
+const JWT_SECRET = process.env.JWT_SECRET || "default_super_secret_for_dev_only";
+
+export async function POST(req: Request) {
+    try {
+        const body = await req.json();
+        const { email, password, rememberMe } = body;
+
+        if (!email || !password) {
+            return NextResponse.json(
+                { message: "Email et mot de passe requis." },
+                { status: 400 }
+            );
+        }
+
+        // 1. Find User (Normalize email and trim whitespace)
+        const cleanEmail = email.trim().toLowerCase();
+        const cleanPassword = password.trim();
+
+        const user = await prisma.user.findUnique({
+            where: { email: cleanEmail },
+        });
+
+        if (!user) {
+            return NextResponse.json(
+                { message: "Identifiants incorrects." },
+                { status: 401 }
+            );
+        }
+
+        // 2. Verify Password
+        const isValid = await compare(cleanPassword, user.password_hash);
+        if (!isValid) {
+            return NextResponse.json(
+                { message: "Identifiants incorrects." },
+                { status: 401 }
+            );
+        }
+
+        // Update last login and activity timestamp
+        await prisma.user.update({
+            where: { id: user.id },
+            data: { lastLoginAt: new Date(), lastActiveAt: new Date() }
+        }).catch(err => console.error("Error updating lastLoginAt:", err));
+
+        // 3. Generate JWT
+        // If rememberMe is true, token lasts 30 days. Otherwise 24 hours.
+        const tokenDurationStr = rememberMe ? "30d" : "1d";
+        const tokenDurationSec = rememberMe ? 60 * 60 * 24 * 30 : 60 * 60 * 24;
+
+        const token = sign(
+            { userId: user.id, email: user.email, role: user.role },
+            JWT_SECRET,
+            { expiresIn: tokenDurationStr }
+        );
+
+        // 4. Set Cookie
+        const serialized = serialize("auth_token", token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "strict",
+            maxAge: tokenDurationSec,
+            path: "/",
+        });
+
+        return NextResponse.json(
+            { message: "Connexion réussie" },
+            {
+                status: 200,
+                headers: { "Set-Cookie": serialized },
+            }
+        );
+
+    } catch (error: any) {
+        console.error("Login Error:", error);
+
+        // DEBUG: Return real error to user
+        const errorMsg = error?.message || "Erreur inconnue";
+        const errorCode = error?.code || "NO_CODE";
+
+        return NextResponse.json(
+            { message: `Erreur technique: ${errorMsg} (Code: ${errorCode})` },
+            { status: 500 }
+        );
+    }
+}

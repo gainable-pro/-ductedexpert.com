@@ -1,0 +1,501 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { 
+    TrendingUp, 
+    Users, 
+    Calendar, 
+    Euro,
+    Target,
+    AlertCircle,
+    ChevronLeft,
+    ChevronRight
+} from "lucide-react";
+
+interface DashboardStats {
+    dailyCount: number;
+    dailyCA: number;
+    dailyCommission: number;
+    monthlyCount: number;
+    monthlyCA: number;
+    monthlyCommission: number;
+    yearlyCount: number;
+    yearlyCA: number;
+    pendingProspects: number;
+    pendingSalesCount: number;
+    history: {
+        date: string;
+        count: number;
+        level: number;
+        rate: number;
+        ca: number;
+        commission: number;
+    }[];
+    isFixedRate?: boolean;
+    fixedRateValue?: number;
+}
+
+export default function CommercialDashboard() {
+    const [stats, setStats] = useState<DashboardStats | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [selectedDate, setSelectedDate] = useState(new Date());
+    const [selectedPrice, setSelectedPrice] = useState(1200);
+
+    useEffect(() => {
+        const fetchStats = async () => {
+            setLoading(true);
+            try {
+                const month = selectedDate.getMonth();
+                const year = selectedDate.getFullYear();
+                const res = await fetch(`/api/commercial/stats?month=${month}&year=${year}`);
+                if (res.ok) {
+                    const data = await res.json();
+                    setStats(data);
+                }
+            } catch (error) {
+                console.error(error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchStats();
+    }, [selectedDate]);
+
+    const handlePrevMonth = () => {
+        setSelectedDate(prev => new Date(prev.getFullYear(), prev.getMonth() - 1, 1));
+    };
+
+    const handleNextMonth = () => {
+        setSelectedDate(prev => new Date(prev.getFullYear(), prev.getMonth() + 1, 1));
+    };
+
+    const isCurrentMonth = selectedDate.getMonth() === new Date().getMonth() && selectedDate.getFullYear() === new Date().getFullYear();
+
+    if (loading) {
+        return <div className="animate-pulse space-y-6">
+            <div className="h-8 w-64 bg-slate-200 rounded"></div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {[1, 2, 3].map(i => <div key={i} className="h-32 bg-slate-200 rounded-xl"></div>)}
+            </div>
+        </div>;
+    }
+
+    return (
+        <div className="space-y-8">
+            <div>
+                <h1 className="text-2xl font-bold text-slate-900">Tableau de bord</h1>
+                <p className="text-slate-500 mt-1">Suivez vos performances et commissions en temps réel.</p>
+            </div>
+
+            {/* Daily Stats */}
+            <h2 className="text-lg font-semibold text-slate-800 border-b pb-2">Performances du jour</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <StatCard 
+                    title="Ventes du jour" 
+                    value={stats?.dailyCount || 0} 
+                    icon={<Target className="h-6 w-6 text-blue-500" />}
+                    trend={`${stats?.dailyCount || 0} / 5 objectifs`}
+                />
+                <StatCard 
+                    title="CA Généré (Jour)" 
+                    value={`${stats?.dailyCA || 0} € HT`} 
+                    icon={<TrendingUp className="h-6 w-6 text-emerald-500" />}
+                />
+                <StatCard 
+                    title="Commission (Jour)" 
+                    value={`${stats?.dailyCommission || 0} € HT`} 
+                    icon={<Euro className="h-6 w-6 text-amber-500" />}
+                    highlight
+                />
+            </div>
+
+            {/* Monthly Stats */}
+            <h2 className="text-lg font-semibold text-slate-800 border-b pb-2 mt-8">Performances du mois</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <StatCard 
+                    title="Ventes du mois" 
+                    value={stats?.monthlyCount || 0} 
+                    icon={<Calendar className="h-6 w-6 text-indigo-500" />}
+                />
+                <StatCard 
+                    title="CA Généré (Mois)" 
+                    value={`${stats?.monthlyCA || 0} € HT`} 
+                    icon={<TrendingUp className="h-6 w-6 text-teal-500" />}
+                />
+                <StatCard 
+                    title="Commission Estimée (Mois)" 
+                    value={`${stats?.monthlyCommission || 0} € HT`} 
+                    icon={<Euro className="h-6 w-6 text-orange-500" />}
+                    highlight
+                />
+            </div>
+
+            {/* Prospects */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
+                <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-100 flex items-center justify-between">
+                    <div>
+                        <h3 className="text-sm font-medium text-slate-500">Prospects en attente</h3>
+                        <p className="text-2xl font-bold text-slate-900 mt-2">{stats?.pendingProspects || 0}</p>
+                    </div>
+                    <div className="h-12 w-12 bg-blue-50 rounded-full flex items-center justify-center">
+                        <Users className="h-6 w-6 text-blue-600" />
+                    </div>
+                </div>
+
+                <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-100 flex items-center justify-between">
+                    <div>
+                        <h3 className="text-sm font-medium text-slate-500">Ventes en attente de validation</h3>
+                        <p className="text-2xl font-bold text-orange-600 mt-2">{stats?.pendingSalesCount || 0}</p>
+                    </div>
+                    <div className="h-12 w-12 bg-orange-50 rounded-full flex items-center justify-center">
+                        <AlertCircle className="h-6 w-6 text-orange-600" />
+                    </div>
+                </div>
+
+                <div className="md:col-span-2 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl p-6 shadow-sm text-white flex items-center justify-between">
+                    <div>
+                        <h3 className="text-sm font-medium text-blue-100">Besoin d'aide pour closer ?</h3>
+                        <p className="mt-1 text-sm text-blue-50">Consultez nos ressources et argumentaires de vente.</p>
+                    </div>
+                    <a href="/commercial/resources" className="px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg text-sm font-medium transition-colors">
+                        Voir les astuces
+                    </a>
+                </div>
+            </div>
+
+            {/* Upcoming RDV & Reminders Widget */}
+            <DashboardRdvsWidget />
+
+            {/* Projection Annuelle */}
+            <div className="mt-8 bg-slate-900 rounded-xl p-6 shadow-sm text-white flex flex-col md:flex-row items-center justify-between">
+                <div>
+                    <h3 className="text-lg font-bold">Projection & CA Annuel</h3>
+                    <p className="text-slate-400 text-sm mt-1">Total généré sur l'année en cours :</p>
+                </div>
+                <div className="mt-4 md:mt-0 text-right">
+                    <div className="text-3xl font-black text-emerald-400">{stats?.yearlyCA || 0} € HT</div>
+                    <div className="text-sm font-medium text-slate-300 mt-1">{stats?.yearlyCount || 0} ventes réalisées au total</div>
+                </div>
+            </div>
+
+            {/* Historique du mois (Agenda) */}
+            <div className="mt-8 bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                <div className="p-4 border-b border-slate-200 bg-slate-50 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <h2 className="font-semibold text-slate-800">Agenda des ventes</h2>
+                    <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-2 bg-white border border-slate-200 rounded-lg px-2 py-1 shadow-sm">
+                            <button onClick={handlePrevMonth} className="p-1 hover:bg-slate-100 rounded text-slate-500 transition-colors">
+                                <ChevronLeft className="h-4 w-4" />
+                            </button>
+                            <span className="text-sm font-medium w-32 text-center text-slate-700 capitalize">
+                                {selectedDate.toLocaleDateString("fr-FR", { month: "long", year: "numeric" })}
+                            </span>
+                            <button 
+                                onClick={handleNextMonth} 
+                                disabled={isCurrentMonth}
+                                className={`p-1 rounded transition-colors ${isCurrentMonth ? 'text-slate-300 cursor-not-allowed' : 'text-slate-500 hover:bg-slate-100'}`}
+                            >
+                                <ChevronRight className="h-4 w-4" />
+                            </button>
+                        </div>
+                        <span className="text-xs font-medium bg-slate-200 text-slate-700 px-2 py-1.5 rounded hidden md:block">Tarifs : CVC 1 200€ HT, Diag 750€ HT</span>
+                    </div>
+                </div>
+                <div className="overflow-x-auto">
+                    <table className="w-full text-left text-sm">
+                        <thead className="bg-slate-50 border-b border-slate-200 text-slate-600">
+                            <tr>
+                                <th className="px-6 py-3 font-semibold">Date</th>
+                                <th className="px-6 py-3 font-semibold">Ventes jour</th>
+                                <th className="px-6 py-3 font-semibold">Palier atteint</th>
+                                <th className="px-6 py-3 font-semibold">CA Généré HT</th>
+                                <th className="px-6 py-3 font-semibold text-right text-orange-600">Commission gagnée HT</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100">
+                            {!stats?.history || stats.history.length === 0 ? (
+                                <tr>
+                                    <td colSpan={5} className="px-6 py-8 text-center text-slate-500">Aucune vente ce mois-ci.</td>
+                                </tr>
+                            ) : (
+                                stats.history.map((h, idx) => (
+                                    <tr key={idx} className="hover:bg-slate-50 transition-colors">
+                                        <td className="px-6 py-4 font-medium text-slate-900">
+                                            {new Date(h.date).toLocaleDateString("fr-FR", { weekday: 'long', day: 'numeric', month: 'long' })}
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <span className="inline-flex items-center justify-center bg-blue-100 text-blue-700 h-6 w-6 rounded-full font-bold text-xs">
+                                                {h.count}
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-4 text-slate-600">
+                                            Niveau {h.level} ({h.rate}%)
+                                        </td>
+                                        <td className="px-6 py-4 font-bold text-emerald-600">
+                                            {h.ca} €
+                                        </td>
+                                        <td className="px-6 py-4 text-right font-bold text-orange-600">
+                                            {h.commission} €
+                                        </td>
+                                    </tr>
+                                ))
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            {/* Grille Rappel Premium */}
+            <div className="mt-12 bg-slate-900 rounded-3xl p-8 shadow-xl overflow-hidden relative">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-blue-600/10 rounded-full blur-3xl -mr-32 -mt-32" />
+                
+                <div className="relative z-10">
+                    <div className="flex items-center gap-3 mb-8">
+                        <div className="p-2 bg-blue-600 rounded-lg">
+                            <TrendingUp className="h-5 w-5 text-white" />
+                        </div>
+                        <h3 className="text-xl font-bold text-white">Objectifs & Grille de Commissions</h3>
+                    </div>
+
+                    {stats?.isFixedRate ? (
+                        <div className="space-y-6">
+                            <div className="bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/20 rounded-2xl p-6 text-center">
+                                <p className="text-amber-400 font-bold uppercase tracking-widest text-xs mb-2">Mode de calcul personnalisé</p>
+                                <p className="text-3xl font-black text-white">Taux fixe à {stats.fixedRateValue}%</p>
+                                <p className="text-slate-300 text-sm mt-3 max-w-xl mx-auto">
+                                    Votre compte bénéficie d'un taux de commission fixe personnalisé à {stats.fixedRateValue}% sur le montant HT de chaque vente (ex : {1200 * (stats.fixedRateValue || 17) / 100} € HT pour un Expert CVC et {750 * (stats.fixedRateValue || 17) / 100} € HT pour un Diag Immo), indépendamment du nombre de ventes journalières.
+                                </p>
+                            </div>
+
+                            {/* Simulator for Fixed Rate projection */}
+                            <div className="bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 p-6">
+                                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
+                                    <h4 className="text-base font-bold text-white">Simulateur de Gains (Taux Fixe {stats.fixedRateValue}%)</h4>
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-xs text-slate-400">Offre / Prix :</span>
+                                        <select 
+                                            value={selectedPrice} 
+                                            onChange={(e) => setSelectedPrice(Number(e.target.value))}
+                                            className="bg-slate-800 text-white text-xs border border-white/20 rounded px-2.5 py-1 outline-none font-bold"
+                                        >
+                                            <option value={1200}>1 200 € HT (Expert CVC)</option>
+                                            <option value={750}>750 € HT (Diag Immo)</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div className="overflow-x-auto">
+                                    <table className="w-full text-left text-xs">
+                                        <thead>
+                                            <tr className="border-b border-white/10 text-slate-400">
+                                                <th className="px-6 py-4 font-bold uppercase tracking-wider">Ventes / jour</th>
+                                                <th className="px-6 py-4 font-bold uppercase tracking-wider text-blue-400">Commission / jour</th>
+                                                <th className="px-6 py-4 font-bold uppercase tracking-wider text-emerald-400">Mensuel (estimé 20j d'activité)</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="text-white divide-y divide-white/5">
+                                            {[1, 2, 3, 4, 5].map((v) => {
+                                                const daily = v * selectedPrice * (stats.fixedRateValue || 17) / 100;
+                                                const monthly = daily * 20;
+                                                return (
+                                                    <tr key={v} className="hover:bg-white/5 transition-colors">
+                                                        <td className="px-6 py-4 font-black">{v} {v > 1 ? 'ventes' : 'vente'} / jour</td>
+                                                        <td className="px-6 py-4 text-base font-black text-blue-400">{daily.toFixed(2)} € HT</td>
+                                                        <td className="px-6 py-4 text-base font-black text-emerald-400">{monthly.toFixed(2)} € HT</td>
+                                                    </tr>
+                                                );
+                                            })}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <p className="text-[10px] text-slate-500 mt-4 italic text-center">
+                                    * Simulations basées sur le tarif sélectionné de {selectedPrice} € HT.
+                                </p>
+                            </div>
+                        </div>
+                    ) : (
+                        <>
+                            <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-10">
+                                {[
+                                    { level: "Niveau 1", count: "1 vente/jour", rate: "10%", color: "bg-slate-800" },
+                                    { level: "Niveau 2", count: "2 ventes/jour", rate: "12%", color: "bg-slate-800" },
+                                    { level: "Niveau 3", count: "3 ventes/jour", rate: "13%", color: "bg-slate-800" },
+                                    { level: "Niveau 4", count: "4 ventes/jour", rate: "15%", color: "bg-slate-800 border border-blue-500/30" },
+                                    { level: "Niveau 5", count: "5+ ventes/jour", rate: "17%", color: "bg-blue-600", highlight: true },
+                                ].map((lvl, i) => (
+                                    <div key={i} className={`${lvl.color} rounded-2xl p-4 text-center transition-transform hover:scale-105`}>
+                                        <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">{lvl.level}</p>
+                                        <p className="text-xl font-black text-white">{lvl.rate}</p>
+                                        <p className="text-[9px] text-slate-500 font-medium mt-1">{lvl.count}</p>
+                                    </div>
+                                ))}
+                            </div>
+
+                            <div className="bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 overflow-hidden">
+                                <div className="p-4 border-b border-white/10 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                                    <h4 className="text-sm font-bold text-white uppercase tracking-wider">Simulateur de Gains</h4>
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-xs text-slate-400">Offre / Prix :</span>
+                                        <select 
+                                            value={selectedPrice} 
+                                            onChange={(e) => setSelectedPrice(Number(e.target.value))}
+                                            className="bg-slate-800 text-white text-xs border border-white/20 rounded px-2.5 py-1 outline-none font-bold"
+                                        >
+                                            <option value={1200}>1 200 € HT (Expert CVC)</option>
+                                            <option value={750}>750 € HT (Diag Immo)</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <table className="w-full text-left text-xs">
+                                    <thead>
+                                        <tr className="border-b border-white/10 text-slate-400">
+                                            <th className="px-6 py-4 font-bold uppercase tracking-wider">Ventes / jour</th>
+                                            <th className="px-6 py-4 font-bold uppercase tracking-wider text-blue-400">Commission / jour</th>
+                                            <th className="px-6 py-4 font-bold uppercase tracking-wider text-emerald-400">Mensuel (20j d'activité)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="text-white divide-y divide-white/5">
+                                        {[
+                                            { count: "1 vente", rate: 0.10 },
+                                            { count: "2 ventes", rate: 0.12 },
+                                            { count: "3 ventes", rate: 0.13 },
+                                            { count: "4 ventes", rate: 0.15 },
+                                            { count: "5 ventes", rate: 0.17 },
+                                        ].map((row, i) => {
+                                            const countNum = i + 1;
+                                            const daily = countNum * selectedPrice * row.rate;
+                                            const monthly = daily * 20;
+                                            return (
+                                                <tr key={i} className="hover:bg-white/5 transition-colors">
+                                                    <td className="px-6 py-4 font-black">{row.count} / jour</td>
+                                                    <td className="px-6 py-4 text-base font-black text-blue-400">{daily.toFixed(2)} € HT</td>
+                                                    <td className="px-6 py-4 font-black text-emerald-400">{monthly.toFixed(2)} € HT</td>
+                                                </tr>
+                                            );
+                                        })}
+                                    </tbody>
+                                </table>
+                            </div>
+                            <p className="text-[10px] text-slate-500 mt-4 italic text-center">
+                                * Simulations basées sur le tarif sélectionné de {selectedPrice} € HT. Chaque journée est indépendante.
+                            </p>
+                        </>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+}
+
+function StatCard({ title, value, icon, trend, highlight }: any) {
+    return (
+        <div className={`rounded-xl p-6 shadow-sm border ${highlight ? 'bg-orange-50 border-orange-100' : 'bg-white border-slate-100'}`}>
+            <div className="flex justify-between items-start">
+                <div>
+                    <h3 className={`text-sm font-medium ${highlight ? 'text-orange-800' : 'text-slate-500'}`}>{title}</h3>
+                    <p className={`text-3xl font-bold mt-2 ${highlight ? 'text-orange-600' : 'text-slate-900'}`}>{value}</p>
+                </div>
+                <div className={`h-12 w-12 rounded-full flex items-center justify-center ${highlight ? 'bg-orange-100' : 'bg-slate-50'}`}>
+                    {icon}
+                </div>
+            </div>
+            {trend && (
+                <div className="mt-4 text-sm font-medium text-slate-500">
+                    {trend}
+                </div>
+            )}
+        </div>
+    );
+}
+
+function DashboardRdvsWidget() {
+    const [rdvs, setRdvs] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchRdvs = async () => {
+            try {
+                const res = await fetch("/api/commercial/prospects");
+                if (res.ok) {
+                    const data = await res.json();
+                    const scheduled = (data.prospects || []).filter((p: any) => p.dateRdv);
+                    // Sort chronologically
+                    scheduled.sort((a: any, b: any) => new Date(a.dateRdv).getTime() - new Date(b.dateRdv).getTime());
+                    setRdvs(scheduled);
+                }
+            } catch (e) {
+                console.error(e);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchRdvs();
+    }, []);
+
+    if (loading) return null;
+
+    return (
+        <div className="mt-8 bg-white border border-slate-200 rounded-xl p-6 shadow-sm space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                <div className="flex items-center gap-2">
+                    <span className="text-xl">📅</span>
+                    <div>
+                        <h2 className="font-bold text-slate-900 text-lg">Mes Rappels & Rendez-vous à Venir</h2>
+                        <p className="text-xs text-slate-500">Planification des relances et rendez-vous téléphoniques</p>
+                    </div>
+                </div>
+                <span className="bg-blue-50 border border-blue-200 text-blue-700 font-extrabold text-xs px-3 py-1 rounded-full">
+                    {rdvs.length} RDV planifié(s)
+                </span>
+            </div>
+
+            {rdvs.length === 0 ? (
+                <div className="p-6 text-center text-slate-400 text-xs italic bg-slate-50 rounded-xl border border-dashed border-slate-200">
+                    Aucun rendez-vous planifié pour le moment. Lors de vos appels, fixez des rappels pour les retrouver ici !
+                </div>
+            ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {rdvs.map((p: any) => {
+                        const dateObj = new Date(p.dateRdv);
+                        const dateStr = dateObj.toLocaleDateString("fr-FR", { day: "numeric", month: "short", year: "numeric" });
+                        
+                        return (
+                            <div key={p.id} className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-3 hover:border-blue-400 transition-all">
+                                <div className="flex items-center justify-between">
+                                    <span className="bg-amber-100 border border-amber-300 text-amber-900 font-extrabold text-[11px] px-2.5 py-1 rounded-md flex items-center gap-1">
+                                        ⏱️ {dateStr} {p.heureRdv ? `à ${p.heureRdv}` : ''}
+                                    </span>
+                                    <Link href={`/commercial/prospects/${p.id}`} className="text-xs text-blue-600 hover:underline font-bold">
+                                        Fiche ➔
+                                    </Link>
+                                </div>
+
+                                <div>
+                                    <h4 className="font-extrabold text-slate-900 text-sm truncate">{p.nomEntreprise}</h4>
+                                    <div className="text-xs text-slate-500 font-medium">{p.nomContact} {p.prenomContact || ''}</div>
+                                </div>
+
+                                {p.noteRdv && (
+                                    <div className="bg-white p-2 rounded-lg border border-slate-200 text-[11px] text-slate-600 italic">
+                                        "{p.noteRdv}"
+                                    </div>
+                                )}
+
+                                {p.telephone && (
+                                    <a
+                                        href={`tel:${p.telephone}`}
+                                        className="w-full py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg text-xs flex items-center justify-center gap-1.5 transition-colors shadow-sm"
+                                    >
+                                        📞 Appeler ({p.telephone})
+                                    </a>
+                                )}
+                            </div>
+                        );
+                    })}
+                </div>
+            )}
+        </div>
+    );
+}

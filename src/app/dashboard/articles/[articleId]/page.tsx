@@ -1,0 +1,563 @@
+"use client";
+
+import { useState, useRef, useEffect, use } from "react";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import {
+    AlertCircle, ChevronLeft, Loader2, Save, Image as ImageIcon, X, UploadCloud, Plus,
+    Trash2, HelpCircle, Copy, AlignLeft, Heading, Video, MoveUp, MoveDown, Type, Camera
+} from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
+// --- TYPES ---
+export type BlockType = 'h2' | 'h3' | 'text' | 'image' | 'video';
+
+export interface ContentBlock {
+    id: string;
+    type: BlockType;
+    value: string;
+    alt?: string;
+}
+
+interface FAQItem {
+    id: string;
+    question: string;
+    response: string;
+}
+
+export default function EditArticlePage({ params }: { params: Promise<{ articleId: string }> }) {
+    const router = useRouter();
+    const resolvedParams = use(params);
+    const articleId = resolvedParams.articleId;
+
+    const [isLoading, setIsLoading] = useState(true);
+    const [isSaving, setIsSaving] = useState(false);
+    const [isUploading, setIsUploading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const galleryInputRef = useRef<HTMLInputElement>(null);
+    const cameraInputRef = useRef<HTMLInputElement>(null);
+
+    // --- STATE ---
+    const [title, setTitle] = useState("");
+    const [slug, setSlug] = useState("");
+    const [introduction, setIntroduction] = useState("");
+    const [mainImage, setMainImage] = useState("");
+    const [altText, setAltText] = useState("");
+    const [videoUrl, setVideoUrl] = useState("");
+    const [targetCity, setTargetCity] = useState("");
+    const [currentStatus, setCurrentStatus] = useState<string>("DRAFT");
+
+    // BLOCKS
+    const [blocks, setBlocks] = useState<ContentBlock[]>([]);
+    const [faq, setFaq] = useState<FAQItem[]>([]);
+
+    const [score, setScore] = useState(0);
+    const [scoreMessage, setScoreMessage] = useState("Commencez à rédiger...");
+
+    // --- SEO SCORE CALC (Relaxed) ---
+    useEffect(() => {
+        let s = 0;
+        const countWords = (str: any) => {
+            if (typeof str !== 'string') return 0;
+            return str.trim().split(/\s+/).filter(w => w.length > 0).length;
+        };
+
+        const safeBlocks = Array.isArray(blocks) ? blocks : [];
+        const safeFaq = Array.isArray(faq) ? faq : [];
+
+        const currentWordCount = countWords(title) + countWords(introduction) +
+            safeBlocks.reduce((acc, b) => (b && (b.type === 'text' || b.type === 'h2' || b.type === 'h3')) ? acc + countWords(b.value) : acc, 0) +
+            safeFaq.reduce((acc, f) => (f) ? acc + countWords(f.question) + countWords(f.response) : acc, 0);
+
+        const currentNbH2 = safeBlocks.filter(b => b && b.type === 'h2').length;
+
+        // 1. Word Count (Goal: 500 instead of 800)
+        if (currentWordCount >= 500) s += 40;
+        else s += Math.floor((currentWordCount / 500) * 40);
+
+        // 2. Headings (Goal: 3 H2)
+        if (currentNbH2 >= 3) s += 30;
+        else s += currentNbH2 * 10;
+
+        // 3. FAQ Presence (Min 2)
+        if (safeFaq.length >= 2) s += 20;
+        else s += safeFaq.length * 10;
+
+        // 4. Image Present
+        if (mainImage) s += 10;
+
+        // Cap at 100
+        if (s > 100) s = 100;
+        setScore(s);
+
+        if (s < 50) setScoreMessage("Contenu trop court ou incomplet.");
+        else if (s < 80) setScoreMessage("Bon début ! Ajoutez du contenu.");
+        else setScoreMessage("Excellent ! Prêt à publier.");
+    }, [title, introduction, blocks, faq, mainImage]);
+
+    // --- FETCH DATA ---
+    useEffect(() => {
+        const fetchArticle = async () => {
+            try {
+                const res = await fetch(`/api/dashboard/articles/${articleId}`);
+                if (!res.ok) throw new Error("Article introuvable");
+                const data = await res.json();
+
+                setTitle(data.title);
+                setSlug(data.slug);
+                setIntroduction(data.introduction || "");
+                setMainImage(data.mainImage || "");
+                setAltText(data.altText || "");
+                setTargetCity(data.targetCity || "");
+                setVideoUrl(data.videoUrl || "");
+                setCurrentStatus(data.status || "DRAFT");
+
+                // HYDRATION LOGIC (Robust)
+                let finalBlocks: ContentBlock[] = [];
+                let finalFaq: FAQItem[] = [];
+
+                if (data.jsonContent && typeof data.jsonContent === 'object') {
+                    if (Array.isArray((data.jsonContent as any).blocks)) {
+                        // New Format (Clean)
+                        finalBlocks = (data.jsonContent as any).blocks;
+                        if ((data.jsonContent as any).faq) finalFaq = (data.jsonContent as any).faq;
+                    }
+                    else if ((data.jsonContent as any).sections && Array.isArray((data.jsonContent as any).sections)) {
+                        // OLD Format -> Convert to Blocks
+                        const oldSections = (data.jsonContent as any).sections;
+
+                        oldSections.forEach((s: any) => {
+                            if (!s) return;
+                            if (s.title) finalBlocks.push({ id: Date.now().toString() + Math.random(), type: 'h2', value: s.title });
+                            if (s.content) finalBlocks.push({ id: Date.now().toString() + Math.random(), type: 'text', value: s.content });
+
+                            // Image
+                            if (s.imageUrl) {
+                                finalBlocks.push({
+                                    id: Date.now().toString() + Math.random(),
+                                    type: 'image',
+                                    value: s.imageUrl,
+                                    alt: s.imageAlt || ''
+                                });
+                            }
+
+                            if (s.showSubtitle && s.subtitle) {
+                                finalBlocks.push({ id: Date.now().toString() + Math.random(), type: 'h3', value: s.subtitle });
+                            }
+                        });
+
+                        if ((data.jsonContent as any).faq) finalFaq = (data.jsonContent as any).faq;
+                    }
+                }
+
+                // If blocks is still empty after check, fallback
+                if (finalBlocks.length === 0) {
+                    // Fallback / Corrupted
+                    finalBlocks = [
+                        { id: '1', type: 'h2', value: 'Nouvelle Section' },
+                        { id: '2', type: 'text', value: 'Commencez à écrire ici...' }
+                    ];
+                }
+
+                setBlocks(finalBlocks);
+
+                const normalizeFaq = (fList: any[]): FAQItem[] => {
+                    if (!Array.isArray(fList)) return [];
+                    return fList.map((f: any, idx: number) => ({
+                        id: f.id || String(idx + 1),
+                        question: f.question || f.q || "",
+                        response: f.response || f.r || ""
+                    }));
+                };
+
+                if (!finalFaq.length && !data.faq) {
+                    setFaq([{ id: '1', question: '', response: '' }, { id: '2', question: '', response: '' }]);
+                } else if (data.faq && !finalFaq.length) {
+                    setFaq(normalizeFaq(data.faq as any[]));
+                } else {
+                    setFaq(normalizeFaq(finalFaq));
+                }
+
+
+
+            } catch (err) {
+                setError("Impossible de charger l'article.");
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        fetchArticle();
+    }, [articleId]);
+
+    // --- HELPERS ---
+    const slugify = (text: string) => {
+        return text.toString().toLowerCase()
+            .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+            .replace(/\s+/g, "-").replace(/[^\w\-]+/g, "")
+            .replace(/--+/g, "-").replace(/^-+/, "").replace(/-+$/, "");
+    };
+
+    const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const val = e.target.value;
+        setTitle(val);
+        if (!slug) setSlug(slugify(val));
+    };
+
+
+
+    // --- ACTIONS ---
+    const addBlock = (type: BlockType) => {
+        setBlocks([...blocks, { id: Date.now().toString(), type, value: '' }]);
+    };
+    const removeBlock = (index: number) => {
+        const newB = [...blocks]; newB.splice(index, 1); setBlocks(newB);
+    };
+    const moveBlock = (index: number, dir: 'up' | 'down') => {
+        if ((dir === 'up' && index === 0) || (dir === 'down' && index === blocks.length - 1)) return;
+        const newB = [...blocks];
+        const sw = dir === 'up' ? index - 1 : index + 1;
+        [newB[index], newB[sw]] = [newB[sw], newB[index]];
+        setBlocks(newB);
+    };
+    const updateBlock = (index: number, field: keyof ContentBlock, val: string) => {
+        const newB = [...blocks]; newB[index] = { ...newB[index], [field]: val }; setBlocks(newB);
+    };
+
+    const handleBlockUpload = async (index: number, e: React.ChangeEvent<HTMLInputElement>, isVideo: boolean = false) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        if (isVideo && !['video/mp4', 'video/webm'].includes(file.type)) return alert("Format vidéo incorrect");
+
+        setIsUploading(true);
+        const data = new FormData();
+        data.append("file", file);
+        data.append("folder", "articles");
+        try {
+            const res = await fetch("/api/upload", { method: "POST", body: data });
+            if (!res.ok) throw new Error();
+            const json = await res.json();
+            updateBlock(index, 'value', json.url);
+        } catch { alert("Erreur upload"); }
+        finally { setIsUploading(false); }
+    };
+
+    const handleMainImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        setIsUploading(true);
+        const data = new FormData();
+        data.append("file", file);
+        data.append("folder", "articles");
+        try {
+            const res = await fetch("/api/upload", { method: "POST", body: data });
+            if (!res.ok) throw new Error();
+            const json = await res.json();
+            setMainImage(json.url);
+        } catch { setError("Erreur upload image"); }
+        finally { setIsUploading(false); }
+    };
+
+    const updateFaq = (i: number, f: keyof FAQItem, v: string) => {
+        const n = [...faq]; n[i] = { ...n[i], [f]: v }; setFaq(n);
+    };
+    const addFaq = () => setFaq([...faq, { id: Date.now().toString(), question: '', response: '' }]);
+    const removeFaq = (i: number) => { if (faq.length <= 2) return; const n = [...faq]; n.splice(i, 1); setFaq(n); };
+
+    // --- SUBMIT ---
+    const handleSubmit = async (status: string) => {
+        setIsSaving(true);
+        setError(null);
+
+        let generatedContent = "";
+        blocks.forEach(b => {
+            if (!b.value) return;
+            if (b.type === 'h2') generatedContent += `<h2>${b.value}</h2>`;
+            if (b.type === 'h3') generatedContent += `<h3>${b.value}</h3>`;
+            if (b.type === 'image') generatedContent += `<div class="article-image"><img src="${b.value}" alt="${b.alt || ''}" /></div>`;
+            if (b.type === 'video') generatedContent += `<div class="article-video"><video controls src="${b.value}"></video></div>`;
+            if (b.type === 'text') {
+                generatedContent += b.value.split('\n').filter(line => line.trim() !== '').map(line => `<p>${line}</p>`).join('');
+            }
+        });
+
+        const payload = {
+            title,
+            slug,
+            introduction,
+            mainImage,
+            altText,
+            videoUrl,
+            targetCity,
+            blocks,
+            sections: [],
+            faq,
+            status,
+            content: generatedContent,
+            jsonContent: { blocks, faq }
+        };
+
+        try {
+            const res = await fetch(`/api/dashboard/articles/${articleId}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                if (Array.isArray(data.error)) setError(data.error.map((err: any) => err.message).join(", "));
+                else setError(data.error || "Erreur");
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                return;
+            }
+
+            alert("✅ Article mis à jour !");
+            router.push("/dashboard/articles");
+            router.refresh();
+
+        } catch (err) {
+            setError("Erreur serveur.");
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
+    if (isLoading) return <div className="text-center py-20 flex justify-center"><Loader2 className="animate-spin" /></div>;
+
+    return (
+        <div className="max-w-5xl mx-auto pb-[120px] md:pb-24">
+            {/* Header */}
+            <div className="mb-8 flex items-center gap-4">
+                <Button variant="ghost" size="icon" onClick={() => router.back()}>
+                    <ChevronLeft className="w-5 h-5" />
+                </Button>
+                <div>
+                    <h1 className="text-2xl font-bold text-slate-800">Modifier l'article</h1>
+                    <p className="text-slate-500">Mettez à jour votre contenu (Blocs flexibles).</p>
+                </div>
+            </div>
+
+            {error && (
+                <div className="bg-red-50 text-red-600 p-4 rounded-xl mb-6 flex items-start gap-3 border border-red-100">
+                    <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
+                    <div>{error}</div>
+                </div>
+            )}
+
+            <Card className="bg-slate-50 border-slate-200 mb-8">
+                <CardHeader className="pb-2">
+                    <CardTitle className="text-sm text-slate-700 font-bold uppercase tracking-wider flex items-center gap-2">
+                        Score SEO Global
+                    </CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <div className="flex flex-col md:flex-row items-center gap-6">
+                        <div className="text-center md:text-left shrink-0">
+                            <div className="text-4xl font-bold text-[#D59B2B]">{score}%</div>
+                            <div className="text-xs font-medium px-2 py-1 bg-white rounded-full inline-block mt-1 border">
+                                {scoreMessage}
+                            </div>
+                        </div>
+                        <div className="flex-1 w-full space-y-3">
+                            <div className="h-2 bg-slate-200 rounded-full overflow-hidden w-full">
+                                <div className="h-full bg-[#D59B2B] transition-all duration-500 ease-out" style={{ width: `${score}%` }}></div>
+                            </div>
+                        </div>
+                    </div>
+                </CardContent>
+            </Card>
+
+            <div className="space-y-8">
+                {/* INFO */}
+                    <Card>
+                        <CardHeader className="bg-slate-50 border-b border-slate-100 pb-4">
+                            <CardTitle className="text-base text-slate-800">1. Informations Générales</CardTitle>
+                        </CardHeader>
+                        <CardContent className="pt-6 space-y-4">
+                            <div className="space-y-2">
+                                <Label>Titre Principal (H1)</Label>
+                                <Input value={title} onChange={handleTitleChange} />
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <Label>Slug</Label>
+                                    <Input value={slug} onChange={(e) => setSlug(slugify(e.target.value))} />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label>Ville Ciblée</Label>
+                                    <Input value={targetCity} onChange={(e) => setTargetCity(e.target.value)} />
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    {/* IMAGE */}
+                    <Card>
+                        <CardHeader className="bg-slate-50 border-b border-slate-100 pb-4">
+                            <CardTitle className="text-base text-slate-800">2. Illustration</CardTitle>
+                        </CardHeader>
+                        <CardContent className="pt-6 space-y-4">
+                            <div className="grid md:grid-cols-2 gap-6">
+                                <div className="space-y-2">
+                                    <Label>Image de couverture</Label>
+                                    <input type="file" ref={galleryInputRef} onChange={handleMainImageChange} className="hidden" accept="image/*" />
+                                    <input type="file" ref={cameraInputRef} onChange={handleMainImageChange} className="hidden" accept="image/*" capture="environment" />
+                                    {!mainImage ? (
+                                        <div className="flex gap-3">
+                                            <div onClick={() => cameraInputRef.current?.click()} className="flex-1 border-2 border-dashed border-slate-200 rounded-xl p-4 text-center cursor-pointer hover:bg-slate-50 hover:border-blue-300 transition-all group">
+                                                <Camera className="w-7 h-7 mx-auto text-slate-400 group-hover:text-blue-500 transition-colors mb-1" />
+                                                <span className="text-xs font-medium text-slate-600">Photo</span>
+                                            </div>
+                                            <div onClick={() => galleryInputRef.current?.click()} className="flex-1 border-2 border-dashed border-slate-200 rounded-xl p-4 text-center cursor-pointer hover:bg-slate-50 hover:border-blue-300 transition-all group">
+                                                <ImageIcon className="w-7 h-7 mx-auto text-slate-400 group-hover:text-blue-500 transition-colors mb-1" />
+                                                <span className="text-xs font-medium text-slate-600">Galerie</span>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div className="relative rounded-xl overflow-hidden border border-slate-200 group">
+                                            <img src={mainImage} alt="Preview" className="w-full h-32 object-cover" />
+                                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                                                <Button size="sm" variant="secondary" onClick={() => cameraInputRef.current?.click()}><Camera className="w-4 h-4 mr-1"/>Cam</Button>
+                                                <Button size="sm" variant="secondary" onClick={() => galleryInputRef.current?.click()}><ImageIcon className="w-4 h-4 mr-1"/>Galerie</Button>
+                                                <Button size="sm" variant="destructive" onClick={() => setMainImage("")}><X className="w-4 h-4" /></Button>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                                <div className="space-y-2">
+                                    <Label>Texte Alt</Label>
+                                    <Input value={altText} onChange={(e) => setAltText(e.target.value)} />
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    {/* INTRO */}
+                    <Card>
+                        <CardHeader className="bg-slate-50 border-b border-slate-100 pb-4">
+                            <CardTitle className="text-base text-slate-800">3. Introduction</CardTitle>
+                        </CardHeader>
+                        <CardContent className="pt-6">
+                            <Textarea value={introduction} onChange={(e) => setIntroduction(e.target.value)} className="min-h-[100px]" />
+                        </CardContent>
+                    </Card>
+
+                    {/* BLOCKS */}
+                    <div className="space-y-6">
+                        <div className="flex items-center justify-between">
+                            <h2 className="font-bold text-lg text-slate-800">Contenu (Blocs)</h2>
+                            <p className="text-sm text-slate-500">Ajoutez titre, texte, image, vidéo...</p>
+                        </div>
+                        <div className="space-y-4">
+                            {blocks.map((block, index) => (
+                                <div key={block.id} className="relative group">
+                                    <Card className={`border-l-4 shadow-sm hover:shadow-md transition-all ${block.type === 'h2' ? 'border-l-blue-600' : block.type === 'h3' ? 'border-l-blue-400' : 'border-l-slate-300'}`}>
+                                        <div className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
+                                            <Button variant="ghost" size="sm" onClick={() => moveBlock(index, 'up')} disabled={index === 0}><MoveUp className="w-4 h-4 text-slate-400" /></Button>
+                                            <Button variant="ghost" size="sm" onClick={() => moveBlock(index, 'down')} disabled={index === blocks.length - 1}><MoveDown className="w-4 h-4 text-slate-400" /></Button>
+                                            <Button variant="ghost" size="sm" onClick={() => removeBlock(index)} className="text-red-400 hover:text-red-600"><Trash2 className="w-4 h-4" /></Button>
+                                        </div>
+                                        <CardContent className="p-4 pt-4">
+                                            <div className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-400">
+                                                {block.type}
+                                            </div>
+                                            {block.type === 'h2' && <Input value={block.value} onChange={(e) => updateBlock(index, 'value', e.target.value)} className="font-bold text-lg border-x-0 border-t-0 border-b-2" placeholder="Titre..." />}
+                                            {block.type === 'h3' && <Input value={block.value} onChange={(e) => updateBlock(index, 'value', e.target.value)} className="font-semibold text-md border-x-0 border-t-0 border-b-2" placeholder="Sous-titre..." />}
+                                            {block.type === 'text' && <Textarea value={block.value} onChange={(e) => updateBlock(index, 'value', e.target.value)} className="min-h-[120px]" placeholder="Texte..." />}
+                                            {/* Simplified Image/Video inputs for brevity in this replace call, similar logic to new page */}
+                                            {(block.type === 'image' || block.type === 'video') && (
+                                                <div className="flex gap-2">
+                                                    <Input value={block.value} onChange={(e) => updateBlock(index, 'value', e.target.value)} placeholder="URL..." className="flex-1" />
+                                                    <label className="flex items-center justify-center bg-slate-100 hover:bg-slate-200 text-slate-600 rounded px-3 cursor-pointer border border-slate-200 transition-colors" title="Prendre photo">
+                                                        <Camera className="w-4 h-4" />
+                                                        <input type="file" className="hidden" accept="image/*" capture="environment" onChange={(e) => handleBlockUpload(index, e, block.type === 'video')} />
+                                                    </label>
+                                                    <label className="flex items-center justify-center bg-slate-100 hover:bg-slate-200 text-slate-600 rounded px-3 cursor-pointer border border-slate-200 transition-colors" title="Galerie">
+                                                        <ImageIcon className="w-4 h-4" />
+                                                        <input type="file" className="hidden" accept="image/*" onChange={(e) => handleBlockUpload(index, e, block.type === 'video')} />
+                                                    </label>
+                                                </div>
+                                            )}
+                                        </CardContent>
+                                    </Card>
+                                    <div className="h-4 -my-2 flex items-center justify-center opacity-0 group-hover:opacity-100 z-10 relative">
+                                        <div className="bg-blue-500 rounded-full p-1 cursor-pointer hover:scale-110" onClick={() => {
+                                            const n = [...blocks]; n.splice(index + 1, 0, { id: Date.now().toString(), type: 'text', value: '' }); setBlocks(n);
+                                        }}><Plus className="w-3 h-3 text-white" /></div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+
+                        {/* TOOLBOX */}
+                        <Card className="border-dashed border-2 border-slate-300 bg-slate-50/50">
+                            <CardContent className="p-4 flex flex-wrap gap-2 justify-center">
+                                <Button variant="outline" onClick={() => addBlock('h2')} className="gap-2"><Heading className="w-4 h-4" /> H2</Button>
+                                <Button variant="outline" onClick={() => addBlock('text')} className="gap-2"><AlignLeft className="w-4 h-4" /> Texte</Button>
+                                <Button variant="outline" onClick={() => addBlock('image')} className="gap-2"><ImageIcon className="w-4 h-4" /> Image</Button>
+                                <Button variant="outline" onClick={() => addBlock('h3')} className="gap-2"><Type className="w-4 h-4" /> H3</Button>
+                            </CardContent>
+                        </Card>
+                    </div>
+
+                    {/* FAQ */}
+                    <div className="space-y-4">
+                        <h2 className="font-bold text-lg text-slate-800">FAQ</h2>
+                        {faq.map((item, index) => (
+                            <Card key={item.id} className="border-l-4 border-l-green-500">
+                                <CardContent className="pt-4 space-y-3">
+                                    <div className="flex justify-between"><Label>Q{index + 1}</Label><Button variant="ghost" size="sm" onClick={() => removeFaq(index)}><X className="w-4 h-4 text-red-500" /></Button></div>
+                                    <Input value={item.question} onChange={(e) => updateFaq(index, 'question', e.target.value)} />
+                                    <Textarea value={item.response} onChange={(e) => updateFaq(index, 'response', e.target.value)} />
+                                </CardContent>
+                            </Card>
+                        ))}
+                        <Button variant="outline" onClick={addFaq} className="w-full"><Plus className="w-5 h-5 mr-2" /> Ajouter Question</Button>
+                    </div>
+
+                    {/* VALIDATION */}
+                    <Card className="border-t-4 border-t-blue-500 shadow-md">
+                        <CardContent className="pt-6 flex flex-col md:flex-row items-center justify-center gap-4">
+                            <Button onClick={() => handleSubmit('PUBLISHED')} className="w-full md:w-auto bg-[#D59B2B] hover:bg-[#b88622] font-bold py-6 px-8 text-white" disabled={isSaving}>
+                                {isSaving ? <Loader2 className="animate-spin mr-2" /> : <Save className="mr-2 w-5 h-5" />}
+                                {currentStatus === 'PUBLISHED' ? "Mettre à jour" : "Publier l'article"}
+                            </Button>
+                            <Button variant="outline" onClick={() => handleSubmit('DRAFT')} className="w-full md:w-auto py-6 px-8" disabled={isSaving}>
+                                {currentStatus === 'DRAFT' ? "Enregistrer Brouillon" : "Passer en Brouillon"}
+                            </Button>
+                        </CardContent>
+                    </Card>
+                    
+                    <Card className="bg-purple-50 border-purple-100">
+                        <CardContent className="pt-6 space-y-4">
+                            <div className="flex items-center gap-2 text-sm font-bold text-purple-700">
+                                <HelpCircle className="w-4 h-4" /> Prompt IA
+                            </div>
+                            <p className="text-xs text-slate-600">Générez plus de contenu pour cet article.</p>
+                            <Button variant="secondary" className="w-full text-xs" onClick={() => {
+                                const detailedPrompt = `Tu es un expert d'élite en CVC. Complète ou réécris cet article sur : "${title}".
+Ville : ${targetCity || "Général"}
+Objectif : Atteindre 2000 mots avec une qualité technique irréprochable.
+
+Structure JSON attendue :
+{
+  "introduction": "...",
+  "blocks": [ ... ],
+  "faq": [ ... ]
+}`;
+                                navigator.clipboard.writeText(detailedPrompt);
+                                alert("Prompt de complétion copié !");
+                            }}>
+                                <Copy className="w-3 h-3 mr-2" /> Copier Prompt
+                            </Button>
+                        </CardContent>
+                    </Card>
+            </div>
+        </div>
+    );
+}
