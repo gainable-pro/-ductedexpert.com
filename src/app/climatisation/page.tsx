@@ -1,25 +1,26 @@
 import { Metadata } from "next";
 import { Button } from "@/components/ui/button";
-import { ShieldCheck, Zap, Check } from "lucide-react";
+import { MapPin } from "lucide-react";
 import Link from "next/link";
 import { HeroSlider } from "@/components/climatisation/HeroSlider";
 import { getServerLocale } from "@/lib/server-locale";
-import { getAlternatesUrls, getDictionary, withLocalePath } from "@/lib/i18n";
+import { getAlternatesUrls, withLocalePath } from "@/lib/i18n";
+import { CLIMATISATION_CONTENT } from "@/lib/climatisation-content";
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getServerLocale();
-  const dict = getDictionary(locale);
+  const c = CLIMATISATION_CONTENT[locale] || CLIMATISATION_CONTENT.en;
 
   return {
-    title: dict.climatisationPage.metaTitle,
-    description: dict.climatisationPage.metaDesc,
+    title: c.metaTitle,
+    description: c.metaDesc,
     alternates: {
       canonical: `https://www.ductedexpert.com/${locale}/climatisation`,
       languages: getAlternatesUrls('/climatisation'),
     },
     openGraph: {
-      title: dict.climatisationPage.metaTitle,
-      description: dict.climatisationPage.metaDesc,
+      title: c.metaTitle,
+      description: c.metaDesc,
       url: `https://www.ductedexpert.com/${locale}/climatisation`,
       type: "website",
       images: ["/gainable-fr-climatisation-pompe-a-chaleur-hero.png"],
@@ -29,19 +30,18 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function ClimatisationPage() {
   const locale = await getServerLocale();
-  const dict = getDictionary(locale);
-  const c = dict.climatisationPage;
+  const c = CLIMATISATION_CONTENT[locale] || CLIMATISATION_CONTENT.en;
 
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "WebSite",
-    "name": "DuctedExpert.com - Air Conditioning & Heat Pumps",
+    "name": "DuctedExpert.com - Ducted Air Conditioning & Heat Pumps",
     "url": `https://www.ductedexpert.com/${locale}/climatisation`,
     "description": c.metaDesc,
   };
 
   return (
-    <div className="flex min-h-screen flex-col font-sans">
+    <div className="flex min-h-screen flex-col font-sans text-[#1F2D3D]">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -53,27 +53,27 @@ export default async function ClimatisationPage() {
 
         <div className="container relative z-10 mx-auto text-center px-4">
           <h1 className="text-3xl md:text-5xl lg:text-6xl font-normal text-[#1F2D3D] mb-6 tracking-wide leading-tight uppercase font-montserrat">
-            {c.heroTitle1}<br />{c.heroTitle2}
+            {c.hero.title1}<br />{c.hero.title2}
           </h1>
           <h2 className="text-lg md:text-xl text-[#1F2D3D] mb-10 max-w-4xl mx-auto font-light font-montserrat leading-relaxed">
-            <span className="text-[#D59B2B] font-bold">{c.heroSubtitleHighlight}</span> {c.heroSubtitleRest}
+            <span className="text-[#D59B2B] font-bold">{c.hero.subtitleHighlight}</span> {c.hero.subtitleRest}
           </h2>
 
           <div className="mt-8 flex flex-col items-center gap-4">
             <Link href={withLocalePath("/", locale)}>
               <Button size="lg" className="bg-[#D59B2B] hover:bg-[#b88622] text-white font-bold px-12 py-8 rounded-full text-xl shadow-2xl uppercase tracking-wide transform hover:scale-105 transition-transform w-full sm:w-auto">
-                {c.findExpertBtn}
+                {c.hero.findExpertBtn}
               </Button>
             </Link>
             <Link href={withLocalePath("/inscription", locale)}>
               <Button size="lg" className="bg-[#1F2D3D] hover:bg-[#2c3e50] text-white font-bold px-12 py-8 rounded-full text-lg shadow-2xl transform hover:scale-105 transition-transform w-full sm:w-auto">
-                {c.becomeMemberBtn}
+                {c.hero.joinProBtn}
               </Button>
             </Link>
           </div>
 
           <p className="mt-6 text-sm text-slate-500 font-medium">
-            {c.freeQuotesNote}
+            {c.hero.freeQuotesNote}
           </p>
         </div>
       </section>
@@ -82,72 +82,194 @@ export default async function ClimatisationPage() {
       <section className="bg-white py-12 border-b border-slate-100">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8 text-center">
-            <Link href={withLocalePath("/", locale)} className="flex flex-col items-center group cursor-pointer">
-              <div className="w-24 h-24 mb-4 relative transition-transform transform group-hover:scale-110">
-                <img src="/gainable-fr-climatisation-secteur-maison.png" alt="Residential" className="object-contain w-full h-full scale-[1.3]" />
-              </div>
-            </Link>
-            <Link href={withLocalePath("/", locale)} className="flex flex-col items-center group cursor-pointer">
-              <div className="w-24 h-24 mb-4 relative transition-transform transform group-hover:scale-110">
-                <img src="/gainable-fr-climatisation-secteur-tertiaire.jpg" alt="Commercial" className="object-contain w-full h-full" />
-              </div>
-            </Link>
-            <Link href={withLocalePath("/", locale)} className="flex flex-col items-center group cursor-pointer">
-              <div className="w-24 h-24 mb-4 relative transition-transform transform group-hover:scale-110">
-                <img src="/gainable-fr-climatisation-secteur-commerce.jpg" alt="Retail" className="object-contain w-full h-full" />
-              </div>
-            </Link>
-            <Link href={withLocalePath("/", locale)} className="flex flex-col items-center group cursor-pointer">
-              <div className="w-24 h-24 mb-4 relative transition-transform transform group-hover:scale-110">
-                <img src="/gainable-fr-climatisation-secteur-hotellerie.jpg" alt="Hospitality" className="object-contain w-full h-full" />
-              </div>
-            </Link>
-            <Link href={withLocalePath("/", locale)} className="flex flex-col items-center group cursor-pointer">
-              <div className="w-24 h-24 mb-4 relative transition-transform transform group-hover:scale-110">
-                <img src="/gainable-fr-climatisation-secteur-industrie.png" alt="Industrial" className="object-contain w-full h-full" />
-              </div>
-            </Link>
-            <Link href={withLocalePath("/", locale)} className="flex flex-col items-center group cursor-pointer">
-              <div className="w-24 h-24 mb-4 relative transition-transform transform group-hover:scale-110">
-                <img src="/gainable-fr-climatisation-secteur-sante.jpg" alt="Healthcare" className="object-contain w-full h-full" />
-              </div>
-            </Link>
+            {c.sectors.items.map((sector, i) => (
+              <Link key={i} href={withLocalePath(sector.href, locale)} className="flex flex-col items-center group cursor-pointer">
+                <div className="w-24 h-24 mb-4 relative transition-transform transform group-hover:scale-110">
+                  <img src={sector.img} alt={sector.name} className="object-contain w-full h-full" />
+                </div>
+                <span className="text-sm font-semibold text-slate-700 group-hover:text-[#D59B2B] transition-colors">
+                  {sector.name}
+                </span>
+              </Link>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* BLOCK 2: BENEFITS */}
-      <section className="py-20 bg-slate-50">
-        <div className="container max-w-6xl mx-auto px-4">
-          <div className="grid md:grid-cols-2 gap-12 items-center mb-16">
-            <div>
-              <h2 className="text-3xl md:text-4xl font-bold text-[#1F2D3D] mb-6">
-                {c.sectionWhyTitle}
+      {/* BLOC 1 — Villas et maisons haut de gamme */}
+      <section className="py-16 bg-slate-50">
+        <div className="container max-w-7xl mx-auto px-4">
+          <div className="grid md:grid-cols-2 gap-12 items-center">
+            <div className="order-1">
+              <h2 className="text-3xl font-bold font-montserrat text-[#1F2D3D] mb-6">
+                {c.blockVillas.titlePrefix} <span className="text-[#D59B2B]">{c.blockVillas.titleHighlight}</span> {c.blockVillas.titleSuffix}
               </h2>
-              <p className="text-lg text-slate-600 leading-relaxed mb-8">
-                {c.sectionWhyText}
-              </p>
-              <div className="space-y-4">
-                {c.benefits.map((b, idx) => (
-                  <div key={idx} className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-start gap-4">
-                    <div className="w-8 h-8 rounded-full bg-[#D59B2B]/15 text-[#D59B2B] flex items-center justify-center shrink-0 mt-0.5">
-                      <Check className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <h3 className="font-bold text-[#1F2D3D] text-base">{b.title}</h3>
-                      <p className="text-slate-600 text-sm mt-1">{b.desc}</p>
-                    </div>
-                  </div>
+              <div className="space-y-6 text-[#4A4A4A] text-lg font-montserrat font-medium leading-relaxed">
+                {c.blockVillas.paragraphs.map((p, i) => (
+                  <p key={i}>{p}</p>
                 ))}
               </div>
+              <div className="mt-8">
+                <Link href={withLocalePath("/", locale)}>
+                  <Button className="bg-[#D59B2B] hover:bg-[#b88622] text-white font-bold px-8 py-6 rounded-full text-lg shadow-lg">
+                    {c.blockVillas.btnText}
+                  </Button>
+                </Link>
+              </div>
             </div>
-            <div className="relative">
-              <img
-                src="/gainable-fr-climatisation-pompe-a-chaleur-hero.png"
-                alt={c.metaTitle}
-                className="w-full h-auto rounded-3xl shadow-2xl object-cover"
-              />
+            <div className="order-2">
+              <div className="rounded-2xl overflow-hidden shadow-xl h-[400px]">
+                <img src="/gainable-fr-climatisation-villa-interieur.png" alt={c.blockVillas.titleHighlight} className="w-full h-full object-cover" />
+              </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* BLOC 2 — Climatisation et chauffage pour bâtiments pro */}
+      <section className="py-16 bg-white">
+        <div className="container max-w-7xl mx-auto px-4">
+          <div className="grid md:grid-cols-2 gap-12 items-center">
+            <div className="order-1">
+              <h2 className="text-3xl font-bold font-montserrat text-[#1F2D3D] mb-6">
+                {c.blockCommercial.titlePrefix} <span className="text-[#D59B2B]">{c.blockCommercial.titleHighlight}</span>
+              </h2>
+              <div className="space-y-6 text-[#4A4A4A] text-lg font-montserrat font-medium leading-relaxed">
+                {c.blockCommercial.paragraphs.map((p, i) => (
+                  <p key={i}>{p}</p>
+                ))}
+              </div>
+              <div className="mt-8">
+                <Link href={withLocalePath("/", locale)}>
+                  <Button className="bg-[#D59B2B] hover:bg-[#b88622] text-white font-bold px-8 py-6 rounded-full text-lg shadow-lg">
+                    {c.blockCommercial.btnText}
+                  </Button>
+                </Link>
+              </div>
+            </div>
+            <div className="order-2">
+              <div className="rounded-2xl overflow-hidden shadow-xl h-[400px]">
+                <img src="/gainable-fr-climatisation-hotel-lobby.png" alt={c.blockCommercial.titleHighlight} className="w-full h-full object-cover" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* BLOC 3 — Bureau d’étude CVC */}
+      <section className="py-16 bg-slate-50">
+        <div className="container max-w-7xl mx-auto px-4">
+          <div className="grid md:grid-cols-2 gap-12 items-center">
+            <div className="order-1 md:order-2">
+              <h2 className="text-3xl font-bold font-montserrat text-[#1F2D3D] mb-6">
+                {c.blockEngineering.titlePrefix} <span className="text-[#D59B2B]">{c.blockEngineering.titleHighlight}</span>
+              </h2>
+              <div className="space-y-6 text-[#4A4A4A] text-lg font-montserrat font-medium leading-relaxed">
+                {c.blockEngineering.paragraphs.map((p, i) => (
+                  <p key={i}>{p}</p>
+                ))}
+              </div>
+              <div className="mt-8">
+                <Link href={withLocalePath("/bureau-etude", locale)}>
+                  <Button className="bg-[#D59B2B] hover:bg-[#b88622] text-white font-bold px-8 py-6 rounded-full text-lg shadow-lg">
+                    {c.blockEngineering.btnText}
+                  </Button>
+                </Link>
+              </div>
+            </div>
+            <div className="order-2 md:order-1">
+              <div className="rounded-2xl overflow-hidden shadow-xl h-[400px]">
+                <img src="/gainable-fr-climatisation-ingenieur-cvc.png" alt={c.blockEngineering.titleHighlight} className="w-full h-full object-cover" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* BLOC 4 — Systèmes VRV / DRV */}
+      <section className="py-16 bg-white">
+        <div className="container max-w-7xl mx-auto px-4">
+          <div className="grid md:grid-cols-2 gap-12 items-center">
+            <div className="order-1">
+              <h2 className="text-3xl font-bold font-montserrat text-[#1F2D3D] mb-6">
+                {c.blockVrv.titlePrefix} <span className="text-[#D59B2B]">{c.blockVrv.titleHighlight}</span> {c.blockVrv.titleSuffix}
+              </h2>
+              <div className="space-y-6 text-[#4A4A4A] text-lg font-montserrat font-medium leading-relaxed">
+                {c.blockVrv.paragraphs.map((p, i) => (
+                  <p key={i}>{p}</p>
+                ))}
+              </div>
+              <div className="mt-8">
+                <Link href={withLocalePath("/", locale)}>
+                  <Button className="bg-[#D59B2B] hover:bg-[#b88622] text-white font-bold px-8 py-6 rounded-full text-lg shadow-lg">
+                    {c.blockVrv.btnText}
+                  </Button>
+                </Link>
+              </div>
+            </div>
+            <div className="order-2">
+              <div className="rounded-2xl overflow-hidden shadow-xl h-[400px]">
+                <img src="/gainable-fr-climatisation-vrv-toiture.png" alt={c.blockVrv.titleHighlight} className="w-full h-full object-cover" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* BLOC 5 — CTA et qualité de l’air */}
+      <section className="py-16 bg-slate-50">
+        <div className="container max-w-7xl mx-auto px-4">
+          <div className="grid md:grid-cols-2 gap-12 items-center">
+            <div className="order-1 md:order-2">
+              <h2 className="text-3xl font-bold font-montserrat text-[#1F2D3D] mb-6">
+                <span className="text-[#D59B2B]">{c.blockAhu.titleHighlight}</span> {c.blockAhu.titleSuffix}
+              </h2>
+              <div className="space-y-6 text-[#4A4A4A] text-lg font-montserrat font-medium leading-relaxed">
+                {c.blockAhu.paragraphs.map((p, i) => (
+                  <p key={i}>{p}</p>
+                ))}
+              </div>
+              <div className="mt-8">
+                <Link href={withLocalePath("/", locale)}>
+                  <Button className="bg-[#D59B2B] hover:bg-[#b88622] text-white font-bold px-8 py-6 rounded-full text-lg shadow-lg">
+                    {c.blockAhu.btnText}
+                  </Button>
+                </Link>
+              </div>
+            </div>
+            <div className="order-2 md:order-1">
+              <div className="rounded-2xl overflow-hidden shadow-xl h-[400px]">
+                <img src="/gainable-fr-climatisation-technologie-cta.png" alt={c.blockAhu.titleHighlight} className="w-full h-full object-cover" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* BLOC 6 — NOS ZONES D'INTERVENTION */}
+      <section className="py-16 bg-white border-t border-slate-200">
+        <div className="container mx-auto px-4 text-center">
+          <h2 className="text-2xl font-bold text-[#1F2D3D] mb-8">
+            {c.zones.title}
+          </h2>
+          <div className="flex flex-wrap justify-center gap-3 max-w-5xl mx-auto mb-8">
+            {c.zones.cities.map((city, idx) => (
+              <span key={idx} className="inline-flex items-center gap-2">
+                <span className="text-slate-700 font-semibold px-3 py-1 bg-slate-100 rounded-full text-sm">
+                  {city.name} {city.country ? `(${city.country})` : ""}
+                </span>
+                {idx < c.zones.cities.length - 1 && <span className="text-slate-300">•</span>}
+              </span>
+            ))}
+          </div>
+
+          <div className="flex justify-center mt-8">
+            <Link href={withLocalePath("/", locale)}>
+              <Button variant="outline" className="border-2 border-[#1F2D3D] text-[#1F2D3D] hover:bg-[#1F2D3D] hover:text-white font-bold py-6 px-8 rounded-full shadow-md hover:shadow-xl transition-all h-auto text-lg flex items-center gap-2">
+                <MapPin className="w-5 h-5 text-[#D59B2B]" />
+                {c.zones.allCitiesBtn}
+              </Button>
+            </Link>
           </div>
         </div>
       </section>

@@ -1,10 +1,8 @@
 import { Metadata } from 'next';
-import { getServerLocale } from "@/lib/server-locale";
-import { getAlternatesUrls } from "@/lib/i18n";
-import { LABELS_CONTENT } from "@/lib/page-content";
-import { LabelsPageContent } from "@/components/pages/labels-page-content";
-
-export const dynamic = 'force-dynamic';
+import { getServerLocale } from '@/lib/server-locale';
+import { getAlternatesUrls } from '@/lib/i18n';
+import { LabelsPageContent } from '@/components/pages/labels-page-content';
+import { LABELS_CONTENT } from '@/lib/labels-content';
 
 export async function generateMetadata(): Promise<Metadata> {
     const locale = await getServerLocale();
@@ -13,15 +11,16 @@ export async function generateMetadata(): Promise<Metadata> {
     return {
         title: c.metaTitle,
         description: c.metaDesc,
-        openGraph: {
-            title: c.metaTitle,
-            description: c.metaDesc,
-            images: ['/images/relation-pro-client.png'],
-            type: 'website',
-        },
         alternates: {
             canonical: `https://www.ductedexpert.com/${locale}/labels`,
             languages: getAlternatesUrls('/labels'),
+        },
+        openGraph: {
+            title: c.metaTitle,
+            description: c.metaDesc,
+            url: `https://www.ductedexpert.com/${locale}/labels`,
+            type: 'website',
+            images: ['/gainable-fr-label-qualite-climatisation-rge.png'],
         }
     };
 }
