@@ -1,7 +1,8 @@
 import { Metadata } from 'next';
 import { getServerLocale } from "@/lib/server-locale";
 import { getAlternatesUrls } from "@/lib/i18n";
-import { LabelsPageContent, LABELS_CONTENT } from "@/components/pages/labels-page-content";
+import { LABELS_CONTENT } from "@/lib/page-content";
+import { LabelsPageContent } from "@/components/pages/labels-page-content";
 
 export const dynamic = 'force-dynamic';
 

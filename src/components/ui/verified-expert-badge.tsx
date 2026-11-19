@@ -109,6 +109,7 @@ export function VerifiedExpertBadge({ size = "md", className = "" }: VerifiedExp
                 <g>
                     <image
                         href="/ductedexpert-d-emblem.png"
+                        xlinkHref="/ductedexpert-d-emblem.png"
                         x="12"
                         y="18"
                         width="118"
