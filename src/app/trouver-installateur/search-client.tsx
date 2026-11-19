@@ -14,6 +14,7 @@ import { ContactWizard } from "@/components/features/contact/contact-wizard";
 import { NoResultsForm } from "./no-results-form";
 import { useLanguage } from "@/components/layout/language-provider";
 import { INTERNATIONAL_COUNTRIES, translateTerm } from "@/lib/i18n";
+import { CountryFlag } from "@/components/ui/country-flag";
 
 const SearchMap = dynamic(() => import("@/components/features/search-map"), {
     ssr: false,
@@ -289,17 +290,21 @@ function SearchPageContent({ initialExperts, initialView }: { initialExperts: an
 
                             {/* Filter 4: Country */}
                             <FilterDropdown label={t.home.countryFilter} active={!!countryFilter}>
-                                <div className="space-y-2">
+                                <div className="space-y-1.5 max-h-72 overflow-y-auto pr-1">
                                     {INTERNATIONAL_COUNTRIES.map((c) => (
-                                        <label key={c.value} className="flex items-center gap-2 cursor-pointer">
+                                        <label
+                                            key={c.value}
+                                            className="flex items-center gap-2.5 px-2 py-1.5 rounded-lg hover:bg-slate-50 cursor-pointer transition-colors"
+                                        >
                                             <input
                                                 type="checkbox"
-                                                className="rounded accent-[#D59B2B] w-4 h-4"
+                                                className="rounded accent-[#D59B2B] w-4 h-4 shrink-0"
                                                 checked={countryFilter === c.value}
                                                 onChange={() => setCountryFilter(countryFilter === c.value ? "" : c.value)}
                                             />
-                                            <span className="text-sm text-slate-600">
-                                                {c.flag} {translateTerm(c.value, locale)}
+                                            <CountryFlag code={c.code} alt={c.value} className="w-5 h-3.5" />
+                                            <span className="text-sm font-medium text-slate-700">
+                                                {translateTerm(c.value, locale)}
                                             </span>
                                         </label>
                                     ))}

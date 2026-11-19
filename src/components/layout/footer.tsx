@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useLanguage } from "@/components/layout/language-provider";
 import { LOCALE_LABELS, SUPPORTED_LOCALES, getLocalizedUrl, findRouteByPath, withLocalePath } from "@/lib/i18n";
+import { CountryFlag } from "@/components/ui/country-flag";
 
 export function Footer() {
     const { locale, t } = useLanguage();
@@ -33,7 +34,10 @@ export function Footer() {
                                         : "border-slate-800 text-slate-400 hover:text-white hover:border-slate-600"
                                 }`}
                             >
-                                <span className="hidden sm:inline">{LOCALE_LABELS[loc].flag} </span>{LOCALE_LABELS[loc].name}
+                                <span className="hidden sm:inline-flex items-center mr-1.5">
+                                    <CountryFlag code={LOCALE_LABELS[loc].flagCode} alt={LOCALE_LABELS[loc].name} className="w-3.5 h-2.5" />
+                                </span>
+                                <span>{LOCALE_LABELS[loc].name}</span>
                             </Link>
                         );
                     })}
@@ -41,10 +45,13 @@ export function Footer() {
                         href="https://www.gainable.fr"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="px-3 py-1 rounded-full border border-amber-900/60 text-amber-400 hover:text-white hover:border-amber-400 transition-colors"
+                        className="px-3 py-1 rounded-full border border-amber-900/60 text-amber-400 hover:text-white hover:border-amber-400 transition-colors inline-flex items-center"
                         title="Gainable.fr - Réseau officiel France"
                     >
-                        <span className="hidden sm:inline">🇫🇷 </span>France (Gainable.fr) ↗
+                        <span className="hidden sm:inline-flex items-center mr-1.5">
+                            <CountryFlag code="fr" alt="France" className="w-3.5 h-2.5" />
+                        </span>
+                        <span>France (Gainable.fr) ↗</span>
                     </a>
                 </div>
 

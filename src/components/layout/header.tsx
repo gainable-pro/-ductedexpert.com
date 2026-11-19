@@ -9,6 +9,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import * as React from "react";
 import { useLanguage } from "@/components/layout/language-provider";
 import { LOCALE_LABELS, Locale, SUPPORTED_LOCALES, stripLocalePrefix, withLocalePath, findRouteByPath, getLocalizedUrl } from "@/lib/i18n";
+import { CountryFlag } from "@/components/ui/country-flag";
 
 function LanguageSelector({ mobile = false }: { mobile?: boolean }) {
     const { locale, setLocale } = useLanguage();
@@ -87,7 +88,9 @@ function LanguageSelector({ mobile = false }: { mobile?: boolean }) {
                 aria-label="Select Language"
             >
                 <Globe className="w-3.5 h-3.5 text-[#D59B2B]" />
-                <span className="hidden md:inline">{LOCALE_LABELS[locale].flag}</span>
+                <span className="hidden md:inline-flex items-center">
+                    <CountryFlag code={LOCALE_LABELS[locale].flagCode} alt={locale} className="w-4 h-3" />
+                </span>
                 <span className="uppercase">{locale}</span>
                 <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
             </button>
@@ -110,7 +113,9 @@ function LanguageSelector({ mobile = false }: { mobile?: boolean }) {
                                 }`}
                             >
                                 <span className="flex items-center gap-2">
-                                    <span className="hidden md:inline">{LOCALE_LABELS[loc].flag}</span>
+                                    <span className="hidden md:inline-flex items-center">
+                                        <CountryFlag code={LOCALE_LABELS[loc].flagCode} alt={LOCALE_LABELS[loc].name} className="w-4 h-3" />
+                                    </span>
                                     <span>{LOCALE_LABELS[loc].name}</span>
                                 </span>
                                 <span className="uppercase text-[10px] text-slate-400">{loc}</span>
@@ -126,7 +131,9 @@ function LanguageSelector({ mobile = false }: { mobile?: boolean }) {
                             className="w-full flex items-center justify-between px-3.5 py-2 text-xs font-semibold text-slate-700 hover:bg-amber-50/70 hover:text-[#D59B2B] transition-colors"
                         >
                             <span className="flex items-center gap-2">
-                                <span className="hidden md:inline">🇫🇷</span>
+                                <span className="hidden md:inline-flex items-center">
+                                    <CountryFlag code="fr" alt="France" className="w-4 h-3" />
+                                </span>
                                 <span>Français</span>
                             </span>
                             <span className="inline-flex items-center gap-1 text-[10px] text-amber-700 font-bold uppercase">

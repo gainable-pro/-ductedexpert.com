@@ -3,13 +3,13 @@ export type Locale = 'en' | 'de' | 'fi' | 'es' | 'it' | 'ar';
 export const SUPPORTED_LOCALES: Locale[] = ['en', 'de', 'fi', 'es', 'it', 'ar'];
 export const DEFAULT_LOCALE: Locale = 'en';
 
-export const LOCALE_LABELS: Record<Locale, { name: string; flag: string; htmlLang: string; ogLocale: string; dir?: 'ltr' | 'rtl' }> = {
-    en: { name: 'English', flag: '🇬🇧', htmlLang: 'en', ogLocale: 'en_US', dir: 'ltr' },
-    de: { name: 'Deutsch', flag: '🇩🇪', htmlLang: 'de', ogLocale: 'de_DE', dir: 'ltr' },
-    fi: { name: 'Suomi', flag: '🇫🇮', htmlLang: 'fi', ogLocale: 'fi_FI', dir: 'ltr' },
-    es: { name: 'Español', flag: '🇪🇸', htmlLang: 'es', ogLocale: 'es_ES', dir: 'ltr' },
-    it: { name: 'Italiano', flag: '🇮🇹', htmlLang: 'it', ogLocale: 'it_IT', dir: 'ltr' },
-    ar: { name: 'العربية', flag: '🇸🇦', htmlLang: 'ar', ogLocale: 'ar_AR', dir: 'rtl' },
+export const LOCALE_LABELS: Record<Locale, { name: string; flag: string; flagCode: string; htmlLang: string; ogLocale: string; dir?: 'ltr' | 'rtl' }> = {
+    en: { name: 'English', flag: '🇬🇧', flagCode: 'gb', htmlLang: 'en', ogLocale: 'en_US', dir: 'ltr' },
+    de: { name: 'Deutsch', flag: '🇩🇪', flagCode: 'de', htmlLang: 'de', ogLocale: 'de_DE', dir: 'ltr' },
+    fi: { name: 'Suomi', flag: '🇫🇮', flagCode: 'fi', htmlLang: 'fi', ogLocale: 'fi_FI', dir: 'ltr' },
+    es: { name: 'Español', flag: '🇪🇸', flagCode: 'es', htmlLang: 'es', ogLocale: 'es_ES', dir: 'ltr' },
+    it: { name: 'Italiano', flag: '🇮🇹', flagCode: 'it', htmlLang: 'it', ogLocale: 'it_IT', dir: 'ltr' },
+    ar: { name: 'العربية', flag: '🇸🇦', flagCode: 'sa', htmlLang: 'ar', ogLocale: 'ar_AR', dir: 'rtl' },
 };
 
 export function isValidLocale(val?: string | null): val is Locale {
@@ -633,22 +633,21 @@ export function translateTerm(term: string, locale: Locale): string {
 }
 
 export const INTERNATIONAL_COUNTRIES = [
-    { value: "United Kingdom", flag: "🇬🇧" },
-    { value: "United States", flag: "🇺🇸" },
-    { value: "Germany", flag: "🇩🇪" },
-    { value: "Finland", flag: "🇫🇮" },
-    { value: "Spain", flag: "🇪🇸" },
-    { value: "Italy", flag: "🇮🇹" },
-    { value: "France", flag: "🇫🇷" },
-    { value: "Suisse", flag: "🇨🇭" },
-    { value: "Belgique", flag: "🇧🇪" },
-    { value: "Canada", flag: "🇨🇦" },
-    { value: "Australia", flag: "🇦🇺" },
-    { value: "Maroc", flag: "🇲🇦" },
-    { value: "Saudi Arabia", flag: "🇸🇦" },
-    { value: "United Arab Emirates", flag: "🇦🇪" },
-    { value: "Qatar", flag: "🇶🇦" },
-
+    { value: "United Kingdom", code: "gb", flag: "🇬🇧" },
+    { value: "United States", code: "us", flag: "🇺🇸" },
+    { value: "Germany", code: "de", flag: "🇩🇪" },
+    { value: "Finland", code: "fi", flag: "🇫🇮" },
+    { value: "Spain", code: "es", flag: "🇪🇸" },
+    { value: "Italy", code: "it", flag: "🇮🇹" },
+    { value: "France", code: "fr", flag: "🇫🇷" },
+    { value: "Suisse", code: "ch", flag: "🇨🇭" },
+    { value: "Belgique", code: "be", flag: "🇧🇪" },
+    { value: "Canada", code: "ca", flag: "🇨🇦" },
+    { value: "Australia", code: "au", flag: "🇦🇺" },
+    { value: "Maroc", code: "ma", flag: "🇲🇦" },
+    { value: "Saudi Arabia", code: "sa", flag: "🇸🇦" },
+    { value: "United Arab Emirates", code: "ae", flag: "🇦🇪" },
+    { value: "Qatar", code: "qa", flag: "🇶🇦" },
 ];
 
 export const DICTIONARY: Record<Locale, {
