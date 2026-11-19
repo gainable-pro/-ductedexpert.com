@@ -1,30 +1,8 @@
-import { Metadata } from 'next';
+import { redirect } from 'next/navigation';
 import { getServerLocale } from '@/lib/server-locale';
-import { getAlternatesUrls } from '@/lib/i18n';
-import { LabelsPageContent } from '@/components/pages/labels-page-content';
-import { LABELS_CONTENT } from '@/lib/labels-content';
+import { withLocalePath } from '@/lib/i18n';
 
-export async function generateMetadata(): Promise<Metadata> {
+export default async function LabelsPage() {
     const locale = await getServerLocale();
-    const c = LABELS_CONTENT[locale] || LABELS_CONTENT.en;
-
-    return {
-        title: c.metaTitle,
-        description: c.metaDesc,
-        alternates: {
-            canonical: `https://www.ductedexpert.com/${locale}/labels`,
-            languages: getAlternatesUrls('/labels'),
-        },
-        openGraph: {
-            title: c.metaTitle,
-            description: c.metaDesc,
-            url: `https://www.ductedexpert.com/${locale}/labels`,
-            type: 'website',
-            images: ['/gainable-fr-label-qualite-climatisation-rge.png'],
-        }
-    };
-}
-
-export default function LabelsPage() {
-    return <LabelsPageContent />;
+    redirect(withLocalePath('/verified-expert', locale));
 }

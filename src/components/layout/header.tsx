@@ -179,7 +179,7 @@ export function Header() {
                     />
                 </Link>
 
-                {/* Desktop Nav: Experts, Climatisation, Bureau d'étude (NO Diagnostic Immobilier, NO Marques) */}
+                {/* Desktop Nav: Experts, Air Conditioning, Engineering Office, Verified Expert, Why Us */}
                 <nav className="hidden lg:flex items-center gap-6 text-base font-medium text-slate-700">
                     <Link
                         href={withLocalePath("/", locale)}
@@ -188,25 +188,25 @@ export function Header() {
                         {t.nav.experts}
                     </Link>
                     <Link
-                        href={withLocalePath("/climatisation", locale)}
+                        href={withLocalePath("/air-conditioning", locale)}
                         className="text-sm font-semibold text-slate-700 hover:text-[#D59B2B] transition-colors"
                     >
                         {t.nav.climatisation}
                     </Link>
                     <Link
-                        href={withLocalePath("/bureau-etude", locale)}
+                        href={withLocalePath("/engineering-office", locale)}
                         className="text-sm font-semibold text-slate-700 hover:text-[#D59B2B] transition-colors"
                     >
                         {t.nav.bureauEtude}
                     </Link>
                     <Link
-                        href={withLocalePath("/labels", locale)}
+                        href={withLocalePath("/verified-expert", locale)}
                         className="text-sm font-medium text-slate-600 hover:text-[#D59B2B] transition-colors"
                     >
                         {t.nav.verifiedExpert}
                     </Link>
                     <Link
-                        href={withLocalePath("/pourquoi-gainable", locale)}
+                        href={withLocalePath("/why-ducted-expert", locale)}
                         className="text-sm font-medium text-slate-600 hover:text-[#D59B2B] transition-colors"
                     >
                         {t.nav.whyUs}
@@ -263,28 +263,28 @@ function MobileMenu() {
                         {t.nav.experts}
                     </Link>
                     <Link
-                        href={withLocalePath("/climatisation", locale)}
+                        href={withLocalePath("/air-conditioning", locale)}
                         onClick={() => setIsOpen(false)}
                         className="text-lg font-semibold text-slate-800 hover:text-[#D59B2B] transition-colors"
                     >
                         {t.nav.climatisation}
                     </Link>
                     <Link
-                        href={withLocalePath("/bureau-etude", locale)}
+                        href={withLocalePath("/engineering-office", locale)}
                         onClick={() => setIsOpen(false)}
                         className="text-lg font-semibold text-slate-800 hover:text-[#D59B2B] transition-colors"
                     >
                         {t.nav.bureauEtude}
                     </Link>
                     <Link
-                        href={withLocalePath("/labels", locale)}
+                        href={withLocalePath("/verified-expert", locale)}
                         onClick={() => setIsOpen(false)}
                         className="text-lg font-medium text-slate-700 hover:text-[#D59B2B] transition-colors"
                     >
                         {t.nav.verifiedExpert}
                     </Link>
                     <Link
-                        href={withLocalePath("/pourquoi-gainable", locale)}
+                        href={withLocalePath("/why-ducted-expert", locale)}
                         onClick={() => setIsOpen(false)}
                         className="text-lg font-medium text-slate-700 hover:text-[#D59B2B] transition-colors"
                     >

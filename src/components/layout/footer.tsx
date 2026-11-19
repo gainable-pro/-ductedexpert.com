@@ -44,16 +44,16 @@ export function Footer() {
                     <Link href={withLocalePath("/", locale)} className="hover:text-amber-500 transition-colors text-white/95 font-semibold">
                         {t.footer.findInstaller}
                     </Link>
-                    <Link href={withLocalePath("/climatisation", locale)} className="hover:text-amber-500 transition-colors">
+                    <Link href={withLocalePath("/air-conditioning", locale)} className="hover:text-amber-500 transition-colors">
                         {t.nav.climatisation}
                     </Link>
-                    <Link href={withLocalePath("/bureau-etude", locale)} className="hover:text-amber-500 transition-colors">
+                    <Link href={withLocalePath("/engineering-office", locale)} className="hover:text-amber-500 transition-colors">
                         {t.nav.bureauEtude}
                     </Link>
-                    <Link href={withLocalePath("/labels", locale)} className="hover:text-amber-500 transition-colors">
+                    <Link href={withLocalePath("/verified-expert", locale)} className="hover:text-amber-500 transition-colors">
                         {t.nav.verifiedExpert}
                     </Link>
-                    <Link href={withLocalePath("/pourquoi-gainable", locale)} className="hover:text-amber-500 transition-colors">
+                    <Link href={withLocalePath("/why-ducted-expert", locale)} className="hover:text-amber-500 transition-colors">
                         {t.footer.whyDuctedExpert}
                     </Link>
                     <Link href={withLocalePath("/contact", locale)} className="hover:text-amber-500 transition-colors">
@@ -62,19 +62,19 @@ export function Footer() {
                     <Link href={withLocalePath("/inscription", locale)} className="hover:text-amber-500 transition-colors text-amber-500/90 font-semibold">
                         {t.footer.proSpace}
                     </Link>
-                    <Link href={withLocalePath("/mentions-legales", locale)} className="hover:text-amber-500 transition-colors">
+                    <Link href={withLocalePath("/legal-notice", locale)} className="hover:text-amber-500 transition-colors">
                         {t.footer.legalNotice}
                     </Link>
-                    <Link href={withLocalePath("/politique-confidentialite", locale)} className="hover:text-amber-500 transition-colors">
+                    <Link href={withLocalePath("/privacy-policy", locale)} className="hover:text-amber-500 transition-colors">
                         {t.footer.privacyPolicy}
                     </Link>
-                    <Link href={withLocalePath("/politique-cookies", locale)} className="hover:text-amber-500 transition-colors">
+                    <Link href={withLocalePath("/cookies-policy", locale)} className="hover:text-amber-500 transition-colors">
                         {t.footer.cookiesPolicy}
                     </Link>
-                    <Link href={withLocalePath("/cgu", locale)} className="hover:text-amber-500 transition-colors">
+                    <Link href={withLocalePath("/terms-of-use", locale)} className="hover:text-amber-500 transition-colors">
                         {t.footer.termsOfUse}
                     </Link>
-                    <Link href={withLocalePath("/cgv", locale)} className="hover:text-amber-500 transition-colors">
+                    <Link href={withLocalePath("/terms-of-sale", locale)} className="hover:text-amber-500 transition-colors">
                         {t.footer.termsOfSale}
                     </Link>
                 </div>

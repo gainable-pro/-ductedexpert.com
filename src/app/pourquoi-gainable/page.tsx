@@ -1,30 +1,8 @@
-import { Metadata } from 'next';
+import { redirect } from 'next/navigation';
 import { getServerLocale } from '@/lib/server-locale';
-import { getAlternatesUrls } from '@/lib/i18n';
-import { WhyPageContent } from '@/components/pages/why-page-content';
-import { WHY_CONTENT } from '@/lib/why-content';
+import { withLocalePath } from '@/lib/i18n';
 
-export async function generateMetadata(): Promise<Metadata> {
+export default async function PourquoiGainablePage() {
     const locale = await getServerLocale();
-    const c = WHY_CONTENT[locale] || WHY_CONTENT.en;
-
-    return {
-        title: c.metaTitle,
-        description: c.metaDesc,
-        alternates: {
-            canonical: `https://www.ductedexpert.com/${locale}/pourquoi-gainable`,
-            languages: getAlternatesUrls('/pourquoi-gainable'),
-        },
-        openGraph: {
-            title: c.metaTitle,
-            description: c.metaDesc,
-            url: `https://www.ductedexpert.com/${locale}/pourquoi-gainable`,
-            type: 'website',
-            images: ['/images/constat-terrain.png'],
-        }
-    };
-}
-
-export default function PourquoiGainablePage() {
-    return <WhyPageContent />;
+    redirect(withLocalePath('/why-ducted-expert', locale));
 }

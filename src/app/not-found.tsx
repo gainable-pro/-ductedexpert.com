@@ -26,7 +26,7 @@ export default function NotFound() {
               Retour à l'accueil
             </Button>
           </Link>
-          <Link href="/trouver-installateur">
+          <Link href="/find-installer">
             <Button variant="outline" className="w-full sm:w-auto border-slate-300 hover:bg-slate-50 text-[#1F2D3D] font-semibold px-6 py-3 rounded-xl flex items-center justify-center gap-2">
               <Search className="w-4 h-4 text-[#D59B2B]" />
               Trouver un installateur

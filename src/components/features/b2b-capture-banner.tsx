@@ -44,7 +44,7 @@ export function B2bCaptureBanner({ cityName, department, countryCode }: B2bCaptu
                 </div>
 
                 <div className="w-full md:w-auto shrink-0 flex flex-col gap-3">
-                    <Link href="/pourquoi-gainable" className="inline-block w-full">
+                    <Link href="/why-ducted-expert" className="inline-block w-full">
                         <Button size="lg" className="w-full bg-[#D59B2B] hover:bg-[#b88622] text-white font-bold h-14 px-8 text-lg rounded-xl transition-transform hover:scale-105 shadow-xl">
                             Voir les avantages pros
                             <ArrowRight className="ml-2 w-5 h-5" />

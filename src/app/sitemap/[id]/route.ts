@@ -19,20 +19,17 @@ export async function GET(
         if (id === 0) {
             const nowStr = new Date().toISOString();
 
-            // 1. Static pages (strictly existing 200 OK indexable routes - excluding noindex pages)
+            // 1. Static pages (strictly existing 200 OK indexable routes in English)
             const staticUrls = [
                 '',
-                '/trouver-installateur',
-                '/bureau-etude',
-                '/diagnostic-immobilier',
-                '/la-solution-gainable',
-                '/pourquoi-gainable',
-                '/faq-visibilite-referencement',
-                '/labels',
-                '/materiel',
-                '/articles',
-                '/plan-du-site',
+                '/air-conditioning',
+                '/engineering-office',
+                '/verified-expert',
+                '/why-ducted-expert',
+                '/find-installer',
                 '/contact',
+                '/terms-of-use',
+                '/terms-of-sale',
             ].map(r => `  <url><loc>${BASE_URL}${r}</loc><lastmod>${nowStr}</lastmod><changefreq>daily</changefreq><priority>${r === '' ? '1.0' : '0.8'}</priority></url>`);
 
             // 2. Active Experts + Real Artisan Articles in Sitemap 0 (Priority Crawl)

@@ -1,27 +1,8 @@
-import { Metadata } from 'next';
+import { redirect } from 'next/navigation';
 import { getServerLocale } from '@/lib/server-locale';
-import { getAlternatesUrls } from '@/lib/i18n';
-import { CgvPageContent } from '@/components/pages/cgv-page-content';
-import { CGV_CONTENT } from '@/lib/cgv-content';
+import { withLocalePath } from '@/lib/i18n';
 
-export async function generateMetadata(): Promise<Metadata> {
+export default async function CgvRedirect() {
     const locale = await getServerLocale();
-    const c = CGV_CONTENT[locale] || CGV_CONTENT.en;
-
-    return {
-        title: c.metaTitle,
-        description: c.metaDesc,
-        alternates: {
-            canonical: `https://www.ductedexpert.com/${locale}/cgv`,
-            languages: getAlternatesUrls('/cgv'),
-        },
-        robots: {
-            index: true,
-            follow: true,
-        },
-    };
-}
-
-export default function ConditionsGeneralesVentePage() {
-    return <CgvPageContent />;
+    redirect(withLocalePath('/terms-of-sale', locale));
 }
