@@ -2,6 +2,8 @@
 
 @theme {
   --font-sans: var(--font-montserrat), "Inter", sans-serif;
+  --font-cairo: var(--font-cairo), "Cairo", sans-serif;
+  --font-tajawal: var(--font-tajawal), "Tajawal", sans-serif;
 
   /* Gainable.fr Identity Colors */
   --color-primary: #1F2D3D;
@@ -35,6 +37,111 @@
   h6 {
     @apply font-bold tracking-tight text-primary-dark;
   }
+}
+
+/* ========================================================
+   ARABIC TYPOGRAPHY SPECIFICATION:
+   - Titres:       Cairo 700 Bold
+   - Paragraphes:  Tajawal 400 ou 500
+   - Menu:         Cairo 600 Semi-Bold
+   - Boutons:      Cairo 600 Semi-Bold
+   ======================================================== */
+
+html[lang="ar"],
+html[dir="rtl"],
+[dir="rtl"] {
+  --font-sans: var(--font-tajawal), "Tajawal", sans-serif;
+  font-family: var(--font-tajawal), "Tajawal", sans-serif;
+}
+
+/* 1. Titres: Cairo 700 Bold */
+html[lang="ar"] h1,
+html[lang="ar"] h2,
+html[lang="ar"] h3,
+html[lang="ar"] h4,
+html[lang="ar"] h5,
+html[lang="ar"] h6,
+html[dir="rtl"] h1,
+html[dir="rtl"] h2,
+html[dir="rtl"] h3,
+html[dir="rtl"] h4,
+html[dir="rtl"] h5,
+html[dir="rtl"] h6,
+html[lang="ar"] .font-montserrat,
+html[dir="rtl"] .font-montserrat,
+[dir="rtl"] .font-montserrat {
+  font-family: var(--font-cairo), "Cairo", sans-serif !important;
+  font-weight: 700 !important;
+  letter-spacing: normal !important;
+}
+
+/* 2. Paragraphes: Tajawal 400 ou 500 */
+html[lang="ar"] p,
+html[dir="rtl"] p,
+html[lang="ar"] article,
+html[dir="rtl"] article,
+html[lang="ar"] li,
+html[dir="rtl"] li,
+html[lang="ar"] label,
+html[dir="rtl"] label,
+html[lang="ar"] span:not(header *):not(button *):not([role="button"] *),
+html[dir="rtl"] span:not(header *):not(button *):not([role="button"] *) {
+  font-family: var(--font-tajawal), "Tajawal", sans-serif;
+  letter-spacing: normal;
+}
+
+html[lang="ar"] p,
+html[dir="rtl"] p,
+html[lang="ar"] li,
+html[dir="rtl"] li {
+  font-weight: 400;
+}
+
+html[lang="ar"] p strong,
+html[dir="rtl"] p strong,
+html[lang="ar"] p b,
+html[dir="rtl"] p b,
+html[lang="ar"] li strong,
+html[dir="rtl"] li strong,
+html[lang="ar"] .font-medium,
+html[dir="rtl"] .font-medium,
+html[lang="ar"] .font-semibold,
+html[dir="rtl"] .font-semibold {
+  font-weight: 500 !important;
+}
+
+/* 3. Menu: Cairo 600 Semi-Bold */
+html[lang="ar"] header nav,
+html[dir="rtl"] header nav,
+html[lang="ar"] header nav a,
+html[dir="rtl"] header nav a,
+html[lang="ar"] header a,
+html[dir="rtl"] header a,
+html[lang="ar"] [role="navigation"],
+html[dir="rtl"] [role="navigation"],
+html[lang="ar"] [role="navigation"] a,
+html[dir="rtl"] [role="navigation"] a,
+html[lang="ar"] nav a,
+html[dir="rtl"] nav a {
+  font-family: var(--font-cairo), "Cairo", sans-serif !important;
+  font-weight: 600 !important;
+  letter-spacing: normal;
+}
+
+/* 4. Boutons: Cairo 600 Semi-Bold */
+html[lang="ar"] button,
+html[dir="rtl"] button,
+html[lang="ar"] button *,
+html[dir="rtl"] button *,
+html[lang="ar"] [role="button"],
+html[dir="rtl"] [role="button"],
+html[lang="ar"] [role="button"] *,
+html[dir="rtl"] [role="button"] *,
+html[lang="ar"] .btn,
+html[dir="rtl"] .btn {
+  font-family: var(--font-cairo), "Cairo", sans-serif !important;
+  font-weight: 600 !important;
+  letter-spacing: normal;
 }
 
 /* Custom Utilities */

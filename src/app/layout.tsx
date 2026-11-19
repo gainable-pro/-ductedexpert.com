@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Montserrat } from "next/font/google";
+import { Montserrat, Cairo, Tajawal } from "next/font/google";
 import "./globals.css";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
@@ -15,6 +15,20 @@ const montserrat = Montserrat({
   subsets: ["latin"],
   variable: "--font-montserrat",
   weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
+});
+
+const cairo = Cairo({
+  subsets: ["arabic", "latin"],
+  variable: "--font-cairo",
+  weight: ["500", "600", "700", "800"],
+  display: "swap",
+});
+
+const tajawal = Tajawal({
+  subsets: ["arabic", "latin"],
+  variable: "--font-tajawal",
+  weight: ["400", "500", "700"],
+  display: "swap",
 });
 
 export const viewport = {
@@ -89,7 +103,7 @@ export default async function RootLayout({
       <head>
         <OrganizationJsonLd />
       </head>
-      <body className={`${montserrat.variable} font-sans`}>
+      <body className={`${montserrat.variable} ${cairo.variable} ${tajawal.variable} font-sans`}>
         <LanguageProvider initialLocale={locale}>
           <Header />
           <main className="min-h-screen">
