@@ -8,7 +8,7 @@ import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import * as React from "react";
 import { useLanguage } from "@/components/layout/language-provider";
-import { LOCALE_LABELS, Locale, SUPPORTED_LOCALES, stripLocalePrefix, withLocalePath } from "@/lib/i18n";
+import { LOCALE_LABELS, Locale, SUPPORTED_LOCALES, stripLocalePrefix, withLocalePath, findRouteByPath, getLocalizedUrl } from "@/lib/i18n";
 
 function LanguageSelector({ mobile = false }: { mobile?: boolean }) {
     const { locale, setLocale } = useLanguage();
@@ -29,7 +29,15 @@ function LanguageSelector({ mobile = false }: { mobile?: boolean }) {
             router.refresh();
             return;
         }
-        const target = withLocalePath(stripped, newLocale);
+
+        const routeMatch = findRouteByPath(pathname);
+        let target: string;
+        if (routeMatch && routeMatch.routeKey) {
+            target = getLocalizedUrl(routeMatch.routeKey, newLocale);
+        } else {
+            target = withLocalePath(stripped, newLocale);
+        }
+
         const search = typeof window !== 'undefined' ? window.location.search : '';
         router.push(target + search);
     };
@@ -182,37 +190,37 @@ export function Header() {
                 {/* Desktop Nav: Experts, Air Conditioning, Engineering Office, Verified Expert, Why Us */}
                 <nav className="hidden lg:flex items-center gap-6 text-base font-medium text-slate-700">
                     <Link
-                        href={withLocalePath("/", locale)}
+                        href={getLocalizedUrl('home', locale)}
                         className="text-sm font-semibold text-slate-700 hover:text-[#D59B2B] transition-colors"
                     >
                         {t.nav.experts}
                     </Link>
                     <Link
-                        href={withLocalePath("/air-conditioning", locale)}
+                        href={getLocalizedUrl('airConditioning', locale)}
                         className="text-sm font-semibold text-slate-700 hover:text-[#D59B2B] transition-colors"
                     >
                         {t.nav.climatisation}
                     </Link>
                     <Link
-                        href={withLocalePath("/engineering-office", locale)}
+                        href={getLocalizedUrl('engineeringOffice', locale)}
                         className="text-sm font-semibold text-slate-700 hover:text-[#D59B2B] transition-colors"
                     >
                         {t.nav.bureauEtude}
                     </Link>
                     <Link
-                        href={withLocalePath("/verified-expert", locale)}
+                        href={getLocalizedUrl('verifiedExpert', locale)}
                         className="text-sm font-medium text-slate-600 hover:text-[#D59B2B] transition-colors"
                     >
                         {t.nav.verifiedExpert}
                     </Link>
                     <Link
-                        href={withLocalePath("/why-ducted-expert", locale)}
+                        href={getLocalizedUrl('whyDuctedExpert', locale)}
                         className="text-sm font-medium text-slate-600 hover:text-[#D59B2B] transition-colors"
                     >
                         {t.nav.whyUs}
                     </Link>
                     <Link
-                        href={withLocalePath("/contact", locale)}
+                        href={getLocalizedUrl('contact', locale)}
                         className="text-sm font-medium text-slate-600 hover:text-[#D59B2B] transition-colors"
                     >
                         {t.nav.contact}
@@ -256,42 +264,42 @@ function MobileMenu() {
                     <hr className="border-slate-100" />
 
                     <Link
-                        href={withLocalePath("/", locale)}
+                        href={getLocalizedUrl('home', locale)}
                         onClick={() => setIsOpen(false)}
                         className="text-lg font-semibold text-slate-800 hover:text-[#D59B2B] transition-colors"
                     >
                         {t.nav.experts}
                     </Link>
                     <Link
-                        href={withLocalePath("/air-conditioning", locale)}
+                        href={getLocalizedUrl('airConditioning', locale)}
                         onClick={() => setIsOpen(false)}
                         className="text-lg font-semibold text-slate-800 hover:text-[#D59B2B] transition-colors"
                     >
                         {t.nav.climatisation}
                     </Link>
                     <Link
-                        href={withLocalePath("/engineering-office", locale)}
+                        href={getLocalizedUrl('engineeringOffice', locale)}
                         onClick={() => setIsOpen(false)}
                         className="text-lg font-semibold text-slate-800 hover:text-[#D59B2B] transition-colors"
                     >
                         {t.nav.bureauEtude}
                     </Link>
                     <Link
-                        href={withLocalePath("/verified-expert", locale)}
+                        href={getLocalizedUrl('verifiedExpert', locale)}
                         onClick={() => setIsOpen(false)}
                         className="text-lg font-medium text-slate-700 hover:text-[#D59B2B] transition-colors"
                     >
                         {t.nav.verifiedExpert}
                     </Link>
                     <Link
-                        href={withLocalePath("/why-ducted-expert", locale)}
+                        href={getLocalizedUrl('whyDuctedExpert', locale)}
                         onClick={() => setIsOpen(false)}
                         className="text-lg font-medium text-slate-700 hover:text-[#D59B2B] transition-colors"
                     >
                         {t.nav.whyUs}
                     </Link>
                     <Link
-                        href={withLocalePath("/contact", locale)}
+                        href={getLocalizedUrl('contact', locale)}
                         onClick={() => setIsOpen(false)}
                         className="text-lg font-medium text-slate-700 hover:text-[#D59B2B] transition-colors"
                     >

@@ -1,20 +1,6 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { DEFAULT_LOCALE, isValidLocale, Locale } from './lib/i18n';
-
-// 301 Permanent Redirects: Transition legacy French URLs to English International URLs
-const LEGACY_URL_REDIRECTS: Record<string, string> = {
-    '/climatisation': '/air-conditioning',
-    '/bureau-etude': '/engineering-office',
-    '/pourquoi-gainable': '/why-ducted-expert',
-    '/labels': '/verified-expert',
-    '/trouver-installateur': '/find-installer',
-    '/cgu': '/terms-of-use',
-    '/cgv': '/terms-of-sale',
-    '/mentions-legales': '/legal-notice',
-    '/politique-confidentialite': '/privacy-policy',
-    '/politique-cookies': '/cookies-policy',
-};
+import { DEFAULT_LOCALE, isValidLocale, Locale, findRouteByPath } from './lib/i18n';
 
 export function middleware(request: NextRequest) {
     const { pathname } = request.nextUrl;
@@ -41,14 +27,13 @@ export function middleware(request: NextRequest) {
         const locale: Locale = firstSegment;
         const remainingPath = '/' + segments.slice(1).join('/');
 
-        // 301 Redirect legacy French subpaths to international English URLs
-        if (LEGACY_URL_REDIRECTS[remainingPath]) {
-            const newTarget = `/${locale}${LEGACY_URL_REDIRECTS[remainingPath]}`;
-            return NextResponse.redirect(new URL(newTarget + request.nextUrl.search, request.url), 301);
-        }
+        // Resolve direct localized route mapping (e.g. /de/klimaanlage -> /air-conditioning)
+        // Direct 200 OK execution, ZERO redirect hops.
+        const routeMatch = findRouteByPath(remainingPath);
+        const internalPath = routeMatch ? routeMatch.internalPath : (remainingPath === '/' ? '/' : remainingPath);
 
         const rewriteUrl = request.nextUrl.clone();
-        rewriteUrl.pathname = remainingPath === '/' ? '/' : remainingPath;
+        rewriteUrl.pathname = internalPath;
 
         const requestHeaders = new Headers(request.headers);
         requestHeaders.set('x-locale', locale);
@@ -69,25 +54,35 @@ export function middleware(request: NextRequest) {
         return response;
     }
 
-    // No locale prefix in URL -> determine from cookie or default to English ('en')
+    // No locale prefix in URL -> check if path matches a localized slug or internal path
+    const routeMatch = findRouteByPath(pathname);
     const cookieLocale = request.cookies.get('NEXT_LOCALE')?.value;
-    const activeLocale: Locale = isValidLocale(cookieLocale) ? cookieLocale : DEFAULT_LOCALE;
+    const targetLocale: Locale = (routeMatch && routeMatch.locale && isValidLocale(routeMatch.locale))
+        ? routeMatch.locale
+        : (isValidLocale(cookieLocale) ? cookieLocale : DEFAULT_LOCALE);
 
-    // 301 Redirect legacy French URLs without locale prefix
-    if (LEGACY_URL_REDIRECTS[pathname]) {
-        const newTarget = `/${activeLocale}${LEGACY_URL_REDIRECTS[pathname]}`;
-        return NextResponse.redirect(new URL(newTarget + request.nextUrl.search, request.url), 301);
-    }
+    const internalPath = routeMatch ? routeMatch.internalPath : pathname;
+
+    const rewriteUrl = request.nextUrl.clone();
+    rewriteUrl.pathname = internalPath;
 
     const requestHeaders = new Headers(request.headers);
-    requestHeaders.set('x-locale', activeLocale);
+    requestHeaders.set('x-locale', targetLocale);
     requestHeaders.set('x-pathname', pathname);
 
-    return NextResponse.next({
+    const response = NextResponse.rewrite(rewriteUrl, {
         request: {
             headers: requestHeaders,
         },
     });
+
+    response.cookies.set('NEXT_LOCALE', targetLocale, {
+        path: '/',
+        maxAge: 60 * 60 * 24 * 365,
+        sameSite: 'lax',
+    });
+
+    return response;
 }
 
 export const config = {

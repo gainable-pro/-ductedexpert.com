@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma, withDbRetry } from '@/lib/prisma';
+import { SUPPORTED_LOCALES, LOCALIZED_ROUTES, RouteKey } from '@/lib/i18n';
 
 export const dynamic = 'force-dynamic';
 
@@ -19,18 +20,28 @@ export async function GET(
         if (id === 0) {
             const nowStr = new Date().toISOString();
 
-            // 1. Static pages (strictly existing 200 OK indexable routes in English)
-            const staticUrls = [
-                '',
-                '/air-conditioning',
-                '/engineering-office',
-                '/verified-expert',
-                '/why-ducted-expert',
-                '/find-installer',
-                '/contact',
-                '/terms-of-use',
-                '/terms-of-sale',
-            ].map(r => `  <url><loc>${BASE_URL}${r}</loc><lastmod>${nowStr}</lastmod><changefreq>daily</changefreq><priority>${r === '' ? '1.0' : '0.8'}</priority></url>`);
+            // 1. Static pages across all supported locales (en, de, fi, es, it, ar) with native localized URLs
+            const staticList: string[] = [];
+            const indexableKeys: RouteKey[] = [
+                'home',
+                'airConditioning',
+                'engineeringOffice',
+                'verifiedExpert',
+                'whyDuctedExpert',
+                'findInstaller',
+                'contact',
+                'termsOfUse',
+                'termsOfSale',
+            ];
+
+            for (const loc of SUPPORTED_LOCALES) {
+                for (const key of indexableKeys) {
+                    const slug = LOCALIZED_ROUTES[key][loc] || '';
+                    staticList.push(`/${loc}${slug}`);
+                }
+            }
+
+            const staticUrls = staticList.map(r => `  <url><loc>${BASE_URL}${r}</loc><lastmod>${nowStr}</lastmod><changefreq>daily</changefreq><priority>${r.endsWith('/air-conditioning') || r.endsWith('/klimaanlage') || r.endsWith('/ilmastointi') ? '0.9' : '0.8'}</priority></url>`);
 
             // 2. Active Experts + Real Artisan Articles in Sitemap 0 (Priority Crawl)
             const [experts, artisanArticles] = await withDbRetry(() =>

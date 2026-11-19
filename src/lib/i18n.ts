@@ -33,7 +33,220 @@ export function stripLocalePrefix(pathname: string): string {
     return pathname || '/';
 }
 
+export type RouteKey = 
+  | 'home'
+  | 'airConditioning'
+  | 'engineeringOffice'
+  | 'verifiedExpert'
+  | 'whyDuctedExpert'
+  | 'findInstaller'
+  | 'termsOfUse'
+  | 'termsOfSale'
+  | 'legalNotice'
+  | 'privacyPolicy'
+  | 'cookiesPolicy'
+  | 'contact';
+
+/**
+ * Direct localized URL slugs per language (English, German, Finnish, Spanish, Italian, Arabic)
+ * Direct 200 OK responses, no redirect hops, perfect for Google Search Console & national SEO.
+ */
+export const LOCALIZED_ROUTES: Record<RouteKey, Record<Locale, string>> = {
+  home: {
+    en: '',
+    de: '',
+    fi: '',
+    es: '',
+    it: '',
+    ar: '',
+  },
+  airConditioning: {
+    en: '/air-conditioning',
+    de: '/klimaanlage',
+    fi: '/ilmastointi',
+    es: '/aire-acondicionado',
+    it: '/aria-condizionata',
+    ar: '/air-conditioning',
+  },
+  engineeringOffice: {
+    en: '/engineering-office',
+    de: '/ingenieurbuero',
+    fi: '/insinooritoimisto',
+    es: '/estudio-de-ingenieria',
+    it: '/studio-di-ingegneria',
+    ar: '/engineering-office',
+  },
+  verifiedExpert: {
+    en: '/verified-expert',
+    de: '/gepruefter-experte',
+    fi: '/varmennettu-asiantuntija',
+    es: '/experto-verificado',
+    it: '/esperto-verificato',
+    ar: '/verified-expert',
+  },
+  whyDuctedExpert: {
+    en: '/why-ducted-expert',
+    de: '/warum-ducted-expert',
+    fi: '/miksi-ducted-expert',
+    es: '/por-que-ducted-expert',
+    it: '/perche-ducted-expert',
+    ar: '/why-ducted-expert',
+  },
+  findInstaller: {
+    en: '/find-installer',
+    de: '/installateur-finden',
+    fi: '/etsi-asentaja',
+    es: '/buscar-instalador',
+    it: '/trova-installatore',
+    ar: '/find-installer',
+  },
+  termsOfUse: {
+    en: '/terms-of-use',
+    de: '/nutzungsbedingungen',
+    fi: '/kayttoehdot',
+    es: '/condiciones-de-uso',
+    it: '/condizioni-d-uso',
+    ar: '/terms-of-use',
+  },
+  termsOfSale: {
+    en: '/terms-of-sale',
+    de: '/agb',
+    fi: '/sopimusehdot',
+    es: '/condiciones-de-venta',
+    it: '/condizioni-di-vendita',
+    ar: '/terms-of-sale',
+  },
+  legalNotice: {
+    en: '/legal-notice',
+    de: '/impressum',
+    fi: '/oikeudellinen-ilmoitus',
+    es: '/aviso-legal',
+    it: '/note-legali',
+    ar: '/legal-notice',
+  },
+  privacyPolicy: {
+    en: '/privacy-policy',
+    de: '/datenschutz',
+    fi: '/tietosuoja',
+    es: '/politica-de-privacidad',
+    it: '/politica-sulla-privacy',
+    ar: '/privacy-policy',
+  },
+  cookiesPolicy: {
+    en: '/cookies-policy',
+    de: '/cookie-richtlinie',
+    fi: '/evastekaytanto',
+    es: '/politica-de-cookies',
+    it: '/politica-sui-cookie',
+    ar: '/cookies-policy',
+  },
+  contact: {
+    en: '/contact',
+    de: '/kontakt',
+    fi: '/yhteystiedot',
+    es: '/contacto',
+    it: '/contatti',
+    ar: '/contact',
+  },
+};
+
+export const INTERNAL_ROUTE_PATHS: Record<RouteKey, string> = {
+  home: '/',
+  airConditioning: '/air-conditioning',
+  engineeringOffice: '/engineering-office',
+  verifiedExpert: '/verified-expert',
+  whyDuctedExpert: '/why-ducted-expert',
+  findInstaller: '/find-installer',
+  termsOfUse: '/terms-of-use',
+  termsOfSale: '/terms-of-sale',
+  legalNotice: '/legal-notice',
+  privacyPolicy: '/privacy-policy',
+  cookiesPolicy: '/cookies-policy',
+  contact: '/contact',
+};
+
+export function getLocalizedUrl(routeKey: RouteKey, locale: Locale): string {
+    const slug = LOCALIZED_ROUTES[routeKey]?.[locale] ?? LOCALIZED_ROUTES[routeKey]?.en ?? '';
+    if (!slug) return `/${locale}`;
+    return `/${locale}${slug}`;
+}
+
+export function findRouteByPath(rawPath: string): { routeKey: RouteKey; internalPath: string; locale?: Locale } | null {
+    if (!rawPath) return null;
+    const clean = rawPath.startsWith('/') ? rawPath : `/${rawPath}`;
+    const segments = clean.split('/').filter(Boolean);
+    let checkLocale: Locale | undefined = undefined;
+    let pathToCheck = clean;
+
+    if (segments.length > 0 && isValidLocale(segments[0])) {
+        checkLocale = segments[0] as Locale;
+        pathToCheck = '/' + segments.slice(1).join('/');
+    }
+
+    if (pathToCheck === '' || pathToCheck === '/') {
+        return { routeKey: 'home', internalPath: '/', locale: checkLocale };
+    }
+
+    // Check localized routes
+    for (const [key, mapping] of Object.entries(LOCALIZED_ROUTES) as [RouteKey, Record<Locale, string>][]) {
+        for (const [loc, slug] of Object.entries(mapping) as [Locale, string][]) {
+            if (slug && slug.toLowerCase() === pathToCheck.toLowerCase()) {
+                return { routeKey: key, internalPath: INTERNAL_ROUTE_PATHS[key], locale: checkLocale || loc };
+            }
+        }
+    }
+
+    // Check internal Next.js paths directly
+    for (const [key, intPath] of Object.entries(INTERNAL_ROUTE_PATHS) as [RouteKey, string][]) {
+        if (intPath && intPath.toLowerCase() === pathToCheck.toLowerCase()) {
+            return { routeKey: key, internalPath: intPath, locale: checkLocale };
+        }
+    }
+
+    // Check legacy aliases
+    const legacyAliases: Record<string, RouteKey> = {
+        '/climatisation': 'airConditioning',
+        '/bureau-etude': 'engineeringOffice',
+        '/pourquoi-gainable': 'whyDuctedExpert',
+        '/labels': 'verifiedExpert',
+        '/trouver-installateur': 'findInstaller',
+        '/cgu': 'termsOfUse',
+        '/cgv': 'termsOfSale',
+        '/mentions-legales': 'legalNotice',
+        '/politique-confidentialite': 'privacyPolicy',
+        '/politique-cookies': 'cookiesPolicy',
+    };
+
+    if (legacyAliases[pathToCheck.toLowerCase()]) {
+        const key = legacyAliases[pathToCheck.toLowerCase()];
+        return { routeKey: key, internalPath: INTERNAL_ROUTE_PATHS[key], locale: checkLocale };
+    }
+
+    return null;
+}
+
+export function getLocalizedAlternates(routeKey: RouteKey) {
+    const base = 'https://www.ductedexpert.com';
+    const m = LOCALIZED_ROUTES[routeKey];
+    return {
+        'en': `${base}/en${m.en}`,
+        'de': `${base}/de${m.de}`,
+        'fi': `${base}/fi${m.fi}`,
+        'es': `${base}/es${m.es}`,
+        'it': `${base}/it${m.it}`,
+        'ar': `${base}/ar${m.ar}`,
+        'ar-SA': `${base}/ar${m.ar}`,
+        'ar-AE': `${base}/ar${m.ar}`,
+        'ar-QA': `${base}/ar${m.ar}`,
+        'x-default': `${base}/en${m.en}`,
+    };
+}
+
 export function getAlternatesUrls(pathname: string) {
+    const route = findRouteByPath(pathname);
+    if (route) {
+        return getLocalizedAlternates(route.routeKey);
+    }
     const base = 'https://www.ductedexpert.com';
     const clean = stripLocalePrefix(pathname);
     const suffix = clean === '/' ? '' : clean;
