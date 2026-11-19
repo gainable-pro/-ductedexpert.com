@@ -5,23 +5,227 @@ import Link from "next/link";
 import { prisma, withDbRetry } from "@/lib/prisma";
 import { Metadata } from "next";
 import { format } from "date-fns";
-import { fr } from "date-fns/locale";
+import { enUS, de, fi, es, it, arSA } from "date-fns/locale";
 import { MapPin, ArrowRight, User, HelpCircle, Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { InternationalLeadForm } from "@/components/features/contact/forms/international-form";
 import { getLocalSEOContext } from "@/lib/local-seo-engine";
 import { ThermalCalculator } from "@/components/features/articles/thermal-calculator";
 import { InternalLinking } from "@/components/features/seo/internal-linking";
+import { getServerLocale } from "@/lib/server-locale";
+import { Locale, DEFAULT_LOCALE, withLocalePath, getAlternatesUrls } from "@/lib/i18n";
 
 const SYSTEM_EXPERT_SLUGS = new Set(["gainable-fr", "redaction-gainable", "bureau-etude-gainable"]);
 
-export const revalidate = 3600; // Cache la page pendant 1 heure (ISR) pour soulager la base de données face à Googlebot
+export const dynamic = 'force-dynamic';
 export const dynamicParams = true;
 
-export async function generateStaticParams() {
-    // Active le cache ISR Edge à la demande (on-demand ISR) pour les 56 277 articles sans surcharger le build
-    return [];
-}
+const DATE_LOCALES: Record<Locale, any> = {
+    en: enUS,
+    de,
+    fi,
+    es,
+    it,
+    ar: arSA,
+};
+
+const ARTICLE_I18N: Record<Locale, {
+    expertAdvice: string;
+    by: string;
+    faqTitle: string;
+    climateNormsTitle: string;
+    thermalSpecificities: string;
+    keyRecommendations: string;
+    climateAndZone: string;
+    inverterEfficiency: string;
+    financialGrants: string;
+    freeStudyBadge: string;
+    startProjectIn: string;
+    startProjectGeneric: string;
+    describeNeed: string;
+    otherArticlesTitle: string;
+    viewFullProfile: string;
+    readArticle: string;
+    officialWebsite: string;
+    needAdviceTitle: string;
+    needAdviceDesc: string;
+    contactExpertBtn: string;
+    articleNotFound: string;
+    homeBreadcrumb: string;
+    articlesBreadcrumb: string;
+    developActivityTitle: string;
+    developActivityDesc: string;
+    becomeMemberBtn: string;
+}> = {
+    en: {
+        expertAdvice: "Expert Advice",
+        by: "By",
+        faqTitle: "Frequently Asked Questions",
+        climateNormsTitle: "Climate & Technical Standards",
+        thermalSpecificities: "Thermal specificities and opportunities in",
+        keyRecommendations: "Key recommendations for",
+        climateAndZone: "Zone & Climate",
+        inverterEfficiency: "Inverter Efficiency",
+        financialGrants: "Energy Grants & Incentives",
+        freeStudyBadge: "Free Thermal Study & Quote",
+        startProjectIn: "Start your project in",
+        startProjectGeneric: "Looking for a certified installer? Submit your request",
+        describeNeed: "Describe your project to receive a tailored thermal study and free quotes from local certified HVAC experts.",
+        otherArticlesTitle: "Other projects & advice from",
+        viewFullProfile: "View full profile",
+        readArticle: "Read article",
+        officialWebsite: "Official installer website",
+        needAdviceTitle: "Need advice or a quote?",
+        needAdviceDesc: "Contact {name} for your ducted air conditioning or heat pump project.",
+        contactExpertBtn: "Contact this expert",
+        articleNotFound: "Article not found | DuctedExpert.com",
+        homeBreadcrumb: "Home",
+        articlesBreadcrumb: "Articles",
+        developActivityTitle: "Grow your HVAC Business",
+        developActivityDesc: "Join the dedicated platform for HVAC professionals and generate qualified leads without commission.",
+        becomeMemberBtn: "Become a member",
+    },
+    de: {
+        expertAdvice: "Expertenrat",
+        by: "Von",
+        faqTitle: "Häufige Fragen",
+        climateNormsTitle: "Klima- & technische Richtlinien",
+        thermalSpecificities: "Thermische Besonderheiten & Einsparpotenziale in",
+        keyRecommendations: "Wichtige Empfehlungen für",
+        climateAndZone: "Klimazone",
+        inverterEfficiency: "Inverter-Wirkungsgrad",
+        financialGrants: "Förderungen & Zuschüsse",
+        freeStudyBadge: "Kostenlose Planung & Angebot",
+        startProjectIn: "Starten Sie Ihr Projekt in",
+        startProjectGeneric: "Zertifizierten Installateur gesucht? Anfrage stellen",
+        describeNeed: "Beschreiben Sie Ihren Bedarf, um eine maßgeschneiderte Planung und Angebote von zertifizierten Installateuren zu erhalten.",
+        otherArticlesTitle: "Weitere Projekte & Fachbeiträge von",
+        viewFullProfile: "Vollständiges Profil ansehen",
+        readArticle: "Artikel lesen",
+        officialWebsite: "Offizielle Website des Fachbetriebs",
+        needAdviceTitle: "Beratung oder Angebot gewünscht?",
+        needAdviceDesc: "Kontaktieren Sie {name} für Ihr Klimaanlagen- oder Wärmepumpenprojekt.",
+        contactExpertBtn: "Diesen Experten kontaktieren",
+        articleNotFound: "Artikel nicht gefunden | DuctedExpert.com",
+        homeBreadcrumb: "Startseite",
+        articlesBreadcrumb: "Artikel",
+        developActivityTitle: "Bauen Sie Ihr HVAC-Geschäft aus",
+        developActivityDesc: "Treten Sie der Plattform für HVAC-Fachbetriebe bei und generieren Sie qualifizierte Kundenaufträge ohne Provision.",
+        becomeMemberBtn: "Mitglied werden",
+    },
+    fi: {
+        expertAdvice: "Asiantuntijan neuvot",
+        by: "Kirjoittanut",
+        faqTitle: "Usein kysytyt kysymykset",
+        climateNormsTitle: "Ilmasto- ja tekniset standardit",
+        thermalSpecificities: "Lämpötekniset ominaisuudet ja mahdollisuudet kohteessa",
+        keyRecommendations: "Keskeiset suositukset kohteelle",
+        climateAndZone: "Ilmastovyöhyke",
+        inverterEfficiency: "Invertterin hyötysuhde",
+        financialGrants: "Energiatuet ja avustukset",
+        freeStudyBadge: "Ilmainen lämpöselvitys ja tarjous",
+        startProjectIn: "Aloita projektisi kohteessa",
+        startProjectGeneric: "Etsitkö sertifioitua asentajaa? Jätä yhteydenottopyyntö",
+        describeNeed: "Kuvaile tarpeesi saadaksesi räätälöidyn mitoituksen ja tarjouksia paikallisilta sertifioiduilta asiantuntijoilta.",
+        otherArticlesTitle: "Muut kohteet ja neuvot yritykseltä",
+        viewFullProfile: "Katso koko profiili",
+        readArticle: "Lue artikkeli",
+        officialWebsite: "Urakoitsijan viralliset kotisivut",
+        needAdviceTitle: "Tarvitsetko neuvoa tai tarjouksen?",
+        needAdviceDesc: "Ota yhteyttä asiantuntijaan {name} kanavoitavan ilmastoinnin tai lämpöpumpun tiimoilta.",
+        contactExpertBtn: "Ota yhteyttä asiantuntijaan",
+        articleNotFound: "Artikkelia ei löytynyt | DuctedExpert.com",
+        homeBreadcrumb: "Etusivu",
+        articlesBreadcrumb: "Artikkelit",
+        developActivityTitle: "Kasvata LVI-liiketoimintaasi",
+        developActivityDesc: "Liity LVI-alan ammattilaisverkostoon ja vastaanota laadukkaita toimeksiantoja ilman välikäsiä.",
+        becomeMemberBtn: "Liity jäseneksi",
+    },
+    es: {
+        expertAdvice: "Consejo Experto",
+        by: "Por",
+        faqTitle: "Preguntas Frecuentes",
+        climateNormsTitle: "Normativa Climática y Técnica",
+        thermalSpecificities: "Especificidades térmicas y oportunidades en",
+        keyRecommendations: "Recomendaciones clave para",
+        climateAndZone: "Zona y Clima",
+        inverterEfficiency: "Rendimiento Inverter",
+        financialGrants: "Ayudas y Subvenciones",
+        freeStudyBadge: "Estudio Térmico y Presupuesto Gratis",
+        startProjectIn: "Comienza tu proyecto en",
+        startProjectGeneric: "¿Buscas un instalador certificado? Haz tu solicitud",
+        describeNeed: "Describe tu necesidad para recibir un estudio personalizado y presupuestos de instaladores certificados locales.",
+        otherArticlesTitle: "Otros proyectos y consejos de",
+        viewFullProfile: "Ver perfil completo",
+        readArticle: "Leer artículo",
+        officialWebsite: "Sitio web oficial del instalador",
+        needAdviceTitle: "¿Necesitas asesoramiento o presupuesto?",
+        needAdviceDesc: "Contacta con {name} para tu proyecto de climatización por conductos o aerotermia.",
+        contactExpertBtn: "Contactar a este experto",
+        articleNotFound: "Artículo no encontrado | DuctedExpert.com",
+        homeBreadcrumb: "Inicio",
+        articlesBreadcrumb: "Artículos",
+        developActivityTitle: "Haz crecer tu actividad de climatización",
+        developActivityDesc: "Únete a la plataforma para profesionales y genera solicitudes de clientes rentables sin comisiones.",
+        becomeMemberBtn: "Hacerse miembro",
+    },
+    it: {
+        expertAdvice: "Consiglio dell'Esperto",
+        by: "Da",
+        faqTitle: "Domande Frequenti",
+        climateNormsTitle: "Scheda Climatica e Normative",
+        thermalSpecificities: "Specificità termiche e opportunità a",
+        keyRecommendations: "Raccomandazioni chiave per",
+        climateAndZone: "Zona e Clima",
+        inverterEfficiency: "Efficienza Inverter",
+        financialGrants: "Incentivi e Detrazioni Fiscali",
+        freeStudyBadge: "Studio Termico & Preventivo Gratuito",
+        startProjectIn: "Avvia il tuo progetto a",
+        startProjectGeneric: "Cerchi un installatore certificato? Invia la tua richiesta",
+        describeNeed: "Descrivi il tuo progetto per ricevere uno studio su misura e preventivi da installatori locali accreditati.",
+        otherArticlesTitle: "Altri interventi e consigli di",
+        viewFullProfile: "Visualizza profilo completo",
+        readArticle: "Leggi l'articolo",
+        officialWebsite: "Sito ufficiale dell'esperto",
+        needAdviceTitle: "Hai bisogno di una consulenza o di un preventivo?",
+        needAdviceDesc: "Contatta {name} per il tuo impianto canalizzato o pompa di calore.",
+        contactExpertBtn: "Contatta questo esperto",
+        articleNotFound: "Articolo non trovato | DuctedExpert.com",
+        homeBreadcrumb: "Home",
+        articlesBreadcrumb: "Articoli",
+        developActivityTitle: "Sviluppa la tua attività HVAC",
+        developActivityDesc: "Entra nella piattaforma dedicata ai professionisti e ricevi richieste qualificate senza commissioni.",
+        becomeMemberBtn: "Diventa membro",
+    },
+    ar: {
+        expertAdvice: "نصيحة الخبير المعتمد",
+        by: "بواسطة",
+        faqTitle: "الأسئلة الشائعة",
+        climateNormsTitle: "المعايير المناخية والفنية",
+        thermalSpecificities: "الخصائص الحرارية وفرص الترشيد في",
+        keyRecommendations: "أبرز التوصيات الهندسية لمدينة",
+        climateAndZone: "المناخ والمنطقة",
+        inverterEfficiency: "كفاءة تقنية الإنفرتر",
+        financialGrants: "حوافز وترشيد الطاقة",
+        freeStudyBadge: "دراسة هندسية وعرض سعر مجاني",
+        startProjectIn: "ابدأ مشروعك في",
+        startProjectGeneric: "تبحث عن فني معتمد؟ أرسل طلبك الآن",
+        describeNeed: "صف تفاصيل مشروعك للحصول على دراسة فنية دقيقة وعروض أسعار تنافسية من مهندسين وفنيين معتمدين.",
+        otherArticlesTitle: "أعمال ونصائح أخرى من المهندس",
+        viewFullProfile: "عرض الملف المهني الكامل",
+        readArticle: "قراءة المقال",
+        officialWebsite: "الموقع الرسمي للمهندس / الشركة",
+        needAdviceTitle: "هل تحتاج إلى استشارة فنية أو عرض سعر؟",
+        needAdviceDesc: "تواصل مع {name} لتنفيذ مشروع التكييف المخفي أو المضخات الحرارية.",
+        contactExpertBtn: "تواصل مع هذا الخبير الآن",
+        articleNotFound: "المقال غير موجود | DuctedExpert.com",
+        homeBreadcrumb: "الرئيسية",
+        articlesBreadcrumb: "المقالات",
+        developActivityTitle: "نمّي أعمالك في قطاع التكييف",
+        developActivityDesc: "انضم إلى شبكة DuctedExpert الدولية للمهندسين والفنيين المعتمدين واستقبل مشاريع مميزة بدون عمولات.",
+        becomeMemberBtn: "انضمام كخبير معتمد",
+    },
+};
 
 interface PageProps {
     params: Promise<{
@@ -93,47 +297,24 @@ async function getArticleData(slug: string, articleSlug: string) {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
     const { slug, articleSlug } = await params;
-    const canonical = `https://www.gainable.fr/entreprise/${slug}/articles/${articleSlug}`;
+    const locale = await getServerLocale();
+    const t = ARTICLE_I18N[locale] || ARTICLE_I18N.en;
+    const canonical = `https://www.ductedexpert.com/${locale}/entreprise/${slug}/articles/${articleSlug}`;
     const data = await getArticleData(slug, articleSlug);
     if (!data) {
         return {
-            title: "Article introuvable | Gainable.fr",
-            alternates: { canonical }
+            title: t.articleNotFound,
+            alternates: {
+                canonical,
+                languages: getAlternatesUrls(`/entreprise/${slug}/articles/${articleSlug}`),
+            }
         };
     }
 
     const { article, expert } = data;
     const city = article.targetCity || expert.ville || "";
-
-    // Generate Dynamic and GEO-optimized Meta Title & Description with strong Acquisition intent
-    let metaTitle = article.title;
-    
-    // Ensure acquisition & local artisan keywords are present in Meta Title
-    const hasAcquisition = /installateur|artisan|devis|entreprise|société/i.test(metaTitle);
-    const hasCity = city ? new RegExp(city, 'i').test(metaTitle) : true;
-
-    if (city && (!hasAcquisition || !hasCity)) {
-        if (!hasAcquisition && !hasCity) {
-            metaTitle = `Trouver un Installateur de Climatisation à ${city} : Devis & ${article.title}`;
-        } else if (!hasAcquisition) {
-            metaTitle = `Installateur Climatisation - ${article.title}`;
-        } else if (!hasCity) {
-            metaTitle = `${article.title} à ${city}`;
-        }
-    }
-    
-    // Add company name suffix
-    metaTitle = `${metaTitle} - ${expert.nom_entreprise}`;
-
-    let metaDesc = article.metaDesc || article.introduction?.slice(0, 160) || "Trouvez un installateur certifié RGE de climatisation gainable et pompe à chaleur au meilleur tarif.";
-    
-    // Enhance description for Local SEO & Artisan Acquisition
-    if (city) {
-        const hasAcquisitionDesc = /installateur|artisan|devis|rge|expert/i.test(metaDesc);
-        if (!hasAcquisitionDesc) {
-            metaDesc = `Trouvez un installateur certifié RGE à ${city}. Devis gratuit & étude thermique sur-mesure. ${metaDesc}`.slice(0, 160);
-        }
-    }
+    const metaTitle = `${article.title} - ${expert.nom_entreprise} | DuctedExpert.com`;
+    const metaDesc = article.metaDesc || article.introduction?.slice(0, 160) || `${article.title} by ${expert.nom_entreprise}. Expert ducted air conditioning and heat pumps.`;
 
     return {
         title: metaTitle,
@@ -143,7 +324,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
             follow: true,
         },
         alternates: {
-            canonical: `https://www.gainable.fr/entreprise/${slug}/articles/${articleSlug}`,
+            canonical,
+            languages: getAlternatesUrls(`/entreprise/${slug}/articles/${articleSlug}`),
         },
         openGraph: {
             title: metaTitle,
@@ -152,7 +334,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
                 ? [{ 
                     url: article.mainImage.startsWith('http') 
                         ? article.mainImage 
-                        : `https://www.gainable.fr${article.mainImage.startsWith('/') ? '' : '/'}${article.mainImage}`, 
+                        : `https://www.ductedexpert.com${article.mainImage.startsWith('/') ? '' : '/'}${article.mainImage}`, 
                     alt: article.altText || article.title 
                   }] 
                 : [{ url: 'https://www.ductedexpert.com/assets/logo-share.png' }],
@@ -166,13 +348,16 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
                 "ICBM": `${expert.lat}, ${expert.lng}`
             } : {}),
             "geo.placename": city,
-            "geo.region": expert.pays ? `${expert.pays}` : "FR",
+            "geo.region": expert.pays ? `${expert.pays}` : "US",
         }
     };
 }
 
 export default async function PublicArticlePage({ params }: PageProps) {
     const { slug, articleSlug } = await params;
+    const locale = await getServerLocale();
+    const t = ARTICLE_I18N[locale] || ARTICLE_I18N.en;
+    const dateLoc = DATE_LOCALES[locale] || enUS;
     const data = await getArticleData(slug, articleSlug);
 
     if (!data) {
@@ -183,11 +368,10 @@ export default async function PublicArticlePage({ params }: PageProps) {
 
     let articleContent = article.content || "";
     if (article.targetCity) {
-        // Strip out the hardcoded Spintax HTML button so we can render the dynamic React form instead
         articleContent = articleContent.replace(/<div class="mt-12 p-8 bg-slate-900 text-white rounded-2xl text-center shadow-lg hover:shadow-2xl transition-all">[\s\S]*?<\/div>/, '');
     }
 
-    // Resolve Content Blocks (New System)
+    // Resolve Content Blocks
     let blocks: any[] = [];
     try {
         const jsonContent = typeof article.jsonContent === 'string'
@@ -199,11 +383,8 @@ export default async function PublicArticlePage({ params }: PageProps) {
     }
 
     const hasBlocks = Array.isArray(blocks) && blocks.length > 0;
-
-    // Group Blocks for Zig-Zag Layout
     const groupedSections: any[] = [];
 
-    // Helper for Legacy HTML Parsing
     const extractImageFromHtml = (html: string) => {
         let image = null;
         let alt = null;
@@ -213,10 +394,8 @@ export default async function PublicArticlePage({ params }: PageProps) {
             image = imgMatch[1];
             const altMatch = imgMatch[0].match(/alt="([^">]+)"/i);
             if (altMatch) alt = altMatch[1];
-            // Remove figure wrapper if exists (using [\s\S] instead of s flag for compatibility)
             cleanHtml = html.replace(/<figure[^>]*>[\s\S]*?<img[^>]*>[\s\S]*?<\/figure>/i, "");
             if (cleanHtml.length === html.length) {
-                // Fallback: Remove just the img tag
                 cleanHtml = html.replace(/<img[^>]*>/i, "");
             }
         }
@@ -249,11 +428,9 @@ export default async function PublicArticlePage({ params }: PageProps) {
             }
         });
     } else if (articleContent) {
-        // Fallback: Parse Legacy HTML to Zig-Zag Sections
         const parts = articleContent.split(/<h2.*?>/i);
         parts.forEach((part: string, index: number) => {
             if (index === 0) {
-                // Introduction (text before first H2)
                 if (part.trim()) {
                     const { image, alt, cleanHtml } = extractImageFromHtml(part);
                     groupedSections.push({
@@ -264,10 +441,9 @@ export default async function PublicArticlePage({ params }: PageProps) {
                     });
                 }
             } else {
-                // "Title</h2> Content..."
                 const closeIdx = part.indexOf('</h2>');
                 if (closeIdx !== -1) {
-                    const title = part.substring(0, closeIdx).replace(/<\/?[^>]+(>|$)/g, ""); // strip tags
+                    const title = part.substring(0, closeIdx).replace(/<\/?[^>]+(>|$)/g, "");
                     const body = part.substring(closeIdx + 5);
                     const { image, alt, cleanHtml } = extractImageFromHtml(body);
                     groupedSections.push({
@@ -282,30 +458,12 @@ export default async function PublicArticlePage({ params }: PageProps) {
         });
     }
 
-    console.log("--- DEBUG ARTICLE RENDER ---");
-    console.log("Title:", article.title);
-    console.log("Has Blocks:", hasBlocks);
-    console.log("Blocks Count:", blocks?.length);
-    console.log("Raw JSON:", JSON.stringify(article.jsonContent));
-    console.log("----------------------------");
-
-    // Structured Data (Schema.org)
     const targetCity = article.targetCity || expert.ville;
-    
-    // Dynamic FAQs for GEO / AI Overview
     const rawFaqs = (article.faq as any[]) || [];
     const defaultFaqs = targetCity ? [
         {
-            question: `Quelles sont les normes RE2020 pour l'installation de climatisation à ${targetCity} ?`,
-            response: `À ${targetCity}, l'installation d'une climatisation réversible ou d'un système gainable doit respecter l'indice de confort d'été (DH) et privilégier les équipements à haute efficacité énergétique décarbonée conformément à la réglementation thermique RE2020.`
-        },
-        {
-            question: `Quelles sont les aides financières disponibles à ${targetCity} pour la pompe à chaleur gainable ?`,
-            response: `Les résidents de ${targetCity} peuvent bénéficier de MaPrimeRénov', de la prime CEE (Certificats d'Économies d'Énergie) ainsi que du prêt à taux zéro pour le remplacement d'un ancien chauffage par un système réversible performant.`
-        },
-        {
-            question: `Comment dimensionner une climatisation gainable à ${targetCity} ?`,
-            response: `Le dimensionnement nécessite une étude thermique préalable prenant en compte l'altitude, l'orientation du logement et l'isolation spécifique aux normes thermiques en vigueur à ${targetCity}.`
+            question: `${t.faqTitle} — ${targetCity}`,
+            response: `In ${targetCity}, modern ducted heat pumps and air conditioning systems are engineered for high energy efficiency and all-season thermal comfort.`
         }
     ] : [];
 
@@ -330,8 +488,8 @@ export default async function PublicArticlePage({ params }: PageProps) {
         "headline": article.title,
         "image": article.mainImage ? {
             "@type": "ImageObject",
-            "url": article.mainImage.startsWith('http') ? article.mainImage : `https://www.gainable.fr${article.mainImage.startsWith('/') ? '' : '/'}${article.mainImage}`,
-            "caption": article.altText || `${article.title} - Climatisation Gainable & RGE ${targetCity}`
+            "url": article.mainImage.startsWith('http') ? article.mainImage : `https://www.ductedexpert.com${article.mainImage.startsWith('/') ? '' : '/'}${article.mainImage}`,
+            "caption": article.altText || `${article.title} - DuctedExpert.com`
         } : {
             "@type": "ImageObject",
             "url": "https://www.ductedexpert.com/assets/logo-share.png",
@@ -342,7 +500,7 @@ export default async function PublicArticlePage({ params }: PageProps) {
         "author": [{
             "@type": "Organization",
             "name": expert.nom_entreprise,
-            "url": `https://www.ductedexpert.com/pro/${expert.slug}`
+            "url": `https://www.ductedexpert.com/${locale}/pro/${expert.slug}`
         }],
         "publisher": {
             "@type": "Organization",
@@ -363,19 +521,20 @@ export default async function PublicArticlePage({ params }: PageProps) {
             "address": {
                 "@type": "PostalAddress",
                 "addressLocality": targetCity,
-                "addressCountry": expert.pays || "FR"
+                "addressCountry": expert.pays || "US"
             }
         };
     }
 
+    const currentUrl = `https://www.ductedexpert.com/${locale}/entreprise/${slug}/articles/${articleSlug}`;
     const breadcrumbJsonLd = {
         "@context": "https://schema.org",
         "@type": "BreadcrumbList",
         "itemListElement": [
-            { "@type": "ListItem", "position": 1, "name": "Accueil", "item": "https://www.gainable.fr" },
-            { "@type": "ListItem", "position": 2, "name": expert.nom_entreprise, "item": `https://www.gainable.fr/pro/${expert.slug}` },
-            { "@type": "ListItem", "position": 3, "name": "Articles", "item": `https://www.gainable.fr/pro/${expert.slug}#articles` },
-            { "@type": "ListItem", "position": 4, "name": article.title, "item": `https://www.gainable.fr/entreprise/${slug}/articles/${articleSlug}` }
+            { "@type": "ListItem", "position": 1, "name": t.homeBreadcrumb, "item": `https://www.ductedexpert.com/${locale}` },
+            { "@type": "ListItem", "position": 2, "name": expert.nom_entreprise, "item": `https://www.ductedexpert.com/${locale}/pro/${expert.slug}` },
+            { "@type": "ListItem", "position": 3, "name": t.articlesBreadcrumb, "item": `https://www.ductedexpert.com/${locale}/pro/${expert.slug}#articles` },
+            { "@type": "ListItem", "position": 4, "name": article.title, "item": currentUrl }
         ]
     };
 
@@ -388,7 +547,6 @@ export default async function PublicArticlePage({ params }: PageProps) {
                 type="application/ld+json"
                 dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaList) }}
             />
-
 
             {/* Article Image */}
             {article.mainImage && (
@@ -411,18 +569,18 @@ export default async function PublicArticlePage({ params }: PageProps) {
                     <div className="flex items-center justify-between flex-wrap gap-4">
                         <div className="flex flex-wrap items-center gap-4 text-sm md:text-base">
                             <span className="bg-[#D59B2B] text-white px-3 py-1 rounded-full font-bold text-xs uppercase tracking-wider">
-                                Conseil Expert
+                                {t.expertAdvice}
                             </span>
                             {article.publishedAt && (
                                 <time dateTime={article.publishedAt.toISOString()} className="text-slate-500 font-medium">
-                                    {format(article.publishedAt, "d MMMM yyyy", { locale: fr })}
+                                    {format(article.publishedAt, "d MMMM yyyy", { locale: dateLoc })}
                                 </time>
                             )}
                         </div>
 
                         {/* Social Share Buttons */}
                         <ShareButtons
-                            url={`https://www.gainable.fr/entreprise/${slug}/articles/${articleSlug}`}
+                            url={currentUrl}
                             title={article.title}
                         />
                     </div>
@@ -448,13 +606,13 @@ export default async function PublicArticlePage({ params }: PageProps) {
                             </div>
                         )}
                         <div className="font-medium text-slate-600">
-                            Par{' '}
+                            {t.by}{' '}
                             {expert.slug === 'gainable-fr' || expert.slug.includes('redaction') || expert.slug === 'bureau-etude-gainable' ? (
                                 <span className="text-[#D59B2B] font-bold">
                                     {expert.nom_entreprise}
                                 </span>
                             ) : (
-                                <Link href={`/pro/${expert.slug}`} className="text-[#D59B2B] hover:underline underline-offset-4">
+                                <Link href={withLocalePath(`/pro/${expert.slug}`, locale)} className="text-[#D59B2B] hover:underline underline-offset-4">
                                     {expert.nom_entreprise}
                                 </Link>
                             )}
@@ -464,8 +622,6 @@ export default async function PublicArticlePage({ params }: PageProps) {
             </div>
 
             <div className="max-w-7xl mx-auto px-6 grid lg:grid-cols-[1fr_350px] gap-12 mt-12">
-
-                {/* ARTICLE CONTENT */}
                 {/* ARTICLE CONTENT */}
                 <article className="max-w-none">
                     {/* Introduction */}
@@ -475,8 +631,7 @@ export default async function PublicArticlePage({ params }: PageProps) {
                         </div>
                     )}
 
-                    {/* Dynamic Block Rendering OR Fallback HTML */}
-                    {/* Dynamic Zig-Zag Rendering (Works for Blocks AND Legacy HTML) */}
+                    {/* Dynamic Zig-Zag Rendering */}
                     {groupedSections.length > 0 ? (
                         <div className="space-y-24">
                             {groupedSections.map((section, idx) => {
@@ -490,12 +645,11 @@ export default async function PublicArticlePage({ params }: PageProps) {
                                     );
                                 }
 
-                                const isReversed = idx % 2 !== 0; // Alternate layout
+                                const isReversed = idx % 2 !== 0;
                                 const hasImage = !!section.image;
 
                                 return (
                                     <section key={idx} className={`grid gap-12 items-center ${hasImage ? 'md:grid-cols-2' : ''}`}>
-                                        {/* TEXT COLUMN */}
                                         <div className={`space-y-6 ${hasImage ? (isReversed ? 'md:order-2' : 'md:order-1') : ''}`}>
                                             {section.title && (
                                                 <h2 className="text-3xl font-bold text-[#1F2D3D] mb-6 relative inline-block">
@@ -519,7 +673,6 @@ export default async function PublicArticlePage({ params }: PageProps) {
                                             </div>
                                         </div>
 
-                                        {/* IMAGE COLUMN */}
                                         {hasImage && (
                                             <div className={`${isReversed ? 'md:order-1' : 'md:order-2'}`}>
                                                 <div className="relative w-full h-[400px] rounded-2xl overflow-hidden shadow-xl border border-slate-100 group hover:shadow-2xl transition-shadow duration-500">
@@ -543,7 +696,7 @@ export default async function PublicArticlePage({ params }: PageProps) {
                         />
                     )}
 
-                    {/* DYNAMIC LOCAL CLIMATE & RE2020 BLOCK (For Unique GEO Value) */}
+                    {/* DYNAMIC LOCAL CLIMATE & NORMS BLOCK */}
                     {targetCity && (() => {
                         const localSEO = getLocalSEOContext(targetCity);
                         if (!localSEO) return null;
@@ -555,15 +708,15 @@ export default async function PublicArticlePage({ params }: PageProps) {
                                     <div className="relative z-10 space-y-6">
                                         <div className="flex flex-wrap items-center justify-between gap-3">
                                             <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#D59B2B]/20 border border-[#D59B2B]/30 rounded-full text-[#D59B2B] text-xs font-bold uppercase tracking-wider">
-                                                <MapPin className="w-3.5 h-3.5" /> Fiche Climat & Normes • {localSEO.cityName} ({localSEO.department})
+                                                <MapPin className="w-3.5 h-3.5" /> {t.climateNormsTitle} • {localSEO.cityName} ({localSEO.department})
                                             </div>
                                             <span className="text-xs text-slate-400 bg-white/5 px-3 py-1 rounded-full border border-white/10">
-                                                Zone RE2020 : <strong className="text-white">{localSEO.re2020Zone}</strong>
+                                                Zone : <strong className="text-white">{localSEO.re2020Zone}</strong>
                                             </span>
                                         </div>
 
                                         <h3 className="text-2xl md:text-3xl font-bold leading-snug text-white">
-                                            Spécificités thermiques et opportunités à <span className="text-[#D59B2B]">{localSEO.cityName}</span>
+                                            {t.thermalSpecificities} <span className="text-[#D59B2B]">{localSEO.cityName}</span>
                                         </h3>
 
                                         <p className="text-slate-300 text-sm leading-relaxed border-l-2 border-[#D59B2B] pl-4 italic">
@@ -572,33 +725,32 @@ export default async function PublicArticlePage({ params }: PageProps) {
 
                                         <div className="grid md:grid-cols-3 gap-6 pt-4 border-t border-slate-700/60">
                                             <div className="bg-white/5 backdrop-blur p-5 rounded-2xl border border-white/10 space-y-2">
-                                                <div className="text-xs text-slate-400 font-semibold uppercase tracking-wider">Zone & Climat</div>
+                                                <div className="text-xs text-slate-400 font-semibold uppercase tracking-wider">{t.climateAndZone}</div>
                                                 <div className="text-lg font-bold text-white">{localSEO.climateZone}</div>
                                                 <p className="text-xs text-slate-300 leading-relaxed">
-                                                    Pics estivaux jusqu'à {localSEO.summerPeakTemp} et min hivernales à {localSEO.winterMinTemp}.
+                                                    Max : {localSEO.summerPeakTemp} | Min : {localSEO.winterMinTemp}.
                                                 </p>
                                             </div>
 
                                             <div className="bg-white/5 backdrop-blur p-5 rounded-2xl border border-white/10 space-y-2">
-                                                <div className="text-xs text-slate-400 font-semibold uppercase tracking-wider">Rendement Inverter</div>
+                                                <div className="text-xs text-slate-400 font-semibold uppercase tracking-wider">{t.inverterEfficiency}</div>
                                                 <div className="text-lg font-bold text-[#D59B2B]">SCOP {localSEO.copEst} • SEER {localSEO.seerEst}</div>
                                                 <p className="text-xs text-slate-300 leading-relaxed">
-                                                    Économies estimées jusqu'à {localSEO.estimatedSavingsPct} sur la facture de chauffage à {localSEO.cityName}.
+                                                    ~{localSEO.estimatedSavingsPct} energy savings in {localSEO.cityName}.
                                                 </p>
                                             </div>
 
                                             <div className="bg-white/5 backdrop-blur p-5 rounded-2xl border border-white/10 space-y-2">
-                                                <div className="text-xs text-slate-400 font-semibold uppercase tracking-wider">Aides Financières</div>
-                                                <div className="text-lg font-bold text-emerald-400">MaPrimeRénov' & CEE</div>
+                                                <div className="text-xs text-slate-400 font-semibold uppercase tracking-wider">{t.financialGrants}</div>
+                                                <div className="text-lg font-bold text-emerald-400">Heat Pump Subsidies</div>
                                                 <p className="text-xs text-slate-300 leading-relaxed">
-                                                    Cumul possible avec l'Éco-PTZ pour les rénovations certifiées RGE à {localSEO.cityName}.
+                                                    Available for energy-efficient certified installations in {localSEO.cityName}.
                                                 </p>
                                             </div>
                                         </div>
 
-                                        {/* Key Points */}
                                         <div className="pt-4 border-t border-slate-700/60">
-                                            <div className="text-xs font-bold text-[#D59B2B] uppercase tracking-wider mb-3">Recommandations clés pour {localSEO.cityName} :</div>
+                                            <div className="text-xs font-bold text-[#D59B2B] uppercase tracking-wider mb-3">{t.keyRecommendations} {localSEO.cityName} :</div>
                                             <ul className="grid sm:grid-cols-2 gap-3 text-xs text-slate-300">
                                                 {localSEO.keyPoints.map((pt, idx) => (
                                                     <li key={idx} className="flex items-start gap-2 bg-white/5 p-2.5 rounded-xl border border-white/5">
@@ -610,7 +762,6 @@ export default async function PublicArticlePage({ params }: PageProps) {
                                     </div>
                                 </section>
 
-                                {/* INTERACTIVE SIMULATION WIDGET */}
                                 <ThermalCalculator cityName={localSEO.cityName} climateZone={localSEO.climateZone} />
                             </>
                         );
@@ -623,7 +774,7 @@ export default async function PublicArticlePage({ params }: PageProps) {
                                 <div className="bg-[#D59B2B]/10 p-2 rounded-lg">
                                     <HelpCircle className="text-[#D59B2B] w-6 h-6" />
                                 </div>
-                                Questions Fréquentes
+                                {t.faqTitle}
                             </h2>
                             <div className="space-y-8">
                                 {effectiveFaqs.map((f: any, i: number) => (
@@ -641,29 +792,29 @@ export default async function PublicArticlePage({ params }: PageProps) {
                         </section>
                     )}
 
-                    {/* DYNAMIC LEAD FORM FOR CITY OR CATALOG ARTICLES (ALWAYS PRESENT WITH ID="devis") */}
+                    {/* DYNAMIC LEAD FORM */}
                     <div id="devis" className="mt-16 w-full max-w-4xl mx-auto bg-white p-8 md:p-10 rounded-3xl shadow-xl border border-slate-100 relative overflow-hidden scroll-mt-28">
                         <div className="absolute top-0 right-0 w-64 h-64 bg-[#D59B2B]/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 pointer-events-none"></div>
                         
                         <div className="text-center mb-8 relative z-10">
                             <span className="inline-block px-3 py-1 bg-amber-50 border border-amber-200 text-[#D59B2B] rounded-full text-xs font-bold uppercase tracking-wider mb-3">
-                                Étude Thermique & Devis Gratuit
+                                {t.freeStudyBadge}
                             </span>
                             <h3 className="text-3xl font-bold text-slate-800">
                                 {targetCity ? (
-                                    <>Démarrer votre projet à <span className="text-[#D59B2B]">{targetCity}</span></>
+                                    <>{t.startProjectIn} <span className="text-[#D59B2B]">{targetCity}</span></>
                                 ) : (
-                                    <>Besoin d'un installateur certifié ? <span className="text-[#D59B2B]">Faites votre demande</span></>
+                                    <>{t.startProjectGeneric}</>
                                 )}
                             </h3>
                             <p className="text-slate-500 mt-2 max-w-xl mx-auto">
-                                Décrivez votre besoin pour recevoir une étude personnalisée et des devis d'installateurs locaux certifiés RGE {targetCity ? `à ${targetCity}` : ""}.
+                                {t.describeNeed}
                             </p>
                         </div>
                         
                         <div className="relative z-10">
                             <InternationalLeadForm 
-                                city={targetCity || "votre secteur"}
+                                city={targetCity || "your area"}
                                 expertId={expert.slug !== 'bureau-etude-gainable' && expert.slug !== 'gainable-fr' && !expert.slug.includes('redaction') ? expert.id : undefined}
                                 expertName={expert.nom_entreprise}
                                 hideHeader={true}
@@ -671,25 +822,25 @@ export default async function PublicArticlePage({ params }: PageProps) {
                         </div>
                     </div>
 
-                    {/* OTHER REALISATIONS BY THIS ARTISAN (INTERNAL LINKING ENGINE) */}
+                    {/* OTHER REALISATIONS BY THIS ARTISAN */}
                     {otherArticles && otherArticles.length > 0 && (
                         <section className="mt-16 bg-white p-8 rounded-3xl shadow-sm border border-slate-100">
                             <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
                                 <h2 className="text-2xl font-bold text-[#1F2D3D]">
-                                    Autres chantiers & conseils de {expert.nom_entreprise}
+                                    {t.otherArticlesTitle} {expert.nom_entreprise}
                                 </h2>
                                 <Link
-                                    href={`/pro/${expert.slug}`}
+                                    href={withLocalePath(`/pro/${expert.slug}`, locale)}
                                     className="text-sm font-bold text-[#D59B2B] hover:underline flex items-center gap-1"
                                 >
-                                    Voir le profil complet <ArrowRight className="w-4 h-4" />
+                                    {t.viewFullProfile} <ArrowRight className="w-4 h-4" />
                                 </Link>
                             </div>
                             <div className="grid sm:grid-cols-2 gap-4">
                                 {otherArticles.map((oa) => (
                                     <Link
                                         key={oa.slug}
-                                        href={`/entreprise/${expert.slug}/articles/${oa.slug}`}
+                                        href={withLocalePath(`/entreprise/${expert.slug}/articles/${oa.slug}`, locale)}
                                         className="group p-4 rounded-2xl border border-slate-100 hover:border-[#D59B2B] hover:shadow-md transition-all bg-slate-50/60 flex flex-col justify-between"
                                     >
                                         <div>
@@ -703,19 +854,17 @@ export default async function PublicArticlePage({ params }: PageProps) {
                                             </h3>
                                         </div>
                                         <span className="text-xs font-semibold text-[#D59B2B] mt-3 inline-flex items-center gap-1">
-                                            Lire l&apos;article <ArrowRight className="w-3.5 h-3.5" />
+                                            {t.readArticle} <ArrowRight className="w-3.5 h-3.5" />
                                         </span>
                                     </Link>
                                 ))}
                             </div>
                         </section>
                     )}
-
                 </article>
 
                 {/* SIDEBAR : AUTHOR & CTA */}
                 <aside className="space-y-8 sticky top-24 h-fit">
-
                     {/* Author Card */}
                     <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col items-center text-center space-y-4">
                         {expert.logo_url ? (
@@ -742,9 +891,9 @@ export default async function PublicArticlePage({ params }: PageProps) {
 
                         {expert.slug !== 'gainable-fr' && !expert.slug.includes('redaction') && expert.slug !== 'bureau-etude-gainable' && (
                             <div className="w-full space-y-2">
-                                <Link href={`/pro/${expert.slug}`} className="w-full block">
+                                <Link href={withLocalePath(`/pro/${expert.slug}`, locale)} className="w-full block">
                                     <Button variant="outline" className="w-full">
-                                        Voir le profil
+                                        {t.viewFullProfile}
                                     </Button>
                                 </Link>
                                 {expert.site_web && (
@@ -754,7 +903,7 @@ export default async function PublicArticlePage({ params }: PageProps) {
                                         rel="noopener noreferrer"
                                         className="w-full inline-flex items-center justify-center gap-2 text-xs font-semibold text-slate-600 hover:text-[#D59B2B] py-1.5"
                                     >
-                                        <Globe className="w-3.5 h-3.5" /> Site officiel de l&apos;artisan
+                                        <Globe className="w-3.5 h-3.5" /> {t.officialWebsite}
                                     </a>
                                 )}
                             </div>
@@ -768,32 +917,29 @@ export default async function PublicArticlePage({ params }: PageProps) {
                         {(expert.slug === 'gainable-fr' || expert.slug.includes('redaction') || expert.slug === 'bureau-etude-gainable') ? (
                             <>
                                 <h3 className="text-xl font-bold relative z-10">
-                                    Développez votre activité CVC
+                                    {t.developActivityTitle}
                                 </h3>
                                 <p className="text-slate-300 text-sm relative z-10">
-                                    Rejoignez la plateforme dédiée aux professionnels et générez des chantiers rentables sans commission.
+                                    {t.developActivityDesc}
                                 </p>
-                                <Link href="/pourquoi-gainable" className="block relative z-10">
+                                <Link href={withLocalePath("/why-ducted-expert", locale)} className="block relative z-10">
                                     <Button size="lg" className="w-full bg-[#D59B2B] hover:bg-[#b88622] text-white font-bold h-12 text-base">
-                                        Devenir membre
+                                        {t.becomeMemberBtn}
                                         <ArrowRight className="ml-2 w-4 h-4" />
                                     </Button>
                                 </Link>
-                                <p className="text-xs text-slate-400 mt-4 relative z-10">
-                                    Comparez nos formules d'abonnement et prenez le contrôle de votre visibilité locale.
-                                </p>
                             </>
                         ) : (
                             <>
                                 <h3 className="text-xl font-bold relative z-10">
-                                    Besoin d'un conseil ou d'un devis ?
+                                    {t.needAdviceTitle}
                                 </h3>
                                 <p className="text-slate-300 text-sm relative z-10">
-                                    Contactez <strong>{expert.nom_entreprise}</strong> pour votre projet de climatisation gainable.
+                                    {t.needAdviceDesc.replace('{name}', expert.nom_entreprise)}
                                 </p>
-                                <Link href={`/pro/${expert.slug}#contact`} className="block relative z-10">
+                                <Link href={withLocalePath(`/pro/${expert.slug}#contact`, locale)} className="block relative z-10">
                                     <Button size="lg" className="w-full bg-[#D59B2B] hover:bg-[#b88622] text-white font-bold h-12 text-base">
-                                        Contacter cet expert
+                                        {t.contactExpertBtn}
                                         <ArrowRight className="ml-2 w-4 h-4" />
                                     </Button>
                                 </Link>

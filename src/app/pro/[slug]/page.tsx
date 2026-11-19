@@ -15,7 +15,7 @@ import { VerifiedExpertBadge } from "@/components/ui/verified-expert-badge";
 import { getServerLocale } from "@/lib/server-locale";
 import { getAlternatesUrls, getDictionary, translateTerm } from "@/lib/i18n";
 
-export const revalidate = 3600;
+export const dynamic = 'force-dynamic';
 
 async function getExpertBySlug(slug: string) {
     return await withDbRetry(() =>
@@ -417,6 +417,7 @@ export default async function PublicProfilePage({ params }: { params: Promise<{ 
                             articles={expert.articles}
                             expertSlug={expert.slug}
                             expertName={expert.nom_entreprise}
+                            locale={locale}
                         />
                     </div>
 
