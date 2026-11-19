@@ -32,8 +32,8 @@ export function middleware(request: NextRequest) {
         const routeMatch = findRouteByPath(remainingPath);
         const internalPath = routeMatch ? routeMatch.internalPath : (remainingPath === '/' ? '/' : remainingPath);
 
-        const rewriteUrl = request.nextUrl.clone();
-        rewriteUrl.pathname = internalPath;
+        const rewriteUrl = new URL(internalPath, request.url);
+        rewriteUrl.search = request.nextUrl.search;
 
         const requestHeaders = new Headers(request.headers);
         requestHeaders.set('x-locale', locale);
@@ -63,8 +63,8 @@ export function middleware(request: NextRequest) {
 
     const internalPath = routeMatch ? routeMatch.internalPath : pathname;
 
-    const rewriteUrl = request.nextUrl.clone();
-    rewriteUrl.pathname = internalPath;
+    const rewriteUrl = new URL(internalPath, request.url);
+    rewriteUrl.search = request.nextUrl.search;
 
     const requestHeaders = new Headers(request.headers);
     requestHeaders.set('x-locale', targetLocale);
