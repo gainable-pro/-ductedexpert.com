@@ -489,6 +489,14 @@ export default async function PublicArticlePage({ params }: PageProps) {
     }
 
     const targetCity = article.targetCity || expert.ville;
+    const rawLocalSEO = targetCity ? getLocalSEOContext(targetCity) : null;
+    const localSEO = rawLocalSEO ? {
+        ...rawLocalSEO,
+        catchphrase: await translateText(rawLocalSEO.catchphrase, locale, "article_content"),
+        housingTip: await translateText(rawLocalSEO.housingTip, locale, "article_content"),
+        climateZone: await translateText(rawLocalSEO.climateZone, locale, "title"),
+        keyPoints: await Promise.all(rawLocalSEO.keyPoints.map((kp) => translateText(kp, locale, "title"))),
+    } : null;
     const rawFaqs = (article.faq as any[]) || [];
     const defaultFaqs = targetCity ? [
         {
@@ -736,10 +744,7 @@ export default async function PublicArticlePage({ params }: PageProps) {
                     )}
 
                     {/* DYNAMIC LOCAL CLIMATE & NORMS BLOCK */}
-                    {targetCity && (() => {
-                        const localSEO = getLocalSEOContext(targetCity);
-                        if (!localSEO) return null;
-                        return (
+                    {localSEO && (
                             <>
                                 <section className="mt-16 bg-gradient-to-br from-slate-900 via-slate-800 to-[#1F2D3D] text-white p-8 md:p-10 rounded-3xl shadow-2xl relative overflow-hidden border border-slate-700/60">
                                     <div className="absolute top-0 right-0 w-80 h-80 bg-[#D59B2B]/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 pointer-events-none"></div>
@@ -758,7 +763,8 @@ export default async function PublicArticlePage({ params }: PageProps) {
                                             {t.thermalSpecificities} <span className="text-[#D59B2B]">{localSEO.cityName}</span>
                                         </h3>
 
-                                        <p className="text-slate-300 text-sm leading-relaxed border-l-2 border-[#D59B2B] pl-4 italic">
+                                        <p className={`text-slate-300 text-sm leading-relaxed italic ${locale === "ar" ? "border-r-2 border-[#D59B2B] pr-4 text-right font-tajawal" : "border-l-2 border-[#D59B2B] pl-4 text-left"}`}>
+
                                             "{localSEO.catchphrase}" — {localSEO.housingTip}
                                         </p>
 
@@ -803,8 +809,7 @@ export default async function PublicArticlePage({ params }: PageProps) {
 
                                 <ThermalCalculator cityName={localSEO.cityName} climateZone={localSEO.climateZone} />
                             </>
-                        );
-                    })()}
+                    )}
 
                     {/* FAQ SECTION */}
                     {effectiveFaqs.length > 0 && (
