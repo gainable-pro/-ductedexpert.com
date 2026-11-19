@@ -14,6 +14,7 @@ import { BrandLogo } from "@/components/ui/brand-logo";
 import { VerifiedExpertBadge } from "@/components/ui/verified-expert-badge";
 import { getServerLocale } from "@/lib/server-locale";
 import { getAlternatesUrls, getDictionary, translateTerm } from "@/lib/i18n";
+import { translateText } from "@/lib/translator";
 
 export const dynamic = 'force-dynamic';
 
@@ -65,9 +66,10 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
         }
 
         const typeTranslated = translateTerm(expert.expert_type, locale);
+        const translatedDescription = await translateText(expert.description, locale, "expert_description");
         const title = `${expert.nom_entreprise} (${expert.ville}) - ${typeTranslated} | DuctedExpert.com`;
-        const description = expert.description
-            ? expert.description.slice(0, 155)
+        const description = translatedDescription
+            ? translatedDescription.slice(0, 155)
             : `${expert.nom_entreprise} - ${typeTranslated} in ${expert.ville}. ${dict.home.freeQuote}.`;
         const canonical = `https://www.ductedexpert.com/${locale}/pro/${expert.slug}`;
 
@@ -109,6 +111,16 @@ export default async function PublicProfilePage({ params }: { params: Promise<{ 
         ? "bg-purple-100 text-purple-800"
         : "bg-blue-100 text-blue-800";
 
+    const translatedDescription = await translateText(expert.description, locale, "expert_description");
+
+    const localizedArticles = await Promise.all(
+        (expert.articles || []).map(async (art) => ({
+            ...art,
+            title: await translateText(art.title, locale, "title"),
+            introduction: art.introduction ? await translateText(art.introduction, locale, "expert_description") : null,
+        }))
+    );
+
     const getYoutubeId = (url: string | null) => {
         if (!url) return null;
         const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
@@ -133,7 +145,7 @@ export default async function PublicProfilePage({ params }: { params: Promise<{ 
             "postalCode": expert.code_postal,
             "addressCountry": expert.pays
         },
-        "description": expert.description,
+        "description": translatedDescription,
     };
 
     return (
@@ -271,8 +283,8 @@ export default async function PublicProfilePage({ params }: { params: Promise<{ 
                             <h2 className="text-xl font-bold text-[#1F2D3D] mb-4">
                                 {expert.nom_entreprise} – {expert.ville}
                             </h2>
-                            <p className="text-slate-600 leading-relaxed whitespace-pre-line">
-                                {expert.description}
+                            <p className={`text-slate-600 leading-relaxed whitespace-pre-line ${locale === 'ar' ? 'text-right font-tajawal' : 'text-left'}`}>
+                                {translatedDescription}
                             </p>
                         </section>
 
@@ -414,7 +426,7 @@ export default async function PublicProfilePage({ params }: { params: Promise<{ 
 
                         {/* EXPERT'S OWN SEO ARTICLES PUBLISHED FROM PRO DASHBOARD */}
                         <ExpertArticles
-                            articles={expert.articles}
+                            articles={localizedArticles}
                             expertSlug={expert.slug}
                             expertName={expert.nom_entreprise}
                             locale={locale}

@@ -14,6 +14,7 @@ import { ThermalCalculator } from "@/components/features/articles/thermal-calcul
 import { InternalLinking } from "@/components/features/seo/internal-linking";
 import { getServerLocale } from "@/lib/server-locale";
 import { Locale, DEFAULT_LOCALE, withLocalePath, getAlternatesUrls } from "@/lib/i18n";
+import { translateText } from "@/lib/translator";
 
 const SYSTEM_EXPERT_SLUGS = new Set(["gainable-fr", "redaction-gainable", "bureau-etude-gainable"]);
 
@@ -313,8 +314,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
     const { article, expert } = data;
     const city = article.targetCity || expert.ville || "";
-    const metaTitle = `${article.title} - ${expert.nom_entreprise} | DuctedExpert.com`;
-    const metaDesc = article.metaDesc || article.introduction?.slice(0, 160) || `${article.title} by ${expert.nom_entreprise}. Expert ducted air conditioning and heat pumps.`;
+    const translatedTitle = await translateText(article.title, locale, "title");
+    const translatedIntro = article.introduction ? await translateText(article.introduction, locale, "expert_description") : "";
+    const metaTitle = `${translatedTitle} - ${expert.nom_entreprise} | DuctedExpert.com`;
+    const metaDesc = article.metaDesc || translatedIntro?.slice(0, 160) || `${translatedTitle} by ${expert.nom_entreprise}. Expert ducted air conditioning and heat pumps.`;
 
     return {
         title: metaTitle,
@@ -366,21 +369,44 @@ export default async function PublicArticlePage({ params }: PageProps) {
 
     const { expert, article, otherArticles } = data;
 
+    const translatedTitle = await translateText(article.title, locale, "title");
+    const translatedIntro = article.introduction ? await translateText(article.introduction, locale, "expert_description") : null;
+
     let articleContent = article.content || "";
     if (article.targetCity) {
         articleContent = articleContent.replace(/<div class="mt-12 p-8 bg-slate-900 text-white rounded-2xl text-center shadow-lg hover:shadow-2xl transition-all">[\s\S]*?<\/div>/, '');
     }
 
     // Resolve Content Blocks
-    let blocks: any[] = [];
+    let rawBlocks: any[] = [];
     try {
         const jsonContent = typeof article.jsonContent === 'string'
             ? JSON.parse(article.jsonContent)
             : article.jsonContent;
-        blocks = (jsonContent as any)?.blocks || [];
+        rawBlocks = (jsonContent as any)?.blocks || [];
     } catch (e) {
         console.error("Error parsing jsonContent", e);
     }
+
+    // Translate blocks asynchronously for a 100% single-language reading experience
+    const blocks = await Promise.all(
+        rawBlocks.map(async (block: any) => {
+            if (block.type === 'h2' || block.type === 'h3' || block.type === 'text') {
+                return {
+                    ...block,
+                    value: await translateText(block.value, locale, block.type === 'text' ? 'article_content' : 'title'),
+                };
+            }
+            return block;
+        })
+    );
+
+    const localizedOtherArticles = await Promise.all(
+        (otherArticles || []).map(async (oa) => ({
+            ...oa,
+            title: await translateText(oa.title, locale, "title"),
+        }))
+    );
 
     const hasBlocks = Array.isArray(blocks) && blocks.length > 0;
     const groupedSections: any[] = [];
@@ -429,13 +455,15 @@ export default async function PublicArticlePage({ params }: PageProps) {
         });
     } else if (articleContent) {
         const parts = articleContent.split(/<h2.*?>/i);
-        parts.forEach((part: string, index: number) => {
+        for (let index = 0; index < parts.length; index++) {
+            const part = parts[index];
             if (index === 0) {
                 if (part.trim()) {
                     const { image, alt, cleanHtml } = extractImageFromHtml(part);
+                    const translatedHtml = await translateText(cleanHtml, locale, 'article_content');
                     groupedSections.push({
                         type: 'section',
-                        content: [{ type: 'html', value: cleanHtml }],
+                        content: [{ type: 'html', value: translatedHtml }],
                         image,
                         alt
                     });
@@ -443,19 +471,21 @@ export default async function PublicArticlePage({ params }: PageProps) {
             } else {
                 const closeIdx = part.indexOf('</h2>');
                 if (closeIdx !== -1) {
-                    const title = part.substring(0, closeIdx).replace(/<\/?[^>]+(>|$)/g, "");
+                    const rawSectionTitle = part.substring(0, closeIdx).replace(/<\/?[^>]+(>|$)/g, "");
                     const body = part.substring(closeIdx + 5);
                     const { image, alt, cleanHtml } = extractImageFromHtml(body);
+                    const translatedSectionTitle = await translateText(rawSectionTitle, locale, 'title');
+                    const translatedHtml = await translateText(cleanHtml, locale, 'article_content');
                     groupedSections.push({
                         type: 'section',
-                        title: title,
-                        content: [{ type: 'html', value: cleanHtml }],
+                        title: translatedSectionTitle,
+                        content: [{ type: 'html', value: translatedHtml }],
                         image,
                         alt
                     });
                 }
             }
-        });
+        }
     }
 
     const targetCity = article.targetCity || expert.ville;
@@ -467,17 +497,22 @@ export default async function PublicArticlePage({ params }: PageProps) {
         }
     ] : [];
 
-    const effectiveFaqs = rawFaqs.length > 0 ? rawFaqs : defaultFaqs;
+    const effectiveFaqs = await Promise.all(
+        (rawFaqs.length > 0 ? rawFaqs : defaultFaqs).map(async (f: any) => ({
+            question: await translateText(f.question || f.q, locale, "title"),
+            response: await translateText(f.response || f.r, locale, "article_content")
+        }))
+    );
 
     const faqSchema = effectiveFaqs.length > 0 ? {
         "@context": "https://schema.org",
         "@type": "FAQPage",
         "mainEntity": effectiveFaqs.map(f => ({
             "@type": "Question",
-            "name": f.question || f.q,
+            "name": f.question,
             "acceptedAnswer": {
                 "@type": "Answer",
-                "text": f.response || f.r
+                "text": f.response
             }
         }))
     } : null;
@@ -485,11 +520,11 @@ export default async function PublicArticlePage({ params }: PageProps) {
     const jsonLd: any = {
         "@context": "https://schema.org",
         "@type": "Article",
-        "headline": article.title,
+        "headline": translatedTitle || article.title,
         "image": article.mainImage ? {
             "@type": "ImageObject",
             "url": article.mainImage.startsWith('http') ? article.mainImage : `https://www.ductedexpert.com${article.mainImage.startsWith('/') ? '' : '/'}${article.mainImage}`,
-            "caption": article.altText || `${article.title} - DuctedExpert.com`
+            "caption": article.altText || `${translatedTitle || article.title} - DuctedExpert.com`
         } : {
             "@type": "ImageObject",
             "url": "https://www.ductedexpert.com/assets/logo-share.png",
@@ -510,7 +545,7 @@ export default async function PublicArticlePage({ params }: PageProps) {
                 "url": "https://www.ductedexpert.com/ductedexpert-logo.png"
             }
         },
-        "description": article.metaDesc || article.introduction,
+        "description": article.metaDesc || translatedIntro || article.introduction,
         "articleBody": hasBlocks ? blocks.map(b => b.value).join(' ') : articleContent
     };
 
@@ -581,12 +616,12 @@ export default async function PublicArticlePage({ params }: PageProps) {
                         {/* Social Share Buttons */}
                         <ShareButtons
                             url={currentUrl}
-                            title={article.title}
+                            title={translatedTitle || article.title}
                         />
                     </div>
 
-                    <h1 className="text-3xl md:text-5xl font-bold leading-tight text-slate-800">
-                        {article.title}
+                    <h1 className={`text-3xl md:text-5xl font-bold leading-tight text-slate-800 ${locale === 'ar' ? 'text-right font-tajawal' : 'text-left'}`}>
+                        {translatedTitle || article.title}
                     </h1>
 
                     {/* Author mini-block */}
@@ -623,11 +658,15 @@ export default async function PublicArticlePage({ params }: PageProps) {
 
             <div className="max-w-7xl mx-auto px-6 grid lg:grid-cols-[1fr_350px] gap-12 mt-12">
                 {/* ARTICLE CONTENT */}
-                <article className="max-w-none">
+                <article className={`max-w-none ${locale === 'ar' ? 'text-right font-tajawal' : 'text-left'}`}>
                     {/* Introduction */}
-                    {article.introduction && (
-                        <div className="lead text-xl md:text-2xl text-slate-700 font-serif mb-12 border-l-[6px] border-[#D59B2B] pl-8 italic leading-relaxed bg-[#D59B2B]/5 py-6 pr-4 rounded-r-lg">
-                            {article.introduction}
+                    {(translatedIntro || article.introduction) && (
+                        <div className={`lead text-xl md:text-2xl text-slate-700 font-serif mb-12 italic leading-relaxed py-6 ${
+                            locale === 'ar'
+                                ? 'border-r-[6px] border-[#D59B2B] pr-8 pl-4 rounded-l-lg text-right font-tajawal bg-[#D59B2B]/5'
+                                : 'border-l-[6px] border-[#D59B2B] pl-8 pr-4 rounded-r-lg text-left bg-[#D59B2B]/5'
+                        }`}>
+                            {translatedIntro || article.introduction}
                         </div>
                     )}
 
@@ -652,9 +691,9 @@ export default async function PublicArticlePage({ params }: PageProps) {
                                     <section key={idx} className={`grid gap-12 items-center ${hasImage ? 'md:grid-cols-2' : ''}`}>
                                         <div className={`space-y-6 ${hasImage ? (isReversed ? 'md:order-2' : 'md:order-1') : ''}`}>
                                             {section.title && (
-                                                <h2 className="text-3xl font-bold text-[#1F2D3D] mb-6 relative inline-block">
+                                                <h2 className={`text-3xl font-bold text-[#1F2D3D] mb-6 relative inline-block ${locale === 'ar' ? 'text-right font-tajawal' : 'text-left'}`}>
                                                     {section.title}
-                                                    <span className="absolute -bottom-2 left-0 w-12 h-1 bg-[#D59B2B] rounded-full"></span>
+                                                    <span className={`absolute -bottom-2 ${locale === 'ar' ? 'right-0' : 'left-0'} w-12 h-1 bg-[#D59B2B] rounded-full`}></span>
                                                 </h2>
                                             )}
 
@@ -823,7 +862,7 @@ export default async function PublicArticlePage({ params }: PageProps) {
                     </div>
 
                     {/* OTHER REALISATIONS BY THIS ARTISAN */}
-                    {otherArticles && otherArticles.length > 0 && (
+                    {localizedOtherArticles && localizedOtherArticles.length > 0 && (
                         <section className="mt-16 bg-white p-8 rounded-3xl shadow-sm border border-slate-100">
                             <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
                                 <h2 className="text-2xl font-bold text-[#1F2D3D]">
@@ -833,15 +872,15 @@ export default async function PublicArticlePage({ params }: PageProps) {
                                     href={withLocalePath(`/pro/${expert.slug}`, locale)}
                                     className="text-sm font-bold text-[#D59B2B] hover:underline flex items-center gap-1"
                                 >
-                                    {t.viewFullProfile} <ArrowRight className="w-4 h-4" />
+                                    {t.viewFullProfile} <ArrowRight className={`w-4 h-4 ${locale === 'ar' ? 'rotate-180' : ''}`} />
                                 </Link>
                             </div>
                             <div className="grid sm:grid-cols-2 gap-4">
-                                {otherArticles.map((oa) => (
+                                {localizedOtherArticles.map((oa) => (
                                     <Link
                                         key={oa.slug}
                                         href={withLocalePath(`/entreprise/${expert.slug}/articles/${oa.slug}`, locale)}
-                                        className="group p-4 rounded-2xl border border-slate-100 hover:border-[#D59B2B] hover:shadow-md transition-all bg-slate-50/60 flex flex-col justify-between"
+                                        className={`group p-4 rounded-2xl border border-slate-100 hover:border-[#D59B2B] hover:shadow-md transition-all bg-slate-50/60 flex flex-col justify-between ${locale === 'ar' ? 'text-right font-tajawal' : 'text-left'}`}
                                     >
                                         <div>
                                             {oa.targetCity && (
@@ -853,8 +892,9 @@ export default async function PublicArticlePage({ params }: PageProps) {
                                                 {oa.title}
                                             </h3>
                                         </div>
-                                        <span className="text-xs font-semibold text-[#D59B2B] mt-3 inline-flex items-center gap-1">
-                                            {t.readArticle} <ArrowRight className="w-3.5 h-3.5" />
+                                        <span className={`text-xs font-semibold text-[#D59B2B] mt-3 inline-flex items-center gap-1 ${locale === 'ar' ? 'flex-row-reverse justify-end' : ''}`}>
+
+                                            {t.readArticle} <ArrowRight className={`w-3.5 h-3.5 ${locale === 'ar' ? 'rotate-180' : ''}`} />
                                         </span>
                                     </Link>
                                 ))}

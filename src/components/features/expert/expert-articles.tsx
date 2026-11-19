@@ -113,8 +113,8 @@ export function ExpertArticles({ articles, expertSlug, expertName, locale = DEFA
                                     </div>
 
                                     {/* Content */}
-                                    <div className="p-5 flex-1 flex flex-col">
-                                        <div className="flex items-center gap-2 text-xs text-slate-500 mb-2">
+                                    <div className={`p-5 flex-1 flex flex-col ${locale === 'ar' ? 'text-right font-tajawal' : 'text-left'}`}>
+                                        <div className={`flex items-center gap-2 text-xs text-slate-500 mb-2 ${locale === 'ar' ? 'flex-row-reverse justify-end' : ''}`}>
                                             <Calendar className="w-3 h-3" />
                                             <time dateTime={(article.publishedAt || article.createdAt).toISOString()}>
                                                 {format(new Date(article.publishedAt || article.createdAt), "d MMM yyyy", { locale: dateLoc })}
@@ -126,14 +126,14 @@ export function ExpertArticles({ articles, expertSlug, expertName, locale = DEFA
                                         </h3>
 
                                         {article.introduction && (
-                                            <p className="text-sm text-slate-600 line-clamp-2 mb-4">
+                                            <p className="text-sm text-slate-600 line-clamp-2 mb-4 leading-relaxed">
                                                 {article.introduction}
                                             </p>
                                         )}
 
                                         <div className="mt-auto">
-                                            <span className="text-[#D59B2B] text-sm font-bold flex items-center gap-1 hover:gap-2 transition-all">
-                                                {txt.readMore} <ArrowRight className="w-4 h-4" />
+                                            <span className={`text-[#D59B2B] text-sm font-bold flex items-center gap-1 hover:gap-2 transition-all ${locale === 'ar' ? 'flex-row-reverse justify-end' : ''}`}>
+                                                {txt.readMore} <ArrowRight className={`w-4 h-4 ${locale === 'ar' ? 'rotate-180' : ''}`} />
                                             </span>
                                         </div>
                                     </div>
