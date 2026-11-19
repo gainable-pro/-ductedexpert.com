@@ -33,7 +33,7 @@ export function Footer() {
                                         : "border-slate-800 text-slate-400 hover:text-white hover:border-slate-600"
                                 }`}
                             >
-                                {LOCALE_LABELS[loc].flag} {LOCALE_LABELS[loc].name}
+                                <span className="hidden sm:inline">{LOCALE_LABELS[loc].flag} </span>{LOCALE_LABELS[loc].name}
                             </Link>
                         );
                     })}
@@ -44,7 +44,7 @@ export function Footer() {
                         className="px-3 py-1 rounded-full border border-amber-900/60 text-amber-400 hover:text-white hover:border-amber-400 transition-colors"
                         title="Gainable.fr - Réseau officiel France"
                     >
-                        🇫🇷 France (Gainable.fr) ↗
+                        <span className="hidden sm:inline">🇫🇷 </span>France (Gainable.fr) ↗
                     </a>
                 </div>
 

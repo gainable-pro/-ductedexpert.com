@@ -55,13 +55,12 @@ function LanguageSelector({ mobile = false }: { mobile?: boolean }) {
                         key={loc}
                         type="button"
                         onClick={() => handleSwitch(loc)}
-                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold border transition-all ${
+                        className={`flex items-center justify-center px-3 py-1.5 rounded-lg text-xs font-bold border transition-all ${
                             locale === loc
                                 ? "bg-[#1F2D3D] text-white border-[#1F2D3D]"
                                 : "bg-slate-50 text-slate-700 border-slate-200 hover:border-[#D59B2B]"
                         }`}
                     >
-                        <span>{LOCALE_LABELS[loc].flag}</span>
                         <span className="uppercase">{loc}</span>
                     </button>
                 ))}
@@ -70,9 +69,8 @@ function LanguageSelector({ mobile = false }: { mobile?: boolean }) {
                     type="button"
                     onClick={handleFrRedirect}
                     title="Aller sur Gainable.fr (France)"
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold border border-amber-200 bg-amber-50 text-amber-900 hover:bg-amber-100 transition-all shadow-sm"
+                    className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold border border-amber-200 bg-amber-50 text-amber-900 hover:bg-amber-100 transition-all shadow-sm"
                 >
-                    <span>🇫🇷</span>
                     <span className="uppercase">FR</span>
                     <span className="text-[10px] text-amber-700">↗</span>
                 </button>
@@ -85,11 +83,11 @@ function LanguageSelector({ mobile = false }: { mobile?: boolean }) {
             <button
                 type="button"
                 onClick={() => setOpen(!open)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 bg-slate-50 hover:bg-white hover:border-[#D59B2B] text-xs font-bold text-[#1F2D3D] transition-all"
+                className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg border border-slate-200 bg-slate-50 hover:bg-white hover:border-[#D59B2B] text-xs font-bold text-[#1F2D3D] transition-all"
                 aria-label="Select Language"
             >
                 <Globe className="w-3.5 h-3.5 text-[#D59B2B]" />
-                <span>{LOCALE_LABELS[locale].flag}</span>
+                <span className="hidden md:inline">{LOCALE_LABELS[locale].flag}</span>
                 <span className="uppercase">{locale}</span>
                 <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
             </button>
@@ -112,7 +110,7 @@ function LanguageSelector({ mobile = false }: { mobile?: boolean }) {
                                 }`}
                             >
                                 <span className="flex items-center gap-2">
-                                    <span>{LOCALE_LABELS[loc].flag}</span>
+                                    <span className="hidden md:inline">{LOCALE_LABELS[loc].flag}</span>
                                     <span>{LOCALE_LABELS[loc].name}</span>
                                 </span>
                                 <span className="uppercase text-[10px] text-slate-400">{loc}</span>
@@ -128,7 +126,7 @@ function LanguageSelector({ mobile = false }: { mobile?: boolean }) {
                             className="w-full flex items-center justify-between px-3.5 py-2 text-xs font-semibold text-slate-700 hover:bg-amber-50/70 hover:text-[#D59B2B] transition-colors"
                         >
                             <span className="flex items-center gap-2">
-                                <span>🇫🇷</span>
+                                <span className="hidden md:inline">🇫🇷</span>
                                 <span>Français</span>
                             </span>
                             <span className="inline-flex items-center gap-1 text-[10px] text-amber-700 font-bold uppercase">
