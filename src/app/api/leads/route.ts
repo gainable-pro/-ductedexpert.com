@@ -7,15 +7,15 @@ import { prisma } from "@/lib/prisma";
 // Initialize Resend (Use fallback to prevent build crash if env is missing)
 const resend = new Resend(process.env.RESEND_API_KEY || 're_123456789');
 
-// Validation Schema
+// Validation Schema (Relaxed for international phone & postal codes)
 const leadSchema = z.object({
-    type: z.enum(['PARTICULIER', 'PRO', 'cvc', 'simple', 'diag']).or(z.string()), // Flexible type
-    nom: z.string().min(2, "Le nom est requis"),
+    type: z.enum(['PARTICULIER', 'PRO', 'cvc', 'simple', 'diag']).or(z.string()),
+    nom: z.string().min(2, "Last name is required"),
     prenom: z.string().optional(),
-    email: z.string().email("L'email est invalide"),
-    telephone: z.string().min(10, "Le téléphone est invalide"),
-    code_postal: z.string().regex(/^[0-9]{5}$/, "Le code postal est invalide"),
-    ville: z.string().min(2, "La ville est requise"),
+    email: z.string().email("Invalid email"),
+    telephone: z.string().min(6, "Valid phone number is required"),
+    code_postal: z.string().min(1, "Postal code is required").default("00000"),
+    ville: z.string().min(2, "City is required"),
     adresse: z.string().optional(),
     projet: z.string().optional(),
     surface: z.string().optional(),

@@ -7,15 +7,21 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
-import { Loader2, Send, Upload, User, Briefcase, Users, CheckCircle, MapPin, Mail, Phone } from "lucide-react";
+import { Loader2, Send, Upload, User, Briefcase, Users, CheckCircle, Mail, Phone } from "lucide-react";
+import { useLanguage } from "@/components/layout/language-provider";
+import { getFormsDictionary } from "@/lib/forms-i18n";
 
 export default function ContactPage() {
+    const { locale } = useLanguage();
+    const fd = getFormsDictionary(locale);
+    const cp = fd.contactPage;
+    const cf = fd.cvcForm;
+
     const [step, setStep] = useState<"type" | "form" | "success">("type");
-    const [userType, setUserType] = useState<string>(""); // particulier, professionnel, partenaire
+    const [userType, setUserType] = useState<string>("");
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [fileName, setFileName] = useState<string | null>(null);
 
-    // Form Stats
     const fileInputRef = useRef<HTMLInputElement>(null);
     const formRef = useRef<HTMLFormElement>(null);
 
@@ -38,12 +44,12 @@ export default function ContactPage() {
                 body: formData
             });
 
-            if (!res.ok) throw new Error("Erreur d'envoi");
+            if (!res.ok) throw new Error("Send error");
 
             setStep("success");
             window.scrollTo({ top: 0, behavior: 'smooth' });
-        } catch (err) {
-            alert("Une erreur est survenue lors de l'envoi du message. Veuillez réessayer.");
+        } catch {
+            alert("Error sending message. Please try again.");
         } finally {
             setIsSubmitting(false);
         }
@@ -57,22 +63,29 @@ export default function ContactPage() {
         }
     };
 
+    const getUserTypeTitle = (ut: string) => {
+        if (ut === "particulier") return cp.cardIndividualTitle;
+        if (ut === "professionnel") return cp.cardProTitle;
+        if (ut === "partenaire") return cp.cardPartnerTitle;
+        return ut;
+    };
+
     return (
         <div className="min-h-screen bg-slate-50 font-sans text-slate-900 pb-20">
             {/* HERO SECTION */}
             <div className="relative h-[40vh] min-h-[300px] flex items-center justify-center bg-[#1F2D3D] overflow-hidden">
                 <div
                     className="absolute inset-0 bg-cover bg-center opacity-40 mix-blend-overlay"
-                    style={{ backgroundImage: `url('/gainable-fr-climatisation-contact-fond.png')` }} // Assuming image matches path
-                ></div>
-                <div className="absolute inset-0 bg-gradient-to-b from-[#1F2D3D]/80 to-[#1F2D3D]/95"></div>
+                    style={{ backgroundImage: `url('/gainable-fr-climatisation-contact-fond.png')` }}
+                />
+                <div className="absolute inset-0 bg-gradient-to-b from-[#1F2D3D]/80 to-[#1F2D3D]/95" />
                 <div className="relative z-10 text-center px-4 max-w-4xl mx-auto">
                     <h1 className="text-3xl md:text-5xl font-bold text-white mb-4 tracking-tight">
-                        Contactez-nous
+                        {cp.heroTitle}
                     </h1>
                     <p className="text-slate-300 text-lg md:text-xl max-w-2xl mx-auto font-light">
-                        Une question, un devis ou une proposition de partenariat ?
-                        <br />Notre équipe est à votre écoute.
+                        {cp.heroSubtitle1}
+                        <br />{cp.heroSubtitle2}
                     </p>
                 </div>
             </div>
@@ -88,16 +101,15 @@ export default function ContactPage() {
                                     <CheckCircle className="w-12 h-12 text-green-600" />
                                 </div>
                                 <div>
-                                    <h2 className="text-3xl font-bold text-slate-800">Message envoyé !</h2>
-                                    <p className="text-slate-500 mt-2 text-lg">
-                                        Merci de nous avoir contactés. Nous reviendrons vers vous sous 48h.
-                                    </p>
+                                    <h2 className="text-3xl font-bold text-slate-800">{cp.successTitle}</h2>
+                                    <p className="text-slate-500 mt-2 text-lg">{cp.successText}</p>
                                 </div>
                                 <Button
                                     onClick={() => { setStep("type"); setUserType(""); }}
-                                    className="mt-8" variant="outline"
+                                    className="mt-8"
+                                    variant="outline"
                                 >
-                                    Envoyer un autre message
+                                    {cp.sendAnotherBtn}
                                 </Button>
                             </CardContent>
                         </Card>
@@ -110,30 +122,24 @@ export default function ContactPage() {
                                 <div className="bg-blue-50 w-16 h-16 rounded-2xl flex items-center justify-center mb-6 text-blue-600 group-hover:scale-110 transition-transform">
                                     <User className="w-8 h-8" />
                                 </div>
-                                <h3 className="text-xl font-bold text-slate-800 mb-2">Je suis un Particulier</h3>
-                                <p className="text-slate-500 text-sm leading-relaxed">
-                                    Vous avez un projet de climatisation ou de diagnostic ? Posez vos questions ici.
-                                </p>
+                                <h3 className="text-xl font-bold text-slate-800 mb-2">{cp.cardIndividualTitle}</h3>
+                                <p className="text-slate-500 text-sm leading-relaxed">{cp.cardIndividualDesc}</p>
                             </button>
 
                             <button onClick={() => handleTypeSelect("professionnel")} className="group bg-white p-8 rounded-xl shadow-lg border border-transparent hover:border-[#D59B2B] hover:shadow-2xl transition-all text-left">
                                 <div className="bg-amber-50 w-16 h-16 rounded-2xl flex items-center justify-center mb-6 text-[#D59B2B] group-hover:scale-110 transition-transform">
                                     <Briefcase className="w-8 h-8" />
                                 </div>
-                                <h3 className="text-xl font-bold text-slate-800 mb-2">Je suis un Professionnel</h3>
-                                <p className="text-slate-500 text-sm leading-relaxed">
-                                    Bureau d'étude, diagnostiqueur ou installateur. Rejoignez le réseau Gainable.fr.
-                                </p>
+                                <h3 className="text-xl font-bold text-slate-800 mb-2">{cp.cardProTitle}</h3>
+                                <p className="text-slate-500 text-sm leading-relaxed">{cp.cardProDesc}</p>
                             </button>
 
                             <button onClick={() => handleTypeSelect("partenaire")} className="group bg-white p-8 rounded-xl shadow-lg border border-transparent hover:border-[#D59B2B] hover:shadow-2xl transition-all text-left">
                                 <div className="bg-purple-50 w-16 h-16 rounded-2xl flex items-center justify-center mb-6 text-purple-600 group-hover:scale-110 transition-transform">
                                     <Users className="w-8 h-8" />
                                 </div>
-                                <h3 className="text-xl font-bold text-slate-800 mb-2">Partenariat / Autre</h3>
-                                <p className="text-slate-500 text-sm leading-relaxed">
-                                    Une proposition commerciale ou un partenariat média ? C'est par ici.
-                                </p>
+                                <h3 className="text-xl font-bold text-slate-800 mb-2">{cp.cardPartnerTitle}</h3>
+                                <p className="text-slate-500 text-sm leading-relaxed">{cp.cardPartnerDesc}</p>
                             </button>
                         </div>
                     )}
@@ -141,93 +147,88 @@ export default function ContactPage() {
                     {/* FORM STATE */}
                     {step === "form" && (
                         <div className="bg-white rounded-2xl shadow-xl overflow-hidden animate-in fade-in slide-in-from-right-8 duration-500">
-
-                            {/* FORM HEADER */}
                             <div className="bg-slate-50 px-8 py-6 border-b border-slate-100 flex justify-between items-center">
                                 <div>
                                     <p className="text-xs font-bold text-[#D59B2B] uppercase tracking-wider mb-1">
-                                        Formulaire de contact
+                                        {cp.formBadge}
                                     </p>
-                                    <h2 className="text-2xl font-bold text-slate-800 capitalize">
-                                        {userType}
+                                    <h2 className="text-2xl font-bold text-slate-800">
+                                        {getUserTypeTitle(userType)}
                                     </h2>
                                 </div>
                                 <Button variant="ghost" size="sm" onClick={() => setStep("type")} className="text-slate-400 hover:text-slate-600">
-                                    Changer
+                                    {cp.changeBtn}
                                 </Button>
                             </div>
 
                             <div className="p-8 md:p-10">
                                 <form ref={formRef} onSubmit={handleSubmit} className="space-y-6">
-
-                                    {/* DYNAMIC FIELDS FOR PRO */}
+                                    {/* DYNAMIC FIELDS FOR PRO (NO Diagnostiqueur Immobilier) */}
                                     {userType === "professionnel" && (
                                         <div className="bg-amber-50/50 p-6 rounded-xl border border-amber-100 mb-8">
-                                            <Label className="mb-2 block text-amber-900 font-semibold">Votre domaine d'activité *</Label>
+                                            <Label className="mb-2 block text-amber-900 font-semibold">{cp.proSectorLabel}</Label>
                                             <Select name="specificType" required>
                                                 <SelectTrigger className="bg-white border-amber-200">
-                                                    <SelectValue placeholder="Sélectionnez votre métier" />
+                                                    <SelectValue placeholder={cp.proSectorPlaceholder} />
                                                 </SelectTrigger>
                                                 <SelectContent>
-                                                    <SelectItem value="bureau_etude">Bureau d'étude thermique</SelectItem>
-                                                    <SelectItem value="diagnostiqueur">Diagnostiqueur Immobilier (DPE/Audit)</SelectItem>
-                                                    <SelectItem value="installateur">Installateur CVC / Plombier</SelectItem>
-                                                    <SelectItem value="architecte">Architecte / Maître d'œuvre</SelectItem>
-                                                    <SelectItem value="autre_pro">Autre professionnel du bâtiment</SelectItem>
+                                                    <SelectItem value="bureau_etude">{cp.proSectorEngineering}</SelectItem>
+                                                    <SelectItem value="installateur">{cp.proSectorInstaller}</SelectItem>
+                                                    <SelectItem value="architecte">{cp.proSectorArchitect}</SelectItem>
+                                                    <SelectItem value="autre_pro">{cp.proSectorOther}</SelectItem>
                                                 </SelectContent>
                                             </Select>
                                         </div>
                                     )}
 
-                                    {/* GENERAL FIELDS */}
                                     <div className="grid md:grid-cols-2 gap-6">
                                         <div className="space-y-2">
-                                            <Label className="text-slate-600">Civilité</Label>
+                                            <Label className="text-slate-600">{cp.civilityLabel}</Label>
                                             <Select name="civility" defaultValue="M.">
                                                 <SelectTrigger>
                                                     <SelectValue placeholder="-" />
                                                 </SelectTrigger>
                                                 <SelectContent>
-                                                    <SelectItem value="M.">Monsieur</SelectItem>
-                                                    <SelectItem value="Mme">Madame</SelectItem>
+                                                    <SelectItem value="M.">{cp.mr}</SelectItem>
+                                                    <SelectItem value="Mme">{cp.mrs}</SelectItem>
                                                 </SelectContent>
                                             </Select>
                                         </div>
-                                        <div className="hidden md:block"></div> {/* Spacer */}
+                                        <div className="hidden md:block" />
 
                                         <div className="space-y-2">
-                                            <Label className="text-slate-600">Nom *</Label>
-                                            <Input name="lastName" placeholder="Votre nom" required className="h-11" />
+                                            <Label className="text-slate-600">{cf.lastNameLabel}</Label>
+                                            <Input name="lastName" placeholder={cf.lastNamePlaceholder} required className="h-11" />
                                         </div>
                                         <div className="space-y-2">
-                                            <Label className="text-slate-600">Prénom</Label>
-                                            <Input name="firstName" placeholder="Votre prénom" className="h-11" />
-                                        </div>
-
-                                        <div className="space-y-2">
-                                            <Label className="text-slate-600">Email professionnel/perso *</Label>
-                                            <Input name="email" type="email" placeholder="contact@exemple.com" required className="h-11" />
-                                        </div>
-                                        <div className="space-y-2">
-                                            <Label className="text-slate-600">Téléphone</Label>
-                                            <Input name="phone" type="tel" placeholder="06 12 34 56 78" className="h-11" />
+                                            <Label className="text-slate-600">{cf.firstNameLabel}</Label>
+                                            <Input name="firstName" placeholder={cf.firstNamePlaceholder} className="h-11" />
                                         </div>
 
                                         <div className="space-y-2">
-                                            <Label className="text-slate-600">Code Postal</Label>
-                                            <Input name="zip" placeholder="75000" className="h-11" />
+                                            <Label className="text-slate-600">{cf.emailLabel}</Label>
+                                            <Input name="email" type="email" placeholder={cf.emailPlaceholder} required className="h-11" />
                                         </div>
                                         <div className="space-y-2">
-                                            <Label className="text-slate-600">Ville</Label>
-                                            <Input name="city" placeholder="Paris" className="h-11" />
+                                            <Label className="text-slate-600">{cf.phoneLabel}</Label>
+                                            <Input name="phone" type="tel" placeholder={cf.phonePlaceholder} className="h-11" />
+                                        </div>
+
+                                        <div className="space-y-2">
+                                            <Label className="text-slate-600">{cp.postalCodeLabel}</Label>
+                                            <Input name="zip" placeholder="10001" className="h-11" />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label className="text-slate-600">{cp.cityLabel}</Label>
+                                            <Input name="city" placeholder="City" className="h-11" />
                                         </div>
                                     </div>
 
                                     <div className="space-y-2 pt-4">
-                                        <Label className="text-slate-600">Votre Message *</Label>
+                                        <Label className="text-slate-600">{cp.yourMessageLabel}</Label>
                                         <Textarea
                                             name="message"
-                                            placeholder="Détaillez votre demande ici..."
+                                            placeholder={cp.yourMessagePlaceholder}
                                             className="min-h-[150px] resize-y text-base"
                                             required
                                         />
@@ -235,7 +236,7 @@ export default function ContactPage() {
 
                                     {/* ATTACHMENT */}
                                     <div className="space-y-3 pt-2">
-                                        <Label className="text-slate-600">Pièce jointe (Optionnel)</Label>
+                                        <Label className="text-slate-600">{cp.attachmentLabel}</Label>
                                         <input
                                             type="file"
                                             name="file"
@@ -255,8 +256,8 @@ export default function ContactPage() {
                                                 <p className="text-sm font-medium text-blue-600">{fileName}</p>
                                             ) : (
                                                 <>
-                                                    <p className="text-sm font-medium text-slate-700">Cliquez pour importer un fichier</p>
-                                                    <p className="text-xs text-slate-400 mt-1">PDF, DOC, JPG, PNG (Max 4 Mo)</p>
+                                                    <p className="text-sm font-medium text-slate-700">{cp.clickToUpload}</p>
+                                                    <p className="text-xs text-slate-400 mt-1">PDF, DOC, JPG, PNG (Max 4 MB)</p>
                                                 </>
                                             )}
                                         </div>
@@ -266,7 +267,7 @@ export default function ContactPage() {
                                                 onClick={(e) => { e.stopPropagation(); setFileName(null); if (fileInputRef.current) fileInputRef.current.value = ''; }}
                                                 className="text-xs text-red-500 hover:underline"
                                             >
-                                                Supprimer le fichier
+                                                {cp.removeFileBtn}
                                             </button>
                                         )}
                                     </div>
@@ -279,19 +280,18 @@ export default function ContactPage() {
                                         >
                                             {isSubmitting ? (
                                                 <>
-                                                    <Loader2 className="mr-2 h-5 w-5 animate-spin" /> Envoi en cours...
+                                                    <Loader2 className="mr-2 h-5 w-5 animate-spin" /> {cf.sending}
                                                 </>
                                             ) : (
                                                 <>
-                                                    <Send className="mr-2 h-5 w-5" /> Envoyer ma demande
+                                                    <Send className="mr-2 h-5 w-5" /> {cp.sendRequestBtn}
                                                 </>
                                             )}
                                         </Button>
                                         <p className="text-center text-xs text-slate-400 mt-4">
-                                            En soumettant ce formulaire, vous acceptez que vos données soient traitées pour répondre à votre demande.
+                                            {cf.submitDisclaimer}
                                         </p>
                                     </div>
-
                                 </form>
                             </div>
                         </div>
@@ -300,7 +300,6 @@ export default function ContactPage() {
 
                 {/* INFO BOTTOM */}
                 <div className="mt-20 grid md:grid-cols-2 gap-8 max-w-4xl mx-auto border-t border-slate-200 pt-12">
-
                     <div className="flex items-start gap-4">
                         <div className="bg-white p-3 rounded-full shadow-sm text-[#D59B2B] border border-slate-100">
                             <Mail className="w-6 h-6" />
@@ -308,8 +307,8 @@ export default function ContactPage() {
                         <div>
                             <h4 className="font-bold text-slate-900">Email</h4>
                             <p className="text-slate-500 text-sm mt-1">
-                                contact@gainable.fr<br />
-                                <span className="text-xs text-slate-400">Réponse sous 24-48h</span>
+                                contact@ductedexpert.com<br />
+                                <span className="text-xs text-slate-400">{cp.responseTime}</span>
                             </p>
                         </div>
                     </div>
@@ -318,10 +317,10 @@ export default function ContactPage() {
                             <Phone className="w-6 h-6" />
                         </div>
                         <div>
-                            <h4 className="font-bold text-slate-900">Support</h4>
+                            <h4 className="font-bold text-slate-900">{cp.supportTitle}</h4>
                             <p className="text-slate-500 text-sm mt-1">
-                                Via formulaire uniquement<br />
-                                <span className="text-xs text-slate-400">Pour assurer un meilleur suivi</span>
+                                {cp.viaFormOnly}<br />
+                                <span className="text-xs text-slate-400">{cp.betterTracking}</span>
                             </p>
                         </div>
                     </div>

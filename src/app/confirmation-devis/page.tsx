@@ -2,11 +2,11 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { CheckCircle, Home, Search, Phone, Building2, MapPin } from "lucide-react";
 import { prisma } from "@/lib/prisma";
+import { getServerLocale } from "@/lib/server-locale";
+import { getFormsDictionary } from "@/lib/forms-i18n";
+import { withLocalePath } from "@/lib/i18n";
 
-export const metadata = {
-    title: "Demande reçue | Gainable.fr",
-    description: "Votre demande de devis a bien été transmise.",
-};
+export const dynamic = "force-dynamic";
 
 type Props = {
     searchParams: Promise<{ [key: string]: string | string[] | undefined }>
@@ -15,11 +15,13 @@ type Props = {
 export default async function ConfirmationDevisPage({ searchParams }: Props) {
     const resolvedSearchParams = await searchParams;
     const expertsParam = resolvedSearchParams.experts;
+    const locale = await getServerLocale();
+    const cp = getFormsDictionary(locale).confirmationPage;
 
     let experts: any[] = [];
 
     if (typeof expertsParam === 'string') {
-        const expertIds = expertsParam.split(',');
+        const expertIds = expertsParam.split(',').filter(Boolean);
         if (expertIds.length > 0) {
             try {
                 experts = await prisma.expert.findMany({
@@ -48,11 +50,10 @@ export default async function ConfirmationDevisPage({ searchParams }: Props) {
 
             <div className="max-w-xl space-y-4">
                 <h1 className="text-3xl md:text-4xl font-bold text-[#1F2D3D]">
-                    Merci ! Votre demande est enregistrée.
+                    {cp.title}
                 </h1>
                 <p className="text-lg text-slate-600">
-                    Votre dossier a bien été transmis. <br />
-                    Voici les coordonnées des professionnels contactés :
+                    {cp.subtitle}
                 </p>
             </div>
 
@@ -77,7 +78,7 @@ export default async function ConfirmationDevisPage({ searchParams }: Props) {
                                     {expert.telephone}
                                 </a>
                             ) : (
-                                <span className="text-slate-400 text-sm italic">Pas de téléphone public</span>
+                                <span className="text-slate-400 text-sm italic">{cp.noPublicPhone}</span>
                             )}
                         </div>
                     ))}
@@ -87,24 +88,24 @@ export default async function ConfirmationDevisPage({ searchParams }: Props) {
             {/* Advice Section */}
             <div className="bg-blue-50 text-blue-800 text-left p-6 rounded-xl text-sm space-y-3 max-w-lg w-full mx-auto border border-blue-100">
                 <p className="font-bold flex items-center gap-2 text-lg">
-                    🛡️ Conseils avant de vous engager :
+                    {cp.adviceTitle}
                 </p>
                 <ul className="list-disc pl-5 space-y-2 opacity-90">
-                    <li><strong>Vérifiez les qualifications :</strong> Assurez-vous que l'artisan possède les certifications RGE nécessaires (QualiPAC, etc.).</li>
-                    <li><strong>Assurance décennale :</strong> Demandez systématiquement une attestation d'assurance à jour.</li>
-                    <li><strong>Devis détaillé :</strong> Le devis doit préciser la marque, le modèle et les prestations incluses.</li>
+                    {cp.adviceList.map((advice, idx) => (
+                        <li key={idx}>{advice}</li>
+                    ))}
                 </ul>
             </div>
 
             <div className="flex flex-col sm:flex-row gap-4 pt-4">
-                <Link href="/">
+                <Link href={withLocalePath("/", locale)}>
                     <Button variant="outline" className="gap-2">
-                        <Home className="w-4 h-4" /> Retour à l'accueil
+                        <Home className="w-4 h-4" /> {cp.backHomeBtn}
                     </Button>
                 </Link>
-                <Link href="/trouver-installateur">
+                <Link href={withLocalePath("/", locale)}>
                     <Button className="bg-[#D59B2B] hover:bg-[#b88622] text-white gap-2">
-                        <Search className="w-4 h-4" /> Trouver un autre expert
+                        <Search className="w-4 h-4" /> {cp.findAnotherExpertBtn}
                     </Button>
                 </Link>
             </div>

@@ -4,6 +4,8 @@ import { useState } from "react";
 import { CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CvcRequestForm } from "./cvc-form";
+import { useLanguage } from "@/components/layout/language-provider";
+import { getFormsDictionary } from "@/lib/forms-i18n";
 
 interface InternationalLeadFormProps {
     city: string;
@@ -22,6 +24,9 @@ export function InternationalLeadForm({
     hideHeader = false,
     defaultSurface
 }: InternationalLeadFormProps) {
+    const { locale } = useLanguage();
+    const il = getFormsDictionary(locale).internationalLead;
+
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
 
@@ -29,7 +34,7 @@ export function InternationalLeadForm({
         setIsSubmitting(true);
         try {
             const address = data.address || "";
-            const zipMatch = address.match(/\b\d{4,5}\b/);
+            const zipMatch = address.match(/\b\d{4,6}\b/);
             const extractedZip = zipMatch ? zipMatch[0] : "00000";
 
             const payload = {
@@ -42,7 +47,7 @@ export function InternationalLeadForm({
                 ville: address.replace(extractedZip, "").replace(/,/g, "").trim() || city,
                 adresse: address,
                 message: data.description || "",
-                projet: data.propertyType || "Non spécifié",
+                projet: data.propertyType || "Not specified",
                 surface: data.surface ? String(data.surface) : (defaultSurface ? String(defaultSurface) : undefined),
                 source: expertName ? `Article ${expertName} (${city})` : `Landing Page ${city}`,
                 expert_id: expertId,
@@ -61,14 +66,14 @@ export function InternationalLeadForm({
 
             if (!response.ok) {
                 const err = await response.json();
-                throw new Error(err.error || "Une erreur est survenue");
+                throw new Error(err.error || "An error occurred");
             }
 
             setIsSuccess(true);
             if (onSuccess) onSuccess();
         } catch (error) {
             console.error("Submission error", error);
-            alert("Une erreur est survenue lors de l'envoi. Veuillez vérifier votre connexion ou réessayer.");
+            alert("Connection error. Please try again.");
         } finally {
             setIsSubmitting(false);
         }
@@ -81,17 +86,17 @@ export function InternationalLeadForm({
                     <CheckCircle className="w-10 h-10 text-green-600" />
                 </div>
                 <div>
-                    <h3 className="text-2xl font-bold text-[#1F2D3D]">Merci pour votre demande !</h3>
+                    <h3 className="text-2xl font-bold text-[#1F2D3D]">{il.thankYouTitle}</h3>
                     <p className="text-slate-600 mt-2">
-                        {expertName 
-                            ? `Votre dossier pour ${city} a bien été transmis à ${expertName}.`
-                            : `Votre dossier pour ${city} a bien été transmis à nos experts locaux.`
+                        {expertName
+                            ? il.transmittedToExpert(city, expertName)
+                            : il.transmittedToLocal(city)
                         }
-                        <br />Un installateur certifié RGE vous contactera sous 24h ouvrées pour votre devis.
+                        <br />{il.contact24h}
                     </p>
                 </div>
                 <Button onClick={() => setIsSuccess(false)} variant="outline" className="mt-4">
-                    Nouvelle demande
+                    {il.newRequestBtn}
                 </Button>
             </div>
         );
@@ -102,15 +107,15 @@ export function InternationalLeadForm({
             {!hideHeader && (
                 <div className="mb-8 text-center border-b pb-6 border-slate-100">
                     <h3 className="text-2xl font-extrabold text-[#1F2D3D] flex items-center justify-center gap-2 mb-2">
-                        Obtenez votre devis à {city}
+                        {il.getQuoteInCity(city)}
                     </h3>
-                    <p className="text-slate-500">Renseignez les détails de votre projet pour être contacté par nos artisans qualifiés.</p>
+                    <p className="text-slate-500">{il.subtitle}</p>
                 </div>
             )}
-            
-            <CvcRequestForm 
-                onSubmit={handleSubmitCVC} 
-                isSubmitting={isSubmitting} 
+
+            <CvcRequestForm
+                onSubmit={handleSubmitCVC}
+                isSubmitting={isSubmitting}
                 defaultCity={city}
                 defaultSurface={defaultSurface}
             />

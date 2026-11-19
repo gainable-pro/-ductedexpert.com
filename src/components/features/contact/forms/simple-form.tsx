@@ -1,7 +1,7 @@
-
 "use client";
 
-import { useForm } from "react-hook-form";
+import { useMemo } from "react";
+import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
@@ -17,34 +17,33 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Controller } from "react-hook-form";
-
-// Schema Validation
-const simpleFormSchema = z.object({
-    // Coordonnées
-    lastName: z.string().min(2, "Le nom est requis"),
-    firstName: z.string().min(2, "Le prénom est requis"),
-    phone: z.string().min(10, "Numéro de téléphone valide requis (10 chiffres)"),
-    email: z.string().email("Email invalide"),
-    address: z.string().optional(),
-
-    // Détails
-    description: z.string().min(10, "Veuillez décrire brièvement votre besoin."),
-
-    // GDPR
-    acceptTerms: z.boolean().refine(v => v === true, {
-        message: "Vous devez accepter la politique de confidentialité.",
-    }),
-});
-
-type SimpleFormValues = z.infer<typeof simpleFormSchema>;
+import { useLanguage } from "@/components/layout/language-provider";
+import { getFormsDictionary } from "@/lib/forms-i18n";
+import { withLocalePath } from "@/lib/i18n";
 
 interface SimpleRequestFormProps {
-    onSubmit: (data: SimpleFormValues) => void;
+    onSubmit: (data: any) => void;
     isSubmitting?: boolean;
 }
 
 export const SimpleRequestForm = ({ onSubmit, isSubmitting = false }: SimpleRequestFormProps) => {
+    const { locale } = useLanguage();
+    const f = getFormsDictionary(locale).cvcForm;
+
+    const simpleFormSchema = useMemo(() => z.object({
+        lastName: z.string().min(2, f.errLastName),
+        firstName: z.string().min(2, f.errFirstName),
+        phone: z.string().min(6, f.errPhone),
+        email: z.string().email(f.errEmail),
+        address: z.string().optional(),
+        description: z.string().min(5, f.projectDescHint),
+        acceptTerms: z.boolean().refine(v => v === true, {
+            message: f.errGdpr,
+        }),
+    }), [f]);
+
+    type SimpleFormValues = z.infer<typeof simpleFormSchema>;
+
     const form = useForm<SimpleFormValues>({
         resolver: zodResolver(simpleFormSchema),
         defaultValues: {
@@ -56,108 +55,89 @@ export const SimpleRequestForm = ({ onSubmit, isSubmitting = false }: SimpleRequ
 
     return (
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
-
-            {/* 1. Coordonnées */}
             <section className="space-y-4">
                 <h3 className="text-lg font-bold text-[#1F2D3D] flex items-center gap-2 border-b pb-2">
-                    <User className="w-5 h-5 text-[#D59B2B]" /> Vos coordonnées
+                    <User className="w-5 h-5 text-[#D59B2B]" /> {f.yourDetails}
                 </h3>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                        <Label htmlFor="lastName">Nom *</Label>
+                        <Label htmlFor="lastName">{f.lastNameLabel}</Label>
                         <Input
                             id="lastName"
                             {...register("lastName")}
-                            placeholder="Votre nom"
+                            placeholder={f.lastNamePlaceholder}
                             className={errors.lastName ? "border-red-500" : ""}
-                            aria-required="true"
-                            aria-invalid={errors.lastName ? "true" : "false"}
-                            aria-describedby={errors.lastName ? "lastName-error" : undefined}
                         />
-                        {errors.lastName && <p id="lastName-error" className="text-xs text-red-500">{errors.lastName.message}</p>}
+                        {errors.lastName && <p className="text-xs text-red-500">{errors.lastName.message}</p>}
                     </div>
                     <div className="space-y-2">
-                        <Label htmlFor="firstName">Prénom *</Label>
+                        <Label htmlFor="firstName">{f.firstNameLabel}</Label>
                         <Input
                             id="firstName"
                             {...register("firstName")}
-                            placeholder="Votre prénom"
+                            placeholder={f.firstNamePlaceholder}
                             className={errors.firstName ? "border-red-500" : ""}
-                            aria-required="true"
-                            aria-invalid={errors.firstName ? "true" : "false"}
-                            aria-describedby={errors.firstName ? "firstName-error" : undefined}
                         />
-                        {errors.firstName && <p id="firstName-error" className="text-xs text-red-500">{errors.firstName.message}</p>}
+                        {errors.firstName && <p className="text-xs text-red-500">{errors.firstName.message}</p>}
                     </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                        <Label htmlFor="phone">Téléphone *</Label>
+                        <Label htmlFor="phone">{f.phoneLabel}</Label>
                         <div className="relative">
-                            <Phone className="absolute left-3 top-3 w-4 h-4 text-slate-400" aria-hidden="true" />
+                            <Phone className="absolute left-3 top-3 w-4 h-4 text-slate-400" />
                             <Input
                                 id="phone"
                                 {...register("phone")}
-                                placeholder="06 12 34 56 78"
+                                placeholder={f.phonePlaceholder}
                                 className={`pl-10 ${errors.phone ? "border-red-500" : ""}`}
-                                aria-required="true"
-                                aria-invalid={errors.phone ? "true" : "false"}
-                                aria-describedby={errors.phone ? "phone-error" : undefined}
                             />
                         </div>
-                        {errors.phone && <p id="phone-error" className="text-xs text-red-500">{errors.phone.message}</p>}
+                        {errors.phone && <p className="text-xs text-red-500">{errors.phone.message}</p>}
                     </div>
                     <div className="space-y-2">
-                        <Label htmlFor="email">Email *</Label>
+                        <Label htmlFor="email">{f.emailLabel}</Label>
                         <div className="relative">
-                            <Mail className="absolute left-3 top-3 w-4 h-4 text-slate-400" aria-hidden="true" />
+                            <Mail className="absolute left-3 top-3 w-4 h-4 text-slate-400" />
                             <Input
                                 id="email"
                                 {...register("email")}
-                                placeholder="votre@email.com"
+                                placeholder={f.emailPlaceholder}
                                 className={`pl-10 ${errors.email ? "border-red-500" : ""}`}
-                                aria-required="true"
-                                aria-invalid={errors.email ? "true" : "false"}
-                                aria-describedby={errors.email ? "email-error" : undefined}
                             />
                         </div>
-                        {errors.email && <p id="email-error" className="text-xs text-red-500">{errors.email.message}</p>}
+                        {errors.email && <p className="text-xs text-red-500">{errors.email.message}</p>}
                     </div>
                 </div>
 
                 <div className="space-y-2">
-                    <Label>Ville / Code Postal (Optionnel)</Label>
+                    <Label>{f.cityZipOptionalLabel}</Label>
                     <div className="relative">
                         <MapPin className="absolute left-3 top-3 w-4 h-4 text-slate-400" />
-                        <Input {...register("address")} placeholder="Ex: Lyon, 69002" />
+                        <Input {...register("address")} placeholder={f.cityZipOptionalPlaceholder} className="pl-10" />
                     </div>
                 </div>
             </section>
 
-            {/* 2. Détails */}
             <section className="space-y-4">
                 <h3 className="text-lg font-bold text-[#1F2D3D] flex items-center gap-2 border-b pb-2">
-                    <FileText className="w-5 h-5 text-[#D59B2B]" /> Votre demande
+                    <FileText className="w-5 h-5 text-[#D59B2B]" /> {f.yourRequestTitle}
                 </h3>
 
                 <div className="space-y-2">
-                    <Label htmlFor="description">Message *</Label>
+                    <Label htmlFor="description">{f.messageLabel}</Label>
                     <Textarea
                         id="description"
                         {...register("description")}
-                        placeholder="Bonjour, je souhaiterais un devis pour..."
+                        placeholder={f.messagePlaceholder}
                         className="h-32 resize-none"
-                        aria-required="true"
-                        aria-invalid={errors.description ? "true" : "false"}
-                        aria-describedby={errors.description ? "description-error" : undefined}
                     />
-                    {errors.description && <p id="description-error" className="text-xs text-red-500">{errors.description.message}</p>}
+                    {errors.description && <p className="text-xs text-red-500">{errors.description.message}</p>}
                 </div>
             </section>
 
-            {/* GDPR Consent */}
             <section className="space-y-4 pt-2">
                 <div className="flex items-start gap-3 p-4 bg-slate-50 rounded-lg border border-slate-100">
                     <Controller
@@ -177,9 +157,9 @@ export const SimpleRequestForm = ({ onSubmit, isSubmitting = false }: SimpleRequ
                             htmlFor="acceptTerms"
                             className="text-sm font-medium leading-relaxed text-slate-600 cursor-pointer"
                         >
-                            J’accepte que mes données soient traitées pour répondre à ma demande et j'ai lu la{" "}
-                            <Link href="/politique-confidentialite" className="text-[#D59B2B] hover:underline font-semibold">
-                                politique de confidentialité
+                            {f.gdprPrefix}{" "}
+                            <Link href={withLocalePath("/politique-confidentialite", locale)} className="text-[#D59B2B] hover:underline font-semibold">
+                                {f.privacyPolicyLink}
                             </Link>.
                         </Label>
                         {errors.acceptTerms && (
@@ -191,17 +171,15 @@ export const SimpleRequestForm = ({ onSubmit, isSubmitting = false }: SimpleRequ
                 </div>
             </section>
 
-            {/* Actions */}
             <div className="pt-4">
                 <Button
                     type="submit"
                     className="w-full bg-[#D59B2B] hover:bg-[#b88622] text-white font-bold h-14 text-lg shadow-md"
                     disabled={isSubmitting}
                 >
-                    {isSubmitting ? "Envoi en cours..." : "📨 Envoyer ma demande"}
+                    {isSubmitting ? f.sending : f.submitSimpleBtn}
                 </Button>
             </div>
-
         </form>
     );
 };

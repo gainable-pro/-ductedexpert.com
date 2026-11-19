@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect } from "react";
@@ -6,9 +5,10 @@ import { Dialog, DialogContent, DialogTrigger, DialogTitle } from "@/components/
 import { Button } from "@/components/ui/button";
 import { CvcRequestForm } from "./forms/cvc-form";
 import { SimpleRequestForm } from "./forms/simple-form";
-import { DiagRequestForm } from "./forms/diag-form";
 import { X, CheckCircle } from "lucide-react";
-import { BrandLogo } from "@/components/ui/brand-logo";
+import { useLanguage } from "@/components/layout/language-provider";
+import { getFormsDictionary } from "@/lib/forms-i18n";
+import { withLocalePath } from "@/lib/i18n";
 
 interface ExpertSummary {
     id: string;
@@ -25,16 +25,14 @@ interface ContactWizardProps {
 type WizardStep = "select-type" | "form" | "success";
 
 export const ContactWizard = ({ preSelectedExperts = [], triggerButton }: ContactWizardProps) => {
+    const { locale, t } = useLanguage();
+    const w = getFormsDictionary(locale).wizard;
+
     const [isOpen, setIsOpen] = useState(false);
-
-    // Determine initial experts
     const initialExperts = preSelectedExperts;
-
-    // Determine initial step: if we have experts, go to form. If not (future feature), select type.
     const [step, setStep] = useState<WizardStep>(initialExperts.length > 0 ? "form" : "select-type");
     const [selectedExperts, setSelectedExperts] = useState<ExpertSummary[]>(initialExperts);
 
-    // Sync state if props change (e.g. adding more experts in parent)
     useEffect(() => {
         if (preSelectedExperts.length > 0) {
             setSelectedExperts(preSelectedExperts);
@@ -42,37 +40,28 @@ export const ContactWizard = ({ preSelectedExperts = [], triggerButton }: Contac
         }
     }, [preSelectedExperts]);
 
-    // Lock type to the first expert's type if available, otherwise default to CVC for now
-    // TODO: Handle mixed types if necessary, though UI should prevent it
     const expertType = selectedExperts.length > 0 ? selectedExperts[0].expert_type : "cvc_climatisation";
 
     const handleSubmitCVC = async (data: any) => {
-        // Parse Address to extract Zip/City (Simple Regex for FR/CH/BE format support could be complex, assuming FR 5 digits for now as main target)
-        // If international, this might need relaxation.
         const address = data.address || "";
-        const zipMatch = address.match(/\b\d{4,5}\b/); // 4 or 5 digits for CH/FR
+        const zipMatch = address.match(/\b\d{4,6}\b/);
         const extractedZip = zipMatch ? zipMatch[0] : "00000";
-        // City is roughly what's left, or default "Inconnue"
-        // This is a naive parse but better than failing validation.
 
-        // Prepare Payload logic
         const payload = {
-            type: expertType === 'cvc_climatisation' ? 'cvc' : (expertType === 'diagnostics_dpe' ? 'diag' : 'simple'),
-            nom: data.lastName || data.nom, // Handle both just in case
+            type: expertType === 'cvc_climatisation' ? 'cvc' : 'simple',
+            nom: data.lastName || data.nom,
             prenom: data.firstName || data.prenom,
             email: data.email,
             telephone: data.phone || data.telephone,
-            // API expects code_postal key
             code_postal: extractedZip,
-            ville: data.ville || address.replace(extractedZip, "").replace(/,/g, "").trim() || "Localisation non précisée",
+            ville: data.ville || address.replace(extractedZip, "").replace(/,/g, "").trim() || "International",
             adresse: address,
-            // Map Form fields to API expected fields
             message: data.description || data.message || "",
             projet: data.propertyType || data.projet || "",
             surface: data.surface ? String(data.surface) : undefined,
             details: data,
             expertIds: selectedExperts.map(e => e.id),
-            expert_id: selectedExperts.length > 0 ? selectedExperts[0].id : undefined // Logic for single routing
+            expert_id: selectedExperts.length > 0 ? selectedExperts[0].id : undefined
         };
 
         try {
@@ -85,27 +74,20 @@ export const ContactWizard = ({ preSelectedExperts = [], triggerButton }: Contac
             if (!res.ok) {
                 const err = await res.json();
                 console.error("Error submitting lead:", err);
-                alert(err.error || "Une erreur est survenue. Veuillez réessayer.");
+                alert(err.error || "Error submitting request.");
                 return;
             }
 
-            // Redirect to confirmation page for tracking
             setIsOpen(false);
             const expertIds = selectedExperts.map(e => e.id).join(',');
-            window.location.href = `/confirmation-devis?experts=${expertIds}`;
-            // Using window.location to force a hard reload usually ensures pixel firing, 
-            // but router.push is smoother. Let's use router.push if imported, or window.location for simplicity as I don't want to add import hooks top-level if not present.
-            // Looking at file imports: useState, useEffect, etc. No useRouter.
-            // I will use window.location.href as it guarantees tracking scripts reload/fire reliably on the new page.
+            window.location.href = `${withLocalePath('/confirmation-devis', locale)}?experts=${expertIds}`;
         } catch (e) {
             console.error("Network error:", e);
-            alert("Erreur de connexion. Veuillez vérifier votre connexion internet.");
+            alert("Connection error.");
         }
     };
 
     const handleRemoveExpert = (id: string) => {
-        // Prevent removing the last expert if it's the main context one? 
-        // Or allow it but then what? For now, allow removing if list > 1
         if (selectedExperts.length > 1) {
             setSelectedExperts(prev => prev.filter(e => e.id !== id));
         }
@@ -113,7 +95,6 @@ export const ContactWizard = ({ preSelectedExperts = [], triggerButton }: Contac
 
     const resetWizard = () => {
         setIsOpen(false);
-        // Reset state after transition
         setTimeout(() => {
             setStep(preSelectedExperts.length > 0 ? "form" : "select-type");
         }, 300);
@@ -124,60 +105,57 @@ export const ContactWizard = ({ preSelectedExperts = [], triggerButton }: Contac
             <DialogTrigger asChild>
                 {triggerButton || (
                     <Button className="bg-[#D59B2B] hover:bg-[#b88622] text-white font-bold h-12 px-8 shadow-md">
-                        Demander un devis
+                        {t.home.requestQuote}
                     </Button>
                 )}
             </DialogTrigger>
             <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto sm:p-0 bg-slate-50">
-
                 {/* HEADER WIZARD */}
                 <div className="bg-[#1F2D3D] text-white p-6 sticky top-0 z-50 shadow-md">
                     <div className="flex justify-between items-start">
                         <div>
                             <DialogTitle className="text-xl font-bold">
-                                {step === 'success' ? "Demande envoyée !" :
-                                    expertType === 'cvc_climatisation' ? "Demande de devis – Climatisation & Chauffage" :
-                                        "Contacter un professionnel"}
+                                {step === 'success'
+                                    ? w.requestSentTitle
+                                    : expertType === 'cvc_climatisation'
+                                        ? w.hvacQuoteTitle
+                                        : w.contactProTitle}
                             </DialogTitle>
                             {step !== 'success' && (
                                 <p className="text-slate-300 text-sm mt-1">
                                     {selectedExperts.length > 0
-                                        ? `Votre demande sera envoyée à ${selectedExperts.length} professionnel(s)`
-                                        : "Sélectionnez un professionnel"}
+                                        ? w.sentToCount(selectedExperts.length)
+                                        : w.selectProSubtitle}
                                 </p>
                             )}
                         </div>
                         <button
                             onClick={() => setIsOpen(false)}
                             className="text-slate-400 hover:text-white"
-                            aria-label="Fermer la fenêtre"
+                            aria-label="Close"
                         >
                             <X className="w-6 h-6" />
                         </button>
                     </div>
 
-                    {/* RECIPIENTS LIST (Only in Form Step) */}
                     {step === 'form' && selectedExperts.length > 0 && (
                         <div className="mt-4 flex flex-wrap gap-2">
                             {selectedExperts.map(expert => (
                                 <div key={expert.id} className="bg-white/10 text-white text-xs px-2 py-1 rounded flex items-center gap-2">
                                     <span>{expert.nom_entreprise}</span>
-                                    {/* Only show remove if we have more than 1, or allow clearing all? */}
                                     {selectedExperts.length > 1 && (
                                         <button
                                             onClick={() => handleRemoveExpert(expert.id)}
                                             className="hover:text-red-300"
-                                            aria-label={`Retirer ${expert.nom_entreprise}`}
                                         >
                                             <X className="w-3 h-3" />
                                         </button>
                                     )}
                                 </div>
                             ))}
-                            {/* Placeholder for "Add more" feature later */}
                             {selectedExperts.length < 5 && (
                                 <div className="text-xs text-slate-400 italic flex items-center px-2">
-                                    (Max 5 destinataires)
+                                    {w.maxRecipients}
                                 </div>
                             )}
                         </div>
@@ -186,26 +164,17 @@ export const ContactWizard = ({ preSelectedExperts = [], triggerButton }: Contac
 
                 {/* CONTENT */}
                 <div className="p-6 md:p-8">
-
-                    {step === 'select-type' && (
-                        <div className="text-center py-12">
-                            <p>Sélecteur de type à venir...</p>
-                        </div>
-                    )}
-
                     {step === 'form' && expertType === 'cvc_climatisation' && (
                         <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
-                            <CvcRequestForm onSubmit={handleSubmitCVC} isSubmitting={false} defaultCity={preSelectedExperts.length === 0 ? (triggerButton as any)?.props?.['data-city'] : undefined} />
+                            <CvcRequestForm
+                                onSubmit={handleSubmitCVC}
+                                isSubmitting={false}
+                                defaultCity={preSelectedExperts.length === 0 ? (triggerButton as any)?.props?.['data-city'] : undefined}
+                            />
                         </div>
                     )}
 
-                    {step === 'form' && expertType === 'diagnostics_dpe' && (
-                        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
-                            <DiagRequestForm onSubmit={handleSubmitCVC} isSubmitting={false} />
-                        </div>
-                    )}
-
-                    {step === 'form' && expertType !== 'cvc_climatisation' && expertType !== 'diagnostics_dpe' && (
+                    {step === 'form' && expertType !== 'cvc_climatisation' && (
                         <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
                             <SimpleRequestForm onSubmit={handleSubmitCVC} isSubmitting={false} />
                         </div>
@@ -217,27 +186,23 @@ export const ContactWizard = ({ preSelectedExperts = [], triggerButton }: Contac
                                 <CheckCircle className="w-10 h-10 text-green-600" />
                             </div>
                             <div>
-                                <h3 className="text-2xl font-bold text-[#1F2D3D]">Merci pour votre demande !</h3>
-                                <p className="text-slate-600 mt-2">
-                                    Votre dossier a bien été transmis aux professionnels sélectionnés.
-                                    <br />Ils vous contacteront prochainement par téléphone ou email.
-                                </p>
+                                <h3 className="text-2xl font-bold text-[#1F2D3D]">{w.thankYouTitle}</h3>
+                                <p className="text-slate-600 mt-2">{w.thankYouText}</p>
                             </div>
 
-                            {/* Safety Tips */}
                             <div className="bg-blue-50 text-blue-800 text-left p-6 rounded-xl text-sm space-y-2 mt-8 max-w-lg mx-auto">
                                 <p className="font-bold flex items-center gap-2">
-                                    🛡️ Conseils avant de vous engager :
+                                    {w.safetyTipsTitle}
                                 </p>
                                 <ul className="list-disc pl-5 space-y-1 opacity-90">
-                                    <li>Vérifiez l'assurance décennale et les certifications.</li>
-                                    <li>Comparez plusieurs propositions si possible.</li>
-                                    <li>Consultez les avis Google récents de l'entreprise.</li>
+                                    {w.safetyTips.map((tip, idx) => (
+                                        <li key={idx}>{tip}</li>
+                                    ))}
                                 </ul>
                             </div>
 
                             <Button onClick={resetWizard} className="bg-slate-900 text-white font-bold px-8 mt-4">
-                                Fermer
+                                {w.closeBtn}
                             </Button>
                         </div>
                     )}
