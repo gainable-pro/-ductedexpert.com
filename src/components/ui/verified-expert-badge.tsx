@@ -57,14 +57,18 @@ export function VerifiedExpertBadge({ size = "md", className = "" }: VerifiedExp
 
     return (
         <div
+            dir="ltr"
+            style={{ direction: "ltr" }}
             className={`inline-flex items-center justify-center select-none group ${dimensions} ${className}`}
             title={`${txt.line1} — ${txt.line2}® ${txt.line3}`}
         >
             <svg
+                dir="ltr"
                 viewBox="0 0 460 155"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
                 className="w-full h-auto overflow-visible"
+                style={{ direction: "ltr" }}
                 role="img"
                 aria-label={`${txt.line1} ${txt.line2} ${txt.line3}`}
             >
@@ -133,6 +137,8 @@ export function VerifiedExpertBadge({ size = "md", className = "" }: VerifiedExp
                         fontWeight="700"
                         fontSize={line1FontSize}
                         letterSpacing="-0.5"
+                        textAnchor="start"
+                        direction="ltr"
                     >
                         {txt.line1}
                     </text>
@@ -173,6 +179,8 @@ export function VerifiedExpertBadge({ size = "md", className = "" }: VerifiedExp
                         fontWeight="700"
                         fontSize="33"
                         letterSpacing="-0.5"
+                        textAnchor="start"
+                        direction="ltr"
                     >
                         {txt.line2}
                         <tspan fontSize="18" dy="-13" fontWeight="600">®</tspan>
@@ -185,6 +193,8 @@ export function VerifiedExpertBadge({ size = "md", className = "" }: VerifiedExp
                         fontFamily="Montserrat, Inter, system-ui, -apple-system, sans-serif"
                         fontWeight="500"
                         fontSize={line3FontSize}
+                        textAnchor="start"
+                        direction="ltr"
                     >
                         {txt.line3}
                     </text>
