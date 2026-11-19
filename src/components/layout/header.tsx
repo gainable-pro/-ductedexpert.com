@@ -146,12 +146,12 @@ export function Header() {
         return (
             <header className="sticky top-0 z-50 w-full bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/80 border-b border-slate-100 shadow-sm">
                 <div className="container mx-auto flex py-2 items-center justify-between px-4">
-                    <Link href={withLocalePath("/", locale)} className="relative h-20 w-52 md:h-24 md:w-60 block">
+                    <Link href={withLocalePath("/", locale)} className="relative h-16 w-52 md:h-20 md:w-64 block">
                         <Image
                             src={logoSrc}
-                            alt="DuctedExpert.com"
+                            alt="DuctedExpert.com - The Platform for HVAC Experts"
                             fill
-                            className="object-contain"
+                            className="object-contain object-left rtl:object-right"
                             priority
                         />
                     </Link>
@@ -167,14 +167,14 @@ export function Header() {
                 {/* Logo */}
                 <Link
                     href={withLocalePath("/", locale)}
-                    className="relative h-20 w-52 md:h-24 md:w-60 block transition-all"
-                    aria-label="DuctedExpert.com - Home"
+                    className="relative h-16 w-52 md:h-20 md:w-64 block transition-all"
+                    aria-label="DuctedExpert.com - The Platform for HVAC Experts"
                 >
                     <Image
                         src={logoSrc}
-                        alt="DuctedExpert.com"
+                        alt="DuctedExpert.com - The Platform for HVAC Experts"
                         fill
-                        className="object-contain"
+                        className="object-contain object-left rtl:object-right"
                         priority
                     />
                 </Link>

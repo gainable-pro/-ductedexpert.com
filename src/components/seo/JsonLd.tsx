@@ -18,57 +18,53 @@ export function OrganizationJsonLd() {
   const organizationSchema = {
     '@context': 'https://schema.org',
     '@type': ['Organization', 'Service'],
-    '@id': 'https://www.gainable.fr/#organization',
-    name: 'Gainable.fr',
-    alternateName: ['Gainable.ch', 'Gainable.be', 'Gainable.ma', 'Gainable.org', 'Gainable.eu', 'Gainable Pro'],
-    url: 'https://www.gainable.fr',
-    logo: 'https://www.gainable.fr/assets/logo-share.png',
-    description: "La première plateforme internationale de mise en relation et de référencement d'experts certifiés en climatisation gainable, pompes à chaleur réversibles, bureaux d'études CVC et diagnostiqueurs.",
+    '@id': 'https://www.ductedexpert.com/#organization',
+    name: 'DuctedExpert.com',
+    alternateName: ['Ducted Expert', 'DuctedExpert'],
+    url: 'https://www.ductedexpert.com',
+    logo: 'https://www.ductedexpert.com/ductedexpert-logo.png',
+    description: "The international platform for verified ducted air conditioning, heat pumps, and HVAC engineering offices.",
     serviceType: [
-      'Référencement d\'installateurs de climatisation gainable',
-      'Mise en relation avec experts CVC certifiés RGE QualiPAC',
-      'Bureaux d\'études thermiques et génie climatique',
-      'Diagnostics de performance énergétique (DPE)'
+      'Directory of verified ducted air conditioning installers',
+      'Direct connection with certified HVAC contractors',
+      'Thermal & HVAC engineering offices',
+      'Commercial & residential ducted systems'
     ],
     knowsAbout: [
-      'Climatisation gainable invisible',
-      'Pompe à chaleur réversible air-air & air-eau',
-      'VRV / DRV & systèmes multizones',
-      'Génie climatique & Audit énergétique',
-      'Labels RGE QualiPAC & certifications CVC'
+      'Ducted air conditioning systems',
+      'Reversible heat pumps',
+      'VRV / VRF & multizone zoning systems',
+      'HVAC thermal studies & sizing',
+      'Verified HVAC expert network'
     ],
     areaServed: [
-      { '@type': 'Country', name: 'France', identifier: 'FR' },
-      { '@type': 'Country', name: 'Suisse', identifier: 'CH' },
-      { '@type': 'Country', name: 'Belgique', identifier: 'BE' },
-      { '@type': 'Country', name: 'Maroc', identifier: 'MA' }
+      { '@type': 'Country', name: 'United Kingdom', identifier: 'GB' },
+      { '@type': 'Country', name: 'Germany', identifier: 'DE' },
+      { '@type': 'Country', name: 'Spain', identifier: 'ES' },
+      { '@type': 'Country', name: 'Italy', identifier: 'IT' },
+      { '@type': 'Country', name: 'Finland', identifier: 'FI' },
+      { '@type': 'Country', name: 'Saudi Arabia', identifier: 'SA' },
+      { '@type': 'Country', name: 'United Arab Emirates', identifier: 'AE' },
+      { '@type': 'Country', name: 'Qatar', identifier: 'QA' },
+      { '@type': 'Country', name: 'France', identifier: 'FR' }
     ],
-    address: {
-      '@type': 'PostalAddress',
-      addressCountry: 'FR',
-    },
     sameAs: [
-      'https://www.gainable.ch',
-      'https://www.gainable.be',
-      'https://www.gainable.ma',
-      'https://www.gainable.org',
-      'https://www.gainable.eu',
-      'https://www.gainable.ca'
+      'https://www.gainable.fr'
     ],
   };
 
   const websiteSchema = {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
-    '@id': 'https://www.gainable.fr/#website',
-    name: 'Gainable.fr',
-    url: 'https://www.gainable.fr',
+    '@id': 'https://www.ductedexpert.com/#website',
+    name: 'DuctedExpert.com',
+    url: 'https://www.ductedexpert.com',
     publisher: {
-      '@id': 'https://www.gainable.fr/#organization'
+      '@id': 'https://www.ductedexpert.com/#organization'
     },
     potentialAction: {
       '@type': 'SearchAction',
-      target: 'https://www.gainable.fr/?q={search_term_string}',
+      target: 'https://www.ductedexpert.com/?q={search_term_string}',
       'query-input': 'required name=search_term_string',
     },
   };

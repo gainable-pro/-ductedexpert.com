@@ -155,7 +155,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
                         : `https://www.gainable.fr${article.mainImage.startsWith('/') ? '' : '/'}${article.mainImage}`, 
                     alt: article.altText || article.title 
                   }] 
-                : [{ url: 'https://www.gainable.fr/assets/logo-share.png' }],
+                : [{ url: 'https://www.ductedexpert.com/assets/logo-share.png' }],
             type: 'article',
             authors: [expert.nom_entreprise],
             publishedTime: article.publishedAt?.toISOString(),
@@ -334,22 +334,22 @@ export default async function PublicArticlePage({ params }: PageProps) {
             "caption": article.altText || `${article.title} - Climatisation Gainable & RGE ${targetCity}`
         } : {
             "@type": "ImageObject",
-            "url": "https://www.gainable.fr/assets/logo-share.png",
-            "caption": "Gainable.fr - Réseau National Climatisation & Pompes à Chaleur"
+            "url": "https://www.ductedexpert.com/assets/logo-share.png",
+            "caption": "DuctedExpert.com - The Platform for HVAC Experts"
         },
         "datePublished": article.publishedAt?.toISOString(),
         "dateModified": article.updatedAt.toISOString(),
         "author": [{
             "@type": "Organization",
             "name": expert.nom_entreprise,
-            "url": `https://www.gainable.fr/pro/${expert.slug}`
+            "url": `https://www.ductedexpert.com/pro/${expert.slug}`
         }],
         "publisher": {
             "@type": "Organization",
-            "name": "Gainable.fr",
+            "name": "DuctedExpert.com",
             "logo": {
                 "@type": "ImageObject",
-                "url": "https://www.gainable.fr/gainable-fr-logo-officiel-climatisation.png"
+                "url": "https://www.ductedexpert.com/ductedexpert-logo.png"
             }
         },
         "description": article.metaDesc || article.introduction,
