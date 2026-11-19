@@ -72,12 +72,12 @@ export const CLIMATISATION_CONTENT: Record<Locale, ClimatisationPageData> = {
         sectors: {
             title: "Sectors of Activity",
             items: [
-                { name: "Villas & Homes", img: "/gainable-fr-climatisation-secteur-maison.png", href: "/trouver-installateur" },
-                { name: "Commercial Offices", img: "/gainable-fr-climatisation-secteur-tertiaire.jpg", href: "/trouver-installateur" },
-                { name: "Retail & Shops", img: "/gainable-fr-climatisation-secteur-commerce.jpg", href: "/trouver-installateur" },
-                { name: "Hotels & Hospitality", img: "/gainable-fr-climatisation-secteur-hotellerie.jpg", href: "/trouver-installateur" },
-                { name: "Industrial Facilities", img: "/gainable-fr-climatisation-secteur-industrie.png", href: "/trouver-installateur" },
-                { name: "Healthcare & Clinics", img: "/gainable-fr-climatisation-secteur-sante.jpg", href: "/trouver-installateur" },
+                { name: "Villas & Homes", img: "/gainable-fr-climatisation-secteur-maison.png", href: "/find-installer" },
+                { name: "Commercial Offices", img: "/gainable-fr-climatisation-secteur-tertiaire.jpg", href: "/find-installer" },
+                { name: "Retail & Shops", img: "/gainable-fr-climatisation-secteur-commerce.jpg", href: "/find-installer" },
+                { name: "Hotels & Hospitality", img: "/gainable-fr-climatisation-secteur-hotellerie.jpg", href: "/find-installer" },
+                { name: "Industrial Facilities", img: "/gainable-fr-climatisation-secteur-industrie.png", href: "/find-installer" },
+                { name: "Healthcare & Clinics", img: "/gainable-fr-climatisation-secteur-sante.jpg", href: "/find-installer" },
             ]
         },
         blockVillas: {
@@ -164,12 +164,12 @@ export const CLIMATISATION_CONTENT: Record<Locale, ClimatisationPageData> = {
         sectors: {
             title: "Tätigkeitsbereiche",
             items: [
-                { name: "Villen & Wohnhäuser", img: "/gainable-fr-climatisation-secteur-maison.png", href: "/trouver-installateur" },
-                { name: "Büro- & Gewerbebau", img: "/gainable-fr-climatisation-secteur-tertiaire.jpg", href: "/trouver-installateur" },
-                { name: "Einzelhandel & Geschäfte", img: "/gainable-fr-climatisation-secteur-commerce.jpg", href: "/trouver-installateur" },
-                { name: "Hotellerie & Gastronomie", img: "/gainable-fr-climatisation-secteur-hotellerie.jpg", href: "/trouver-installateur" },
-                { name: "Industrieanlagen", img: "/gainable-fr-climatisation-secteur-industrie.png", href: "/trouver-installateur" },
-                { name: "Kliniken & Praxen", img: "/gainable-fr-climatisation-secteur-sante.jpg", href: "/trouver-installateur" },
+                { name: "Villen & Wohnhäuser", img: "/gainable-fr-climatisation-secteur-maison.png", href: "/find-installer" },
+                { name: "Büro- & Gewerbebau", img: "/gainable-fr-climatisation-secteur-tertiaire.jpg", href: "/find-installer" },
+                { name: "Einzelhandel & Geschäfte", img: "/gainable-fr-climatisation-secteur-commerce.jpg", href: "/find-installer" },
+                { name: "Hotellerie & Gastronomie", img: "/gainable-fr-climatisation-secteur-hotellerie.jpg", href: "/find-installer" },
+                { name: "Industrieanlagen", img: "/gainable-fr-climatisation-secteur-industrie.png", href: "/find-installer" },
+                { name: "Kliniken & Praxen", img: "/gainable-fr-climatisation-secteur-sante.jpg", href: "/find-installer" },
             ]
         },
         blockVillas: {
@@ -256,12 +256,12 @@ export const CLIMATISATION_CONTENT: Record<Locale, ClimatisationPageData> = {
         sectors: {
             title: "Toimialat",
             items: [
-                { name: "Villas & Omakotitalot", img: "/gainable-fr-climatisation-secteur-maison.png", href: "/trouver-installateur" },
-                { name: "Toimistot & Liiketilat", img: "/gainable-fr-climatisation-secteur-tertiaire.jpg", href: "/trouver-installateur" },
-                { name: "Myymälät & Kaupat", img: "/gainable-fr-climatisation-secteur-commerce.jpg", href: "/trouver-installateur" },
-                { name: "Hotellit & Ravintolat", img: "/gainable-fr-climatisation-secteur-hotellerie.jpg", href: "/trouver-installateur" },
-                { name: "Teollisuus & Varastot", img: "/gainable-fr-climatisation-secteur-industrie.png", href: "/trouver-installateur" },
-                { name: "Terveydenhuolto & Klinikat", img: "/gainable-fr-climatisation-secteur-sante.jpg", href: "/trouver-installateur" },
+                { name: "Villas & Omakotitalot", img: "/gainable-fr-climatisation-secteur-maison.png", href: "/find-installer" },
+                { name: "Toimistot & Liiketilat", img: "/gainable-fr-climatisation-secteur-tertiaire.jpg", href: "/find-installer" },
+                { name: "Myymälät & Kaupat", img: "/gainable-fr-climatisation-secteur-commerce.jpg", href: "/find-installer" },
+                { name: "Hotellit & Ravintolat", img: "/gainable-fr-climatisation-secteur-hotellerie.jpg", href: "/find-installer" },
+                { name: "Teollisuus & Varastot", img: "/gainable-fr-climatisation-secteur-industrie.png", href: "/find-installer" },
+                { name: "Terveydenhuolto & Klinikat", img: "/gainable-fr-climatisation-secteur-sante.jpg", href: "/find-installer" },
             ]
         },
         blockVillas: {
@@ -347,12 +347,12 @@ export const CLIMATISATION_CONTENT: Record<Locale, ClimatisationPageData> = {
         sectors: {
             title: "Sectores de Actividad",
             items: [
-                { name: "Villas & Chalets", img: "/gainable-fr-climatisation-secteur-maison.png", href: "/trouver-installateur" },
-                { name: "Oficinas y Terciario", img: "/gainable-fr-climatisation-secteur-tertiaire.jpg", href: "/trouver-installateur" },
-                { name: "Comercios y Locales", img: "/gainable-fr-climatisation-secteur-commerce.jpg", href: "/trouver-installateur" },
-                { name: "Hoteles y Restauración", img: "/gainable-fr-climatisation-secteur-hotellerie.jpg", href: "/trouver-installateur" },
-                { name: "Naves Industriales", img: "/gainable-fr-climatisation-secteur-industrie.png", href: "/trouver-installateur" },
-                { name: "Clínicas y Hospitales", img: "/gainable-fr-climatisation-secteur-sante.jpg", href: "/trouver-installateur" },
+                { name: "Villas & Chalets", img: "/gainable-fr-climatisation-secteur-maison.png", href: "/find-installer" },
+                { name: "Oficinas y Terciario", img: "/gainable-fr-climatisation-secteur-tertiaire.jpg", href: "/find-installer" },
+                { name: "Comercios y Locales", img: "/gainable-fr-climatisation-secteur-commerce.jpg", href: "/find-installer" },
+                { name: "Hoteles y Restauración", img: "/gainable-fr-climatisation-secteur-hotellerie.jpg", href: "/find-installer" },
+                { name: "Naves Industriales", img: "/gainable-fr-climatisation-secteur-industrie.png", href: "/find-installer" },
+                { name: "Clínicas y Hospitales", img: "/gainable-fr-climatisation-secteur-sante.jpg", href: "/find-installer" },
             ]
         },
         blockVillas: {
@@ -437,12 +437,12 @@ export const CLIMATISATION_CONTENT: Record<Locale, ClimatisationPageData> = {
         sectors: {
             title: "Settori di Intervento",
             items: [
-                { name: "Ville & Case Indipendenti", img: "/gainable-fr-climatisation-secteur-maison.png", href: "/trouver-installateur" },
-                { name: "Uffici & Terziario", img: "/gainable-fr-climatisation-secteur-tertiaire.jpg", href: "/trouver-installateur" },
-                { name: "Negozi & Attività", img: "/gainable-fr-climatisation-secteur-commerce.jpg", href: "/trouver-installateur" },
-                { name: "Hotel & Ristorazione", img: "/gainable-fr-climatisation-secteur-hotellerie.jpg", href: "/trouver-installateur" },
-                { name: "Impianti Industriali", img: "/gainable-fr-climatisation-secteur-industrie.png", href: "/trouver-installateur" },
-                { name: "Ospedali & Cliniche", img: "/gainable-fr-climatisation-secteur-sante.jpg", href: "/trouver-installateur" },
+                { name: "Ville & Case Indipendenti", img: "/gainable-fr-climatisation-secteur-maison.png", href: "/find-installer" },
+                { name: "Uffici & Terziario", img: "/gainable-fr-climatisation-secteur-tertiaire.jpg", href: "/find-installer" },
+                { name: "Negozi & Attività", img: "/gainable-fr-climatisation-secteur-commerce.jpg", href: "/find-installer" },
+                { name: "Hotel & Ristorazione", img: "/gainable-fr-climatisation-secteur-hotellerie.jpg", href: "/find-installer" },
+                { name: "Impianti Industriali", img: "/gainable-fr-climatisation-secteur-industrie.png", href: "/find-installer" },
+                { name: "Ospedali & Cliniche", img: "/gainable-fr-climatisation-secteur-sante.jpg", href: "/find-installer" },
             ]
         },
         blockVillas: {
@@ -527,12 +527,12 @@ export const CLIMATISATION_CONTENT: Record<Locale, ClimatisationPageData> = {
         sectors: {
             title: "مجالات العمل والقطاعات المنفذة",
             items: [
-                { name: "الفلل والقصور السكنية", img: "/gainable-fr-climatisation-secteur-maison.png", href: "/trouver-installateur" },
-                { name: "المكاتب والأبراج الإدارية", img: "/gainable-fr-climatisation-secteur-tertiaire.jpg", href: "/trouver-installateur" },
-                { name: "المراكز والمحلات التجارية", img: "/gainable-fr-climatisation-secteur-commerce.jpg", href: "/trouver-installateur" },
-                { name: "الفنادق والضيافة والمطاعم", img: "/gainable-fr-climatisation-secteur-hotellerie.jpg", href: "/trouver-installateur" },
-                { name: "المصانع والمستودعات", img: "/gainable-fr-climatisation-secteur-industrie.png", href: "/trouver-installateur" },
-                { name: "المستشفيات والقطاع الصحي", img: "/gainable-fr-climatisation-secteur-sante.jpg", href: "/trouver-installateur" },
+                { name: "الفلل والقصور السكنية", img: "/gainable-fr-climatisation-secteur-maison.png", href: "/find-installer" },
+                { name: "المكاتب والأبراج الإدارية", img: "/gainable-fr-climatisation-secteur-tertiaire.jpg", href: "/find-installer" },
+                { name: "المراكز والمحلات التجارية", img: "/gainable-fr-climatisation-secteur-commerce.jpg", href: "/find-installer" },
+                { name: "الفنادق والضيافة والمطاعم", img: "/gainable-fr-climatisation-secteur-hotellerie.jpg", href: "/find-installer" },
+                { name: "المصانع والمستودعات", img: "/gainable-fr-climatisation-secteur-industrie.png", href: "/find-installer" },
+                { name: "المستشفيات والقطاع الصحي", img: "/gainable-fr-climatisation-secteur-sante.jpg", href: "/find-installer" },
             ]
         },
         blockVillas: {

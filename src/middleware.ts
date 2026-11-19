@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { DEFAULT_LOCALE, isValidLocale, Locale, findRouteByPath } from './lib/i18n';
+import { DEFAULT_LOCALE, isValidLocale, Locale, findRouteByPath, getLegacyRoute, getLocalizedUrl } from './lib/i18n';
 
 export function middleware(request: NextRequest) {
     const { pathname } = request.nextUrl;
@@ -22,6 +22,19 @@ export function middleware(request: NextRequest) {
 
     const segments = pathname.split('/').filter(Boolean);
     const firstSegment = segments[0]?.toLowerCase();
+
+    // 301 Redirect legacy French slugs to their canonical localized URLs
+    // e.g. /en/climatisation -> /en/air-conditioning, /de/climatisation -> /de/klimaanlage, /en/labels -> /en/verified-expert
+    const legacyKey = getLegacyRoute(pathname);
+    if (legacyKey) {
+        const targetLocale: Locale = isValidLocale(firstSegment)
+            ? firstSegment
+            : (isValidLocale(request.cookies.get('NEXT_LOCALE')?.value)
+                ? (request.cookies.get('NEXT_LOCALE')!.value as Locale)
+                : DEFAULT_LOCALE);
+        const targetUrl = getLocalizedUrl(legacyKey, targetLocale);
+        return NextResponse.redirect(new URL(targetUrl + request.nextUrl.search, request.url), 301);
+    }
 
     if (isValidLocale(firstSegment)) {
         const locale: Locale = firstSegment;

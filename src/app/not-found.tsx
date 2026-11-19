@@ -42,7 +42,7 @@ export default function NotFound() {
             {['Paris', 'Marseille', 'Lyon', 'Toulouse', 'Nice', 'Nantes', 'Bordeaux'].map((city) => (
               <Link
                 key={city}
-                href={`/climatisation/${city.toLowerCase()}`}
+                href={`/find-installer?city=${city.toLowerCase()}`}
                 className="px-3 py-1.5 bg-slate-100 hover:bg-amber-50 hover:text-[#D59B2B] text-slate-700 rounded-lg transition-colors flex items-center gap-1"
               >
                 <MapPin className="w-3.5 h-3.5 text-[#D59B2B]" />

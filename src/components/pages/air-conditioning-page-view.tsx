@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { MapPin } from "lucide-react";
 import Link from "next/link";
 import { HeroSlider } from "@/components/climatisation/HeroSlider";
-import { Locale, withLocalePath } from "@/lib/i18n";
+import { Locale, withLocalePath, getLocalizedUrl } from "@/lib/i18n";
 import { CLIMATISATION_CONTENT } from "@/lib/climatisation-content";
 
 export function AirConditioningPageView({ locale }: { locale: Locale }) {
@@ -59,7 +59,7 @@ export function AirConditioningPageView({ locale }: { locale: Locale }) {
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8 text-center">
             {c.sectors.items.map((sector, i) => (
-              <Link key={i} href={withLocalePath(sector.href.replace('/climatisation', '/air-conditioning'), locale)} className="flex flex-col items-center group cursor-pointer">
+              <Link key={i} href={getLocalizedUrl('findInstaller', locale)} className="flex flex-col items-center group cursor-pointer">
                 <div className="w-24 h-24 mb-4 relative transition-transform transform group-hover:scale-110">
                   <img src={sector.img} alt={sector.name} className="object-contain w-full h-full" />
                 </div>

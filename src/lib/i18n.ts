@@ -204,25 +204,36 @@ export function findRouteByPath(rawPath: string): { routeKey: RouteKey; internal
     }
 
     // Check legacy aliases
-    const legacyAliases: Record<string, RouteKey> = {
-        '/climatisation': 'airConditioning',
-        '/bureau-etude': 'engineeringOffice',
-        '/pourquoi-gainable': 'whyDuctedExpert',
-        '/labels': 'verifiedExpert',
-        '/trouver-installateur': 'findInstaller',
-        '/cgu': 'termsOfUse',
-        '/cgv': 'termsOfSale',
-        '/mentions-legales': 'legalNotice',
-        '/politique-confidentialite': 'privacyPolicy',
-        '/politique-cookies': 'cookiesPolicy',
-    };
-
-    if (legacyAliases[pathToCheck.toLowerCase()]) {
-        const key = legacyAliases[pathToCheck.toLowerCase()];
-        return { routeKey: key, internalPath: INTERNAL_ROUTE_PATHS[key], locale: checkLocale };
+    const legacyKey = LEGACY_ALIASES[pathToCheck.toLowerCase()];
+    if (legacyKey) {
+        return { routeKey: legacyKey, internalPath: INTERNAL_ROUTE_PATHS[legacyKey], locale: checkLocale };
     }
 
     return null;
+}
+
+export const LEGACY_ALIASES: Record<string, RouteKey> = {
+    '/climatisation': 'airConditioning',
+    '/bureau-etude': 'engineeringOffice',
+    '/pourquoi-gainable': 'whyDuctedExpert',
+    '/pourquoi-nous': 'whyDuctedExpert',
+    '/labels': 'verifiedExpert',
+    '/trouver-installateur': 'findInstaller',
+    '/cgu': 'termsOfUse',
+    '/cgv': 'termsOfSale',
+    '/mentions-legales': 'legalNotice',
+    '/politique-confidentialite': 'privacyPolicy',
+    '/politique-cookies': 'cookiesPolicy',
+};
+
+export function getLegacyRoute(rawPath: string): RouteKey | null {
+    if (!rawPath) return null;
+    const clean = rawPath.startsWith('/') ? rawPath : `/${rawPath}`;
+    const segments = clean.split('/').filter(Boolean);
+    const pathToCheck = (segments.length > 0 && isValidLocale(segments[0]))
+        ? '/' + segments.slice(1).join('/')
+        : clean;
+    return LEGACY_ALIASES[pathToCheck.toLowerCase()] || null;
 }
 
 export function getLocalizedAlternates(routeKey: RouteKey) {
