@@ -15,7 +15,7 @@ export function Footer() {
                 </div>
 
                 {/* International SEO Language Links */}
-                <div className="flex justify-center flex-wrap gap-4 mb-8 text-xs font-semibold">
+                <div className="flex justify-center items-center flex-wrap gap-4 mb-8 text-xs font-semibold">
                     {SUPPORTED_LOCALES.map((loc) => (
                         <Link
                             key={loc}
@@ -29,6 +29,15 @@ export function Footer() {
                             {LOCALE_LABELS[loc].flag} {LOCALE_LABELS[loc].name}
                         </Link>
                     ))}
+                    <a
+                        href="https://www.gainable.fr"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-3 py-1 rounded-full border border-amber-900/60 text-amber-400 hover:text-white hover:border-amber-400 transition-colors"
+                        title="Gainable.fr - Réseau officiel France"
+                    >
+                        🇫🇷 France (Gainable.fr) ↗
+                    </a>
                 </div>
 
                 <div className="flex justify-center flex-wrap gap-8 mb-8 text-sm font-medium">

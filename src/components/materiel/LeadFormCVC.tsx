@@ -14,13 +14,359 @@ import {
   Wrench,
   ChevronDown,
 } from "lucide-react";
+import { useLanguage } from "@/components/layout/language-provider";
+import { Locale, withLocalePath } from "@/lib/i18n";
 
 interface LeadFormCVCProps {
   productRef?: string;
   productTitle?: string;
 }
 
+const FORM_I18N: Record<Locale, {
+  freeBadge: string;
+  title: string;
+  forProduct: string;
+  benefits: string[];
+  lastName: string;
+  lastNamePh: string;
+  firstName: string;
+  firstNamePh: string;
+  email: string;
+  phone: string;
+  zip: string;
+  city: string;
+  projectDetails: string;
+  housingType: string;
+  housingOptions: { val: string; label: string }[];
+  surface: string;
+  surfaceOptions: { val: string; label: string }[];
+  workType: string;
+  workOptions: { val: string; label: string }[];
+  budget: string;
+  budgetOptions: { val: string; label: string }[];
+  message: string;
+  messagePh: string;
+  submit: string;
+  submitting: string;
+  privacy: string;
+  privacyLink: string;
+  successTitle: string;
+  successDesc: string;
+  successBadge: string;
+  errorMsg: string;
+  selectOption: string;
+}> = {
+  en: {
+    freeBadge: "Free & No Obligation Quote",
+    title: "Get an HVAC Installation Quote",
+    forProduct: "For:",
+    benefits: ["Response within 24h", "Certified HVAC Expert", "Competitive Direct Pricing", "Quality Warranty"],
+    lastName: "Last Name *",
+    lastNamePh: "Your last name",
+    firstName: "First Name",
+    firstNamePh: "Your first name",
+    email: "Email *",
+    phone: "Phone *",
+    zip: "Postal Code *",
+    city: "City *",
+    projectDetails: "Your HVAC Project Details",
+    housingType: "Building Type",
+    housingOptions: [
+      { val: "maison", label: "Single-Family Home / Villa" },
+      { val: "appartement", label: "Apartment / Flat" },
+      { val: "local_commercial", label: "Commercial Premises" },
+      { val: "bureau", label: "Offices / Tertiary" },
+      { val: "autre", label: "Other" },
+    ],
+    surface: "Surface Area (m²)",
+    surfaceOptions: [
+      { val: "moins_30", label: "Under 30 m²" },
+      { val: "30_50", label: "30 – 50 m²" },
+      { val: "50_80", label: "50 – 80 m²" },
+      { val: "80_120", label: "80 – 120 m²" },
+      { val: "120_200", label: "120 – 200 m²" },
+      { val: "plus_200", label: "Over 200 m²" },
+    ],
+    workType: "Requested Service",
+    workOptions: [
+      { val: "fourniture_pose", label: "Equipment + Installation (Turnkey)" },
+      { val: "pose_seule", label: "Installation only (I have the equipment)" },
+      { val: "entretien_sav", label: "Maintenance / Servicing" },
+      { val: "remplacement", label: "Replacement of existing unit" },
+      { val: "multi_split", label: "Multi-Split installation" },
+      { val: "gainable", label: "Ducted concealed system" },
+    ],
+    budget: "Estimated Budget",
+    budgetOptions: [
+      { val: "", label: "Not defined" },
+      { val: "moins_2000", label: "Under €2,000" },
+      { val: "2000_5000", label: "€2,000 – €5,000" },
+      { val: "5000_10000", label: "€5,000 – €10,000" },
+      { val: "10000_20000", label: "€10,000 – €20,000" },
+      { val: "plus_20000", label: "Over €20,000" },
+    ],
+    message: "Additional Details",
+    messagePh: "Describe your project: property type, ceiling constraints, timeline...",
+    submit: "Send My Quote Request",
+    submitting: "Sending...",
+    privacy: "🔒 Secure data — No spam. A qualified HVAC expert will contact you.",
+    privacyLink: "Privacy Policy",
+    successTitle: "Request Sent!",
+    successDesc: "A verified DuctedExpert professional will contact you within 24 business hours.",
+    successBadge: "Your request has been registered",
+    errorMsg: "An error occurred. Please try again or contact us by email.",
+    selectOption: "Select...",
+  },
+  de: {
+    freeBadge: "Kostenloses & Unverbindliches Angebot",
+    title: "Angebot für Klima- / Wärmepumpen-Installation",
+    forProduct: "Für:",
+    benefits: ["Antwort innerhalb 24h", "Zertifizierter Fachbetrieb", "Direkte Fachbetriebspreise", "Garantie & Fachmontage"],
+    lastName: "Nachname *",
+    lastNamePh: "Ihr Nachname",
+    firstName: "Vorname",
+    firstNamePh: "Ihr Vorname",
+    email: "E-Mail *",
+    phone: "Telefon *",
+    zip: "Postleitzahl *",
+    city: "Stadt *",
+    projectDetails: "Details zu Ihrem Projekt",
+    housingType: "Gebäudetyp",
+    housingOptions: [
+      { val: "maison", label: "Einfamilienhaus / Villa" },
+      { val: "appartement", label: "Wohnung / Apartment" },
+      { val: "local_commercial", label: "Gewerberäume / Laden" },
+      { val: "bureau", label: "Bürogebäude" },
+      { val: "autre", label: "Sonstiges" },
+    ],
+    surface: "Zu klimatisierende Fläche (m²)",
+    surfaceOptions: [
+      { val: "moins_30", label: "Unter 30 m²" },
+      { val: "30_50", label: "30 – 50 m²" },
+      { val: "50_80", label: "50 – 80 m²" },
+      { val: "80_120", label: "80 – 120 m²" },
+      { val: "120_200", label: "120 – 200 m²" },
+      { val: "plus_200", label: "Über 200 m²" },
+    ],
+    workType: "Gewünschte Leistung",
+    workOptions: [
+      { val: "fourniture_pose", label: "Lieferung + Montage (schlüsselfertig)" },
+      { val: "pose_seule", label: "Nur Montage (Gerät vorhanden)" },
+      { val: "entretien_sav", label: "Wartung / Kundendienst" },
+      { val: "remplacement", label: "Austausch einer Altanlage" },
+      { val: "multi_split", label: "Multi-Split-Installation" },
+      { val: "gainable", label: "Kanal-Klimasystem" },
+    ],
+    budget: "Geschätztes Budget",
+    budgetOptions: [
+      { val: "", label: "Nicht festgelegt" },
+      { val: "moins_2000", label: "Unter 2.000 €" },
+      { val: "2000_5000", label: "2.000 – 5.000 €" },
+      { val: "5000_10000", label: "5.000 – 10.000 €" },
+      { val: "10000_20000", label: "10.000 – 20.000 €" },
+      { val: "plus_20000", label: "Über 20.000 €" },
+    ],
+    message: "Zusätzliche Angaben",
+    messagePh: "Beschreiben Sie Ihr Projekt: Gebäudeart, Deckenaufbau, gewünschter Termin...",
+    submit: "Kostenloses Angebot anfordern",
+    submitting: "Wird gesendet...",
+    privacy: "🔒 Sichere Daten — Kein Spam. Ein Fachbetrieb meldet sich innerhalb von 24h.",
+    privacyLink: "Datenschutzerklärung",
+    successTitle: "Anfrage gesendet!",
+    successDesc: "Ein geprüfter Fachbetrieb von DuctedExpert kontaktiert Sie innerhalb von 24 Arbeitsstunden.",
+    successBadge: "Ihre Anfrage wurde erfolgreich übermittelt",
+    errorMsg: "Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.",
+    selectOption: "Auswählen...",
+  },
+  fi: {
+    freeBadge: "Ilmainen & Sitoumukseton Tarjous",
+    title: "Pyydä Tarjous Ilmastointi- tai Lämpöpumppuasennuksesta",
+    forProduct: "Tuotteelle:",
+    benefits: ["Vastaus 24h kuluessa", "Sertifioitu LVI-ammattilainen", "Suora Urakkahinta", "Takuu & Laatuasennus"],
+    lastName: "Sukunimi *",
+    lastNamePh: "Sukunimesi",
+    firstName: "Etunimi",
+    firstNamePh: "Etunimesi",
+    email: "Sähköposti *",
+    phone: "Puhelinnumero *",
+    zip: "Postinumero *",
+    city: "Kaupunki / Paikkakunta *",
+    projectDetails: "Hankkeesi Yksityiskohdat",
+    housingType: "Kiinteistötyyppi",
+    housingOptions: [
+      { val: "maison", label: "Omakotitalo / Huvila" },
+      { val: "appartement", label: "Kerrostaloasunto / Huoneisto" },
+      { val: "local_commercial", label: "Liiketila" },
+      { val: "bureau", label: "Toimistotilat" },
+      { val: "autre", label: "Muu" },
+    ],
+    surface: "Käsiteltävä Pinta-ala (m²)",
+    surfaceOptions: [
+      { val: "moins_30", label: "Alle 30 m²" },
+      { val: "30_50", label: "30 – 50 m²" },
+      { val: "50_80", label: "50 – 80 m²" },
+      { val: "80_120", label: "80 – 120 m²" },
+      { val: "120_200", label: "120 – 200 m²" },
+      { val: "plus_200", label: "Yli 200 m²" },
+    ],
+    workType: "Toivottu Palvelu",
+    workOptions: [
+      { val: "fourniture_pose", label: "Laitteet + Asennus (Avaimet käteen)" },
+      { val: "pose_seule", label: "Pelkkä asennus (laitteet valmiina)" },
+      { val: "entretien_sav", label: "Huolto / Kunnossapito" },
+      { val: "remplacement", label: "Vanhan laitteen korvaaminen" },
+      { val: "multi_split", label: "Multi-Split-asennus" },
+      { val: "gainable", label: "Kanavailmastointijärjestelmä" },
+    ],
+    budget: "Arvioitu Budjetti",
+    budgetOptions: [
+      { val: "", label: "Ei määritelty" },
+      { val: "moins_2000", label: "Alle 2 000 €" },
+      { val: "2000_5000", label: "2 000 – 5 000 €" },
+      { val: "5000_10000", label: "5 000 – 10 000 €" },
+      { val: "10000_20000", label: "10 000 – 20 000 €" },
+      { val: "plus_20000", label: "Yli 20 000 €" },
+    ],
+    message: "Lisätietoja Projektista",
+    messagePh: "Kuvaile hankettasi: tilat, toivottu aikataulu, erityistoiveet...",
+    submit: "Lähetä Tarjouspyyntö",
+    submitting: "Lähetetään...",
+    privacy: "🔒 Suojatut tiedot — Ei roskapostia. LVI-asiantuntija vastaa 24h sisällä.",
+    privacyLink: "Tietosuojaseloste",
+    successTitle: "Tarjouspyyntö Lähetetty!",
+    successDesc: "Varmennettu DuctedExpert-urakoitsija ottaa yhteyttä 24 arkityötunnin sisällä.",
+    successBadge: "Pyyntösi on vastaanotettu",
+    errorMsg: "Tapahtui virhe. Yritä uudelleen tai ota yhteyttä sähköpostitse.",
+    selectOption: "Valitse...",
+  },
+  es: {
+    freeBadge: "Presupuesto Gratuito y Sin Compromiso",
+    title: "Solicitar Presupuesto de Instalación HVAC",
+    forProduct: "Para:",
+    benefits: ["Respuesta en 24h", "Instalador Certificado", "Precios Directos de Instalador", "Garantía y Calidad"],
+    lastName: "Apellidos *",
+    lastNamePh: "Sus apellidos",
+    firstName: "Nombre",
+    firstNamePh: "Su nombre",
+    email: "Email *",
+    phone: "Teléfono *",
+    zip: "Código Postal *",
+    city: "Ciudad *",
+    projectDetails: "Detalles de su Proyecto de Climatización",
+    housingType: "Tipo de Inmueble",
+    housingOptions: [
+      { val: "maison", label: "Vivienda Unifamiliar / Chalet" },
+      { val: "appartement", label: "Piso / Apartamento" },
+      { val: "local_commercial", label: "Local Comercial" },
+      { val: "bureau", label: "Oficinas" },
+      { val: "autre", label: "Otro" },
+    ],
+    surface: "Superficie a Tratar (m²)",
+    surfaceOptions: [
+      { val: "moins_30", label: "Menos de 30 m²" },
+      { val: "30_50", label: "30 – 50 m²" },
+      { val: "50_80", label: "50 – 80 m²" },
+      { val: "80_120", label: "80 – 120 m²" },
+      { val: "120_200", label: "120 – 200 m²" },
+      { val: "plus_200", label: "Más de 200 m²" },
+    ],
+    workType: "Servicio Deseado",
+    workOptions: [
+      { val: "fourniture_pose", label: "Suministro + Instalación (Llave en mano)" },
+      { val: "pose_seule", label: "Solo instalación (ya dispongo del equipo)" },
+      { val: "entretien_sav", label: "Mantenimiento / Servicio Técnico" },
+      { val: "remplacement", label: "Sustitución de equipo existente" },
+      { val: "multi_split", label: "Instalación Multi-Split" },
+      { val: "gainable", label: "Sistema por conductos" },
+    ],
+    budget: "Presupuesto Estimado",
+    budgetOptions: [
+      { val: "", label: "No definido" },
+      { val: "moins_2000", label: "Menos de 2.000 €" },
+      { val: "2000_5000", label: "2.000 – 5.000 €" },
+      { val: "5000_10000", label: "5.000 – 10.000 €" },
+      { val: "10000_20000", label: "10.000 – 20.000 €" },
+      { val: "plus_20000", label: "Más de 20.000 €" },
+    ],
+    message: "Detalles Adicionales",
+    messagePh: "Describa su proyecto: tipo de vivienda, falsos techos, plazos deseados...",
+    submit: "Enviar Solicitud de Presupuesto",
+    submitting: "Enviando...",
+    privacy: "🔒 Datos protegidos — Sin spam. Un instalador cualificado le contactará en 24h.",
+    privacyLink: "Política de Privacidad",
+    successTitle: "¡Solicitud Enviada!",
+    successDesc: "Un instalador verificado de DuctedExpert le contactará en menos de 24 horas laborables.",
+    successBadge: "Su solicitud ha sido registrada correctamente",
+    errorMsg: "Ha ocurrido un error. Por favor inténtelo de nuevo.",
+    selectOption: "Seleccionar...",
+  },
+  it: {
+    freeBadge: "Preventivo Gratuito e Senza Impegno",
+    title: "Richiedi un Preventivo per Impianto HVAC",
+    forProduct: "Per:",
+    benefits: ["Risposta entro 24h", "Installatore Certificato", "Prezzi Diretti da Installatore", "Garanzia e Qualità"],
+    lastName: "Cognome *",
+    lastNamePh: "Il tuo cognome",
+    firstName: "Nome",
+    firstNamePh: "Il tuo nome",
+    email: "Email *",
+    phone: "Telefono *",
+    zip: "Codice Postale *",
+    city: "Città *",
+    projectDetails: "Dettagli del Progetto Termotecnico",
+    housingType: "Tipo di Immobile",
+    housingOptions: [
+      { val: "maison", label: "Casa Indipendente / Villa" },
+      { val: "appartement", label: "Appartamento" },
+      { val: "local_commercial", label: "Locale Commerciale" },
+      { val: "bureau", label: "Uffici" },
+      { val: "autre", label: "Altro" },
+    ],
+    surface: "Superficie da Trattare (m²)",
+    surfaceOptions: [
+      { val: "moins_30", label: "Meno di 30 m²" },
+      { val: "30_50", label: "30 – 50 m²" },
+      { val: "50_80", label: "50 – 80 m²" },
+      { val: "80_120", label: "80 – 120 m²" },
+      { val: "120_200", label: "120 – 200 m²" },
+      { val: "plus_200", label: "Oltre 200 m²" },
+    ],
+    workType: "Servizio Richiesto",
+    workOptions: [
+      { val: "fourniture_pose", label: "Fornitura + Installazione (Chiavi in mano)" },
+      { val: "pose_seule", label: "Solo installazione (materiale già disponibile)" },
+      { val: "entretien_sav", label: "Manutenzione / Assistenza" },
+      { val: "remplacement", label: "Sostituzione impianto esistente" },
+      { val: "multi_split", label: "Installazione Multi-Split" },
+      { val: "gainable", label: "Impianto Canalizzato" },
+    ],
+    budget: "Budget Stimato",
+    budgetOptions: [
+      { val: "", label: "Non definito" },
+      { val: "moins_2000", label: "Meno di 2.000 €" },
+      { val: "2000_5000", label: "2.000 – 5.000 €" },
+      { val: "5000_10000", label: "5.000 – 10.000 €" },
+      { val: "10000_20000", label: "10.000 – 20.000 €" },
+      { val: "plus_20000", label: "Oltre 20.000 €" },
+    ],
+    message: "Dettagli Aggiuntivi",
+    messagePh: "Descrivi il tuo progetto: tipologia immobile, controsoffitti, tempistiche...",
+    submit: "Invia Richiesta di Preventivo",
+    submitting: "Invio in corso...",
+    privacy: "🔒 Dati protetti — Nessuno spam. Un esperto qualificato ti ricontatterà entro 24h.",
+    privacyLink: "Informativa sulla Privacy",
+    successTitle: "Richiesta Inviata!",
+    successDesc: "Un professionista verificato DuctedExpert ti contatterà entro 24 ore lavorative.",
+    successBadge: "La tua richiesta è stata registrata con successo",
+    errorMsg: "Si è verificato un errore. Per favore riprova.",
+    selectOption: "Seleziona...",
+  },
+};
+
 export default function LeadFormCVC({ productRef, productTitle }: LeadFormCVCProps) {
+  const { locale } = useLanguage();
+  const f = FORM_I18N[locale] || FORM_I18N.en;
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
@@ -33,12 +379,11 @@ export default function LeadFormCVC({ productRef, productTitle }: LeadFormCVCPro
     if (productRef) formData.append("productRef", productRef);
     if (productTitle) formData.append("productTitle", productTitle);
 
-    // Ajout d'un message automatique si non renseigné
     const msg = formData.get("message");
     if (!msg || String(msg).trim() === "") {
       formData.set(
         "message",
-        `Demande de devis pour : ${productTitle ?? productRef ?? "Climatisation"}`
+        `Quote request for: ${productTitle ?? productRef ?? "HVAC System"}`
       );
     }
 
@@ -50,9 +395,7 @@ export default function LeadFormCVC({ productRef, productTitle }: LeadFormCVCPro
       if (!res.ok) throw new Error("Erreur");
       setSubmitted(true);
     } catch {
-      alert(
-        "Une erreur est survenue. Veuillez réessayer ou nous contacter par email."
-      );
+      alert(f.errorMsg);
     } finally {
       setIsSubmitting(false);
     }
@@ -64,17 +407,15 @@ export default function LeadFormCVC({ productRef, productTitle }: LeadFormCVCPro
         <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-5">
           <CheckCircle className="w-10 h-10 text-emerald-600" />
         </div>
-        <h3 className="text-2xl font-bold text-slate-900 font-outfit mb-2">
-          Demande envoyée !
+        <h3 className="text-2xl font-bold text-slate-900 mb-2">
+          {f.successTitle}
         </h3>
         <p className="text-slate-500 text-sm max-w-md mx-auto mb-6">
-          Un expert Gainable vous recontactera sous{" "}
-          <strong>24h ouvrées</strong> pour vous proposer un devis
-          personnalisé matériel + pose.
+          {f.successDesc}
         </p>
         <div className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-50 text-emerald-700 rounded-full text-xs font-semibold">
           <CheckCircle className="h-3.5 w-3.5" />
-          Votre demande a bien été enregistrée
+          {f.successBadge}
         </div>
       </div>
     );
@@ -88,28 +429,23 @@ export default function LeadFormCVC({ productRef, productTitle }: LeadFormCVCPro
       {/* Header */}
       <div className="bg-[#1F2D3D] px-8 py-6">
         <p className="text-xs font-bold text-[#D59B2B] uppercase tracking-widest mb-1">
-          Devis gratuit &amp; sans engagement
+          {f.freeBadge}
         </p>
         <h2
           id="lead-form-title"
-          className="text-xl md:text-2xl font-bold text-white font-outfit"
+          className="text-xl md:text-2xl font-bold text-white"
         >
-          Obtenir un devis d&apos;installation CVC
+          {f.title}
         </h2>
         {productTitle && (
           <p className="text-slate-400 text-sm mt-1">
-            Pour :{" "}
+            {f.forProduct}{" "}
             <span className="text-[#D59B2B] font-semibold">{productTitle}</span>
           </p>
         )}
-        {/* Avantages rapides */}
+        {/* Quick Benefits */}
         <div className="flex flex-wrap gap-4 mt-4">
-          {[
-            "Réponse sous 24h",
-            "Expert certifié RGE",
-            "Tarif grossiste préférentiel",
-            "Garantie décennale",
-          ].map((v) => (
+          {f.benefits.map((v) => (
             <span
               key={v}
               className="inline-flex items-center gap-1.5 text-[11px] text-slate-300 font-medium"
@@ -123,7 +459,6 @@ export default function LeadFormCVC({ productRef, productTitle }: LeadFormCVCPro
 
       {/* Form */}
       <form onSubmit={handleSubmit} className="p-8 md:p-10 space-y-6">
-        {/* Champs cachés */}
         {productRef && (
           <input type="hidden" name="productRef" value={productRef} />
         )}
@@ -131,7 +466,7 @@ export default function LeadFormCVC({ productRef, productTitle }: LeadFormCVCPro
           <input type="hidden" name="productTitle" value={productTitle} />
         )}
 
-        {/* Identité */}
+        {/* Identity */}
         <div className="grid md:grid-cols-2 gap-5">
           <div className="space-y-1.5">
             <label
@@ -139,13 +474,13 @@ export default function LeadFormCVC({ productRef, productTitle }: LeadFormCVCPro
               className="block text-xs font-semibold uppercase tracking-wider text-slate-500"
             >
               <User className="inline h-3 w-3 mr-1" />
-              Nom *
+              {f.lastName}
             </label>
             <input
               id="cvc-lastName"
               name="lastName"
               type="text"
-              placeholder="Votre nom"
+              placeholder={f.lastNamePh}
               required
               className="w-full h-11 px-4 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-[#D59B2B] focus:bg-white transition-all"
             />
@@ -155,13 +490,13 @@ export default function LeadFormCVC({ productRef, productTitle }: LeadFormCVCPro
               htmlFor="cvc-firstName"
               className="block text-xs font-semibold uppercase tracking-wider text-slate-500"
             >
-              Prénom
+              {f.firstName}
             </label>
             <input
               id="cvc-firstName"
               name="firstName"
               type="text"
-              placeholder="Votre prénom"
+              placeholder={f.firstNamePh}
               className="w-full h-11 px-4 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-[#D59B2B] focus:bg-white transition-all"
             />
           </div>
@@ -172,13 +507,13 @@ export default function LeadFormCVC({ productRef, productTitle }: LeadFormCVCPro
               className="block text-xs font-semibold uppercase tracking-wider text-slate-500"
             >
               <Mail className="inline h-3 w-3 mr-1" />
-              Email *
+              {f.email}
             </label>
             <input
               id="cvc-email"
               name="email"
               type="email"
-              placeholder="vous@exemple.fr"
+              placeholder="you@domain.com"
               required
               className="w-full h-11 px-4 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-[#D59B2B] focus:bg-white transition-all"
             />
@@ -189,13 +524,13 @@ export default function LeadFormCVC({ productRef, productTitle }: LeadFormCVCPro
               className="block text-xs font-semibold uppercase tracking-wider text-slate-500"
             >
               <Phone className="inline h-3 w-3 mr-1" />
-              Téléphone *
+              {f.phone}
             </label>
             <input
               id="cvc-phone"
               name="phone"
               type="tel"
-              placeholder="06 12 34 56 78"
+              placeholder="+44 20 1234 5678"
               required
               className="w-full h-11 px-4 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-[#D59B2B] focus:bg-white transition-all"
             />
@@ -207,15 +542,14 @@ export default function LeadFormCVC({ productRef, productTitle }: LeadFormCVCPro
               className="block text-xs font-semibold uppercase tracking-wider text-slate-500"
             >
               <MapPin className="inline h-3 w-3 mr-1" />
-              Code Postal *
+              {f.zip}
             </label>
             <input
               id="cvc-zip"
               name="zip"
               type="text"
-              placeholder="06000"
+              placeholder="10115"
               required
-              pattern="[0-9]{4,5}"
               className="w-full h-11 px-4 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-[#D59B2B] focus:bg-white transition-all"
             />
           </div>
@@ -224,35 +558,34 @@ export default function LeadFormCVC({ productRef, productTitle }: LeadFormCVCPro
               htmlFor="cvc-city"
               className="block text-xs font-semibold uppercase tracking-wider text-slate-500"
             >
-              Ville *
+              {f.city}
             </label>
             <input
               id="cvc-city"
               name="city"
               type="text"
-              placeholder="Nice, Marseille..."
+              placeholder="Berlin, London, Helsinki..."
               required
               className="w-full h-11 px-4 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-[#D59B2B] focus:bg-white transition-all"
             />
           </div>
         </div>
 
-        {/* Détails CVC */}
+        {/* HVAC Project Details */}
         <div className="border-t border-slate-100 pt-6">
           <p className="text-xs font-bold text-[#D59B2B] uppercase tracking-widest mb-4 flex items-center gap-1.5">
             <Thermometer className="h-3.5 w-3.5" />
-            Détails de votre projet CVC
+            {f.projectDetails}
           </p>
           <div className="grid md:grid-cols-2 gap-5">
-
-            {/* Type de logement */}
+            {/* Housing Type */}
             <div className="space-y-1.5">
               <label
                 htmlFor="cvc-housingType"
                 className="block text-xs font-semibold uppercase tracking-wider text-slate-500"
               >
                 <Home className="inline h-3 w-3 mr-1" />
-                Type de logement
+                {f.housingType}
               </label>
               <div className="relative">
                 <select
@@ -260,24 +593,22 @@ export default function LeadFormCVC({ productRef, productTitle }: LeadFormCVCPro
                   name="housingType"
                   className="w-full h-11 px-4 pr-10 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-[#D59B2B] focus:bg-white transition-all appearance-none"
                 >
-                  <option value="">Sélectionner...</option>
-                  <option value="maison">Maison individuelle</option>
-                  <option value="appartement">Appartement</option>
-                  <option value="local_commercial">Local commercial</option>
-                  <option value="bureau">Bureaux / Tertiaire</option>
-                  <option value="autre">Autre</option>
+                  <option value="">{f.selectOption}</option>
+                  {f.housingOptions.map((opt) => (
+                    <option key={opt.val} value={opt.val}>{opt.label}</option>
+                  ))}
                 </select>
                 <ChevronDown className="absolute right-3 top-3.5 h-4 w-4 text-slate-400 pointer-events-none" />
               </div>
             </div>
 
-            {/* Surface à traiter */}
+            {/* Surface */}
             <div className="space-y-1.5">
               <label
                 htmlFor="cvc-surface"
                 className="block text-xs font-semibold uppercase tracking-wider text-slate-500"
               >
-                Surface à traiter (m²)
+                {f.surface}
               </label>
               <div className="relative">
                 <select
@@ -285,26 +616,23 @@ export default function LeadFormCVC({ productRef, productTitle }: LeadFormCVCPro
                   name="surface"
                   className="w-full h-11 px-4 pr-10 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-[#D59B2B] focus:bg-white transition-all appearance-none"
                 >
-                  <option value="">Sélectionner...</option>
-                  <option value="moins_30">Moins de 30 m²</option>
-                  <option value="30_50">30 – 50 m²</option>
-                  <option value="50_80">50 – 80 m²</option>
-                  <option value="80_120">80 – 120 m²</option>
-                  <option value="120_200">120 – 200 m²</option>
-                  <option value="plus_200">Plus de 200 m²</option>
+                  <option value="">{f.selectOption}</option>
+                  {f.surfaceOptions.map((opt) => (
+                    <option key={opt.val} value={opt.val}>{opt.label}</option>
+                  ))}
                 </select>
                 <ChevronDown className="absolute right-3 top-3.5 h-4 w-4 text-slate-400 pointer-events-none" />
               </div>
             </div>
 
-            {/* Type de prestation */}
+            {/* Service Type */}
             <div className="space-y-1.5">
               <label
                 htmlFor="cvc-workType"
                 className="block text-xs font-semibold uppercase tracking-wider text-slate-500"
               >
                 <Wrench className="inline h-3 w-3 mr-1" />
-                Prestation souhaitée
+                {f.workType}
               </label>
               <div className="relative">
                 <select
@@ -312,25 +640,22 @@ export default function LeadFormCVC({ productRef, productTitle }: LeadFormCVCPro
                   name="workType"
                   className="w-full h-11 px-4 pr-10 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-[#D59B2B] focus:bg-white transition-all appearance-none"
                 >
-                  <option value="">Sélectionner...</option>
-                  <option value="fourniture_pose">Fourniture + Pose (clé en main)</option>
-                  <option value="pose_seule">Pose seule (j&apos;ai déjà le matériel)</option>
-                  <option value="entretien_sav">Entretien / SAV</option>
-                  <option value="remplacement">Remplacement d&apos;un équipement existant</option>
-                  <option value="multi_split">Installation multi-split</option>
-                  <option value="gainable">Système gainable</option>
+                  <option value="">{f.selectOption}</option>
+                  {f.workOptions.map((opt) => (
+                    <option key={opt.val} value={opt.val}>{opt.label}</option>
+                  ))}
                 </select>
                 <ChevronDown className="absolute right-3 top-3.5 h-4 w-4 text-slate-400 pointer-events-none" />
               </div>
             </div>
 
-            {/* Budget estimé */}
+            {/* Budget */}
             <div className="space-y-1.5">
               <label
                 htmlFor="cvc-budget"
                 className="block text-xs font-semibold uppercase tracking-wider text-slate-500"
               >
-                Budget estimé (HT)
+                {f.budget}
               </label>
               <div className="relative">
                 <select
@@ -338,12 +663,9 @@ export default function LeadFormCVC({ productRef, productTitle }: LeadFormCVCPro
                   name="budget"
                   className="w-full h-11 px-4 pr-10 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-[#D59B2B] focus:bg-white transition-all appearance-none"
                 >
-                  <option value="">Non défini</option>
-                  <option value="moins_2000">Moins de 2 000 €</option>
-                  <option value="2000_5000">2 000 – 5 000 €</option>
-                  <option value="5000_10000">5 000 – 10 000 €</option>
-                  <option value="10000_20000">10 000 – 20 000 €</option>
-                  <option value="plus_20000">Plus de 20 000 €</option>
+                  {f.budgetOptions.map((opt) => (
+                    <option key={opt.val} value={opt.val}>{opt.label}</option>
+                  ))}
                 </select>
                 <ChevronDown className="absolute right-3 top-3.5 h-4 w-4 text-slate-400 pointer-events-none" />
               </div>
@@ -351,13 +673,13 @@ export default function LeadFormCVC({ productRef, productTitle }: LeadFormCVCPro
           </div>
         </div>
 
-        {/* Message complémentaire */}
+        {/* Message */}
         <div className="space-y-1.5">
           <label
             htmlFor="cvc-message"
             className="block text-xs font-semibold uppercase tracking-wider text-slate-500"
           >
-            Précisions complémentaires
+            {f.message}
           </label>
           <textarea
             id="cvc-message"
@@ -365,8 +687,8 @@ export default function LeadFormCVC({ productRef, productTitle }: LeadFormCVCPro
             rows={4}
             placeholder={
               productRef
-                ? `Ex : Je souhaite un devis pour l'installation du ${productRef}, maison neuve, pose en R+1, accès par l'extérieur...`
-                : "Décrivez votre projet : type d'habitation, contraintes d'accès, délai souhaité..."
+                ? `Quote request for ${productRef}...`
+                : f.messagePh
             }
             className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-[#D59B2B] focus:bg-white transition-all resize-none"
           />
@@ -382,23 +704,21 @@ export default function LeadFormCVC({ productRef, productTitle }: LeadFormCVCPro
             {isSubmitting ? (
               <>
                 <Loader2 className="h-5 w-5 animate-spin" />
-                Envoi en cours...
+                {f.submitting}
               </>
             ) : (
               <>
                 <Send className="h-5 w-5" />
-                Envoyer ma demande de devis
+                {f.submit}
               </>
             )}
           </button>
           <p className="text-center text-[11px] text-slate-400 mt-3 leading-relaxed">
-            🔒 Données sécurisées — Pas de démarchage. Réponse d&apos;un expert sous 24h ouvrées.
+            {f.privacy}
             <br />
-            En soumettant ce formulaire, vous acceptez notre{" "}
-            <a href="/politique-confidentialite" className="underline hover:text-slate-600">
-              politique de confidentialité
+            <a href={withLocalePath("/politique-confidentialite", locale)} className="underline hover:text-slate-600">
+              {f.privacyLink}
             </a>
-            .
           </p>
         </div>
       </form>

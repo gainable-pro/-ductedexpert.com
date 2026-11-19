@@ -13,27 +13,27 @@ const BADGE_TEXT: Record<Locale, { line1: string; line2: string; line3: string }
     en: {
         line1: "Verified Expert",
         line2: "DuctedExpert",
-        line3: "(profile vetted & verified by DuctedExpert.com)",
+        line3: "(vetted & verified by DuctedExpert.com)",
     },
     de: {
         line1: "Geprüfter Experte",
         line2: "DuctedExpert",
-        line3: "(Profil geprüft & verifiziert von DuctedExpert.com)",
+        line3: "(geprüft & verifiziert von DuctedExpert.com)",
     },
     fi: {
-        line1: "Varmennettu",
+        line1: "Varmennettu Asiantuntija",
         line2: "DuctedExpert",
-        line3: "(DuctedExpert.com tarkistama yritysprofiili)",
+        line3: "(tarkistettu ja vahvistettu • DuctedExpert.com)",
     },
     es: {
         line1: "Experto Verificado",
         line2: "DuctedExpert",
-        line3: "(perfil moderado y verificado por DuctedExpert.com)",
+        line3: "(perfil auditado y verificado • DuctedExpert.com)",
     },
     it: {
         line1: "Esperto Verificato",
         line2: "DuctedExpert",
-        line3: "(profilo moderato e verificato da DuctedExpert.com)",
+        line3: "(profilo verificato e accreditato • DuctedExpert.com)",
     },
 };
 
@@ -46,6 +46,9 @@ export function VerifiedExpertBadge({ size = "md", className = "" }: VerifiedExp
         md: "w-[210px]",
         lg: "w-full max-w-[380px]"
     }[size];
+
+    const line1FontSize = txt.line1.length > 20 ? 23 : txt.line1.length > 16 ? 26 : 30;
+    const line3FontSize = txt.line3.length > 40 ? 11.5 : 13;
 
     return (
         <div
@@ -102,21 +105,15 @@ export function VerifiedExpertBadge({ size = "md", className = "" }: VerifiedExp
                     `}</style>
                 </defs>
 
-                {/* ================= LOGO "D" (LEFT) ================= */}
+                {/* ================= OFFICIAL DUCTEDEXPERT "D" EMBLEM (LEFT) ================= */}
                 <g>
-                    {/* Vertical stem & D curve in slate blue */}
-                    <path
-                        d="M 28 32 L 66 32 A 45 45 0 0 1 111 77 A 45 45 0 0 1 66 122 L 28 122 Z"
-                        stroke="#3A4F5C"
-                        strokeWidth="22"
-                        strokeLinejoin="miter"
-                        fill="none"
-                    />
-                    {/* Gold horizontal accent bar of the D */}
-                    <polygon
-                        points="66,67 120,67 116,88 62,88"
-                        fill="url(#ductedGoldGrad)"
-                        filter="url(#goldGlow)"
+                    <image
+                        href="/ductedexpert-d-emblem.png"
+                        x="12"
+                        y="18"
+                        width="118"
+                        height="118"
+                        preserveAspectRatio="xMidYMid meet"
                     />
                 </g>
 
@@ -128,7 +125,7 @@ export function VerifiedExpertBadge({ size = "md", className = "" }: VerifiedExp
                         fill="#3A4F5C"
                         fontFamily="Montserrat, Inter, system-ui, -apple-system, sans-serif"
                         fontWeight="700"
-                        fontSize="31"
+                        fontSize={line1FontSize}
                         letterSpacing="-0.5"
                     >
                         {txt.line1}
@@ -181,7 +178,7 @@ export function VerifiedExpertBadge({ size = "md", className = "" }: VerifiedExp
                         fill="#3A4F5C"
                         fontFamily="Montserrat, Inter, system-ui, -apple-system, sans-serif"
                         fontWeight="500"
-                        fontSize="13.5"
+                        fontSize={line3FontSize}
                     >
                         {txt.line3}
                     </text>

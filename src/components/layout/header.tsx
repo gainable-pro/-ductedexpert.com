@@ -34,9 +34,14 @@ function LanguageSelector({ mobile = false }: { mobile?: boolean }) {
         router.push(target + search);
     };
 
+    const handleFrRedirect = () => {
+        setOpen(false);
+        window.location.href = "https://www.gainable.fr";
+    };
+
     if (mobile) {
         return (
-            <div className="flex flex-wrap gap-2 py-2">
+            <div className="flex flex-wrap items-center gap-2 py-2">
                 {SUPPORTED_LOCALES.map((loc) => (
                     <button
                         key={loc}
@@ -52,6 +57,17 @@ function LanguageSelector({ mobile = false }: { mobile?: boolean }) {
                         <span className="uppercase">{loc}</span>
                     </button>
                 ))}
+                {/* French option redirects to gainable.fr */}
+                <button
+                    type="button"
+                    onClick={handleFrRedirect}
+                    title="Aller sur Gainable.fr (France)"
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold border border-amber-200 bg-amber-50 text-amber-900 hover:bg-amber-100 transition-all shadow-sm"
+                >
+                    <span>🇫🇷</span>
+                    <span className="uppercase">FR</span>
+                    <span className="text-[10px] text-amber-700">↗</span>
+                </button>
             </div>
         );
     }
@@ -72,7 +88,10 @@ function LanguageSelector({ mobile = false }: { mobile?: boolean }) {
             {open && (
                 <>
                     <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
-                    <div className="absolute right-0 mt-2 w-44 bg-white rounded-xl shadow-xl border border-slate-100 py-1.5 z-50">
+                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-xl border border-slate-100 py-1.5 z-50">
+                        <div className="px-3.5 py-1 text-[10px] uppercase font-bold text-slate-400 tracking-wider">
+                            Language
+                        </div>
                         {SUPPORTED_LOCALES.map((loc) => (
                             <button
                                 key={loc}
@@ -91,6 +110,23 @@ function LanguageSelector({ mobile = false }: { mobile?: boolean }) {
                                 <span className="uppercase text-[10px] text-slate-400">{loc}</span>
                             </button>
                         ))}
+
+                        <div className="my-1 border-t border-slate-100" />
+
+                        {/* French: redirects directly to gainable.fr */}
+                        <button
+                            type="button"
+                            onClick={handleFrRedirect}
+                            className="w-full flex items-center justify-between px-3.5 py-2 text-xs font-semibold text-slate-700 hover:bg-amber-50/70 hover:text-[#D59B2B] transition-colors"
+                        >
+                            <span className="flex items-center gap-2">
+                                <span>🇫🇷</span>
+                                <span>Français</span>
+                            </span>
+                            <span className="inline-flex items-center gap-1 text-[10px] text-amber-700 font-bold uppercase">
+                                gainable.fr ↗
+                            </span>
+                        </button>
                     </div>
                 </>
             )}
