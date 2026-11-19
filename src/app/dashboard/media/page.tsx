@@ -6,8 +6,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Loader2, Video, Image as ImageIcon, CheckCircle2, Trash2 } from "lucide-react";
+import { useLanguage } from "@/components/layout/language-provider";
+import { getDashboardDictionary } from "@/lib/dashboard-i18n";
 
 export default function MediaPage() {
+    const { locale } = useLanguage();
+    const d = getDashboardDictionary(locale);
+
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
     const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
@@ -28,7 +33,7 @@ export default function MediaPage() {
                 }
             } catch (error) {
                 console.error(error);
-                setMessage({ type: 'error', text: "Erreur de chargement des données." });
+                setMessage({ type: 'error', text: d.media.saveError });
             } finally {
                 setIsLoading(false);
             }
@@ -43,8 +48,6 @@ export default function MediaPage() {
         setIsLoading(true);
         setMessage(null);
 
-        // Import supabase client dynamically or use the one from lib (but lib one is generic)
-        // We'll use the one from lib since it uses public keys
         const { supabase } = await import("@/lib/supabase");
 
         try {
@@ -53,7 +56,7 @@ export default function MediaPage() {
                 const filename = `${Date.now()}_${Math.random().toString(36).substr(2, 9)}_${sanitizedName}`;
                 const filePath = `uploads/${filename}`;
 
-                const { data, error } = await supabase.storage
+                const { error } = await supabase.storage
                     .from('gainable-assets')
                     .upload(filePath, file, { upsert: false });
 
@@ -73,13 +76,11 @@ export default function MediaPage() {
             if (type === 'photo') {
                 setPhotos(prev => [...prev, ...uploadedUrls]);
             }
-
         } catch (error: any) {
             console.error(error);
-            setMessage({ type: 'error', text: `Erreur lors de l'upload: ${error.message || "Erreur inconnue"}` });
+            setMessage({ type: 'error', text: `Upload error: ${error.message || "Unknown error"}` });
         } finally {
             setIsLoading(false);
-            // Reset input value to allow re-uploading same file if needed
             e.target.value = '';
         }
     };
@@ -103,10 +104,10 @@ export default function MediaPage() {
             });
 
             if (!res.ok) throw new Error("Failed");
-            setMessage({ type: 'success', text: "Vos médias ont été sauvegardés !" });
+            setMessage({ type: 'success', text: d.media.savedSuccess });
         } catch (error) {
             console.error(error);
-            setMessage({ type: 'error', text: "Erreur lors de la sauvegarde." });
+            setMessage({ type: 'error', text: d.media.saveError });
         } finally {
             setIsSaving(false);
         }
@@ -118,12 +119,12 @@ export default function MediaPage() {
         <div className="space-y-8">
             <div className="flex items-center justify-between">
                 <div>
-                    <h2 className="text-2xl font-bold text-[#1F2D3D]">Mes Médias</h2>
-                    <p className="text-slate-500">Gérez vos fichiers (Logo, Vidéo, Galerie) visibles sur votre profil.</p>
+                    <h2 className="text-2xl font-bold text-[#1F2D3D]">{d.media.title}</h2>
+                    <p className="text-slate-500">{d.media.subtitle}</p>
                 </div>
                 <Button onClick={handleSave} disabled={isSaving} className="bg-[#D59B2B] hover:bg-[#b88622] text-white px-6">
                     {isSaving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <CheckCircle2 className="w-4 h-4 mr-2" />}
-                    {isSaving ? "Sauvegarde..." : "Enregistrer tout"}
+                    {isSaving ? d.media.saving : d.media.saveAll}
                 </Button>
             </div>
 
@@ -135,16 +136,15 @@ export default function MediaPage() {
             )}
 
             <div className="grid md:grid-cols-2 gap-6">
-
                 {/* LOGO SECTION */}
                 <Card>
                     <CardContent className="pt-6 space-y-4">
                         <h3 className="font-semibold text-lg flex items-center gap-2">
-                            <ImageIcon className="w-5 h-5 text-[#D59B2B]" /> Logo de l'entreprise
+                            <ImageIcon className="w-5 h-5 text-[#D59B2B]" /> {d.media.logoTitle}
                         </h3>
 
                         <div className="space-y-2">
-                            <Label>Importer mon logo</Label>
+                            <Label>{d.media.uploadLogo}</Label>
                             <Input
                                 type="file"
                                 accept="image/*"
@@ -159,7 +159,7 @@ export default function MediaPage() {
                             </div>
                         ) : (
                             <div className="mt-4 h-32 border-2 border-dashed rounded-lg flex items-center justify-center text-slate-300">
-                                Pas de logo
+                                {d.media.noLogo}
                             </div>
                         )}
                     </CardContent>
@@ -169,17 +169,17 @@ export default function MediaPage() {
                 <Card>
                     <CardContent className="pt-6 space-y-4">
                         <h3 className="font-semibold text-lg flex items-center gap-2">
-                            <Video className="w-5 h-5 text-[#D59B2B]" /> Vidéo de présentation
+                            <Video className="w-5 h-5 text-[#D59B2B]" /> {d.media.videoTitle}
                         </h3>
 
                         <div className="space-y-2">
-                            <Label>Importer une vidéo</Label>
+                            <Label>{d.media.uploadVideo}</Label>
                             <Input
                                 type="file"
                                 accept="video/*"
                                 onChange={(e) => handleFileUpload(e, 'video')}
                             />
-                            <p className="text-xs text-slate-400">MP4, WEBM (Fichier local).</p>
+                            <p className="text-xs text-slate-400">MP4, WEBM.</p>
                         </div>
 
                         {videoUrl ? (
@@ -193,7 +193,7 @@ export default function MediaPage() {
                                 <button
                                     onClick={() => setVideoUrl("")}
                                     className="absolute top-2 right-2 bg-red-600 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-700 shadow-sm"
-                                    title="Supprimer la vidéo"
+                                    title={d.media.deleteVideo}
                                     type="button"
                                 >
                                     <Trash2 className="w-4 h-4" />
@@ -201,52 +201,23 @@ export default function MediaPage() {
                             </div>
                         ) : (
                             <div className="mt-4 h-[200px] border-2 border-dashed rounded-lg flex items-center justify-center text-slate-300">
-                                Pas de vidéo
+                                {d.media.noVideo}
                             </div>
                         )}
-
-                        {/* DISTIA PROMO BLOCK */}
-                        <div className="mt-6 pt-6 border-t border-slate-100">
-                            <div className="bg-slate-50 rounded-xl p-4 border border-slate-200 flex flex-col md:flex-row items-center gap-4">
-                                <div className="bg-black p-2 rounded-lg flex-shrink-0">
-                                    <img src="/gainable-fr-logo-partenaire-distia.png" alt="DISTIA" className="w-16 h-auto" />
-                                </div>
-                                <div className="flex-1 text-center md:text-left space-y-1">
-                                    <h4 className="font-bold text-[#1F2D3D]">Besoin d'une vidéo professionnelle ?</h4>
-                                    <p className="text-sm text-slate-600">
-                                        Faites appel à notre partenaire <strong>DISTIA</strong>, expert en communication visuelle & storytelling.
-                                    </p>
-                                    <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 mt-2 text-xs font-medium text-slate-500">
-                                        <span>📞 06 74 07 25 00</span>
-                                        <span className="hidden md:inline">•</span>
-                                        <a href="mailto:mathias.delcistia@distia.fr" className="hover:text-[#D59B2B] transition-colors">mathias.delcistia@distia.fr</a>
-                                    </div>
-                                </div>
-                                <a
-                                    href="https://distia.fr/"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="whitespace-nowrap bg-[#1F2D3D] text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-slate-700 transition-colors shadow-sm"
-                                >
-                                    Voir leur site
-                                </a>
-                            </div>
-                        </div>
-
                     </CardContent>
                 </Card>
             </div>
 
-            {/* --- GALLERY SECTION --- */}
+            {/* GALLERY SECTION */}
             <Card>
                 <CardContent className="pt-6 space-y-4">
                     <div className="flex items-center justify-between">
                         <h3 className="font-semibold text-lg flex items-center gap-2">
-                            <ImageIcon className="w-5 h-5 text-[#D59B2B]" /> Galerie Photos
+                            <ImageIcon className="w-5 h-5 text-[#D59B2B]" /> {d.media.galleryTitle}
                         </h3>
                         <div className="flex items-center gap-2">
-                            <Label htmlFor="gallery-upload" className="cursor-pointer bg-slate-100 peer-hover:bg-slate-200 px-3 py-2 rounded text-sm font-medium hover:bg-slate-200 transition-colors">
-                                + Ajouter une photo
+                            <Label htmlFor="gallery-upload" className="cursor-pointer bg-slate-100 px-3 py-2 rounded text-sm font-medium hover:bg-slate-200 transition-colors">
+                                {d.media.addPhotoBtn}
                             </Label>
                             <Input
                                 id="gallery-upload"
@@ -258,7 +229,7 @@ export default function MediaPage() {
                             />
                         </div>
                     </div>
-                    <p className="text-sm text-slate-500">Ajoutez des photos de vos réalisations, chantiers, ou équipements pour rassurer vos futurs clients.</p>
+                    <p className="text-sm text-slate-500">{d.media.galleryHelper}</p>
 
                     {photos.length > 0 ? (
                         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mt-4">
@@ -268,7 +239,6 @@ export default function MediaPage() {
                                     <button
                                         onClick={() => removePhoto(idx)}
                                         className="absolute top-2 right-2 bg-red-600 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                                        title="Supprimer"
                                     >
                                         <div className="w-4 h-4 flex items-center justify-center font-bold">×</div>
                                     </button>
@@ -277,11 +247,11 @@ export default function MediaPage() {
                         </div>
                     ) : (
                         <div className="p-8 border-2 border-dashed rounded-lg text-center text-slate-400">
-                            Votre galerie est vide. Ajoutez des photos pour mettre en valeur votre travail.
+                            {d.media.emptyGallery}
                         </div>
                     )}
                 </CardContent>
-            </Card >
-        </div >
+            </Card>
+        </div>
     );
 }

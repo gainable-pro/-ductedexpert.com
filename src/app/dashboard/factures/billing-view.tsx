@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { format } from "date-fns";
-import { fr } from "date-fns/locale";
 import {
     Download,
     AlertCircle,
@@ -23,20 +22,21 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
-
 import { cancelSubscriptionAction } from "./actions";
+import { useLanguage } from "@/components/layout/language-provider";
+import { getDashboardDictionary } from "@/lib/dashboard-i18n";
 
 interface BillingViewProps {
     invoices: any[];
-    subscription: any; // Stripe Subscription Object
+    subscription: any;
 }
 
 export function BillingView({ invoices, subscription }: BillingViewProps) {
+    const { locale } = useLanguage();
+    const d = getDashboardDictionary(locale);
     const [isLoading, setIsLoading] = useState(false);
     const [msg, setMsg] = useState<{ type: 'success' | 'error', text: string } | null>(null);
 
-    // --- LOGIC: ENGAGEMENT & CANCELLATION ---
-    // 1. Calculate Dates
     const startDate = new Date(subscription.created * 1000);
     const anniversaryDate = new Date(startDate);
     anniversaryDate.setFullYear(startDate.getFullYear() + 1);
@@ -48,9 +48,8 @@ export function BillingView({ invoices, subscription }: BillingViewProps) {
     const canCancel = now >= cancellationOpenDate;
     const isCanceled = subscription.cancel_at_period_end;
 
-    // --- ACTION HANDLE ---
     const handleCancel = async () => {
-        if (!confirm("Êtes-vous sûr de vouloir demander la résiliation à la date anniversaire ?")) return;
+        if (!confirm(d.billing.requestCancelBtn + "?")) return;
 
         setIsLoading(true);
         setMsg(null);
@@ -58,25 +57,21 @@ export function BillingView({ invoices, subscription }: BillingViewProps) {
         const res = await cancelSubscriptionAction(subscription.id);
 
         if (res.success) {
-            setMsg({ type: 'success', text: res.message || "Résiliation prise en compte." });
-            window.location.reload(); // Refresh to update status
+            setMsg({ type: 'success', text: res.message || "Cancellation recorded." });
+            window.location.reload();
         } else {
-            setMsg({ type: 'error', text: res.error || "Une erreur est survenue." });
+            setMsg({ type: 'error', text: res.error || "Error." });
         }
         setIsLoading(false);
     };
 
     return (
         <div className="space-y-8 animate-in fade-in duration-500 max-w-5xl">
-            {/* HEAD */}
             <header>
-                <h1 className="text-2xl font-bold text-[#1F2D3D]">Mes Factures & Abonnement</h1>
-                <p className="text-slate-500 text-sm">
-                    Gérez votre abonnement et retrouvez l'historique de vos paiements.
-                </p>
+                <h1 className="text-2xl font-bold text-[#1F2D3D]">{d.billing.title}</h1>
+                <p className="text-slate-500 text-sm">{d.billing.subtitle}</p>
             </header>
 
-            {/* FEEDBACK MSG */}
             {msg && (
                 <div className={`p-4 rounded-lg flex items-center gap-2 text-sm ${msg.type === 'success' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
                     {msg.type === 'success' ? <CheckCircle2 className="w-4 h-4" /> : <AlertCircle className="w-4 h-4" />}
@@ -85,8 +80,7 @@ export function BillingView({ invoices, subscription }: BillingViewProps) {
             )}
 
             <div className="grid lg:grid-cols-2 gap-8">
-
-                {/* --- 1. SUBSCRIPTION CARD --- */}
+                {/* 1. SUBSCRIPTION CARD */}
                 <Card className="border-slate-200 shadow-sm overflow-hidden">
                     <div className="h-2 bg-[#D59B2B] w-full"></div>
                     <CardHeader className="pb-4">
@@ -94,44 +88,41 @@ export function BillingView({ invoices, subscription }: BillingViewProps) {
                             <div>
                                 <CardTitle className="text-lg font-bold text-[#1F2D3D] flex items-center gap-2">
                                     <CreditCard className="h-5 w-5 text-[#D59B2B]" />
-                                    Mon Abonnement Expert
+                                    {d.billing.subscriptionCardTitle}
                                 </CardTitle>
                                 <CardDescription className="mt-1">
-                                    Engagement 12 mois
+                                    {d.billing.commitment12Months}
                                 </CardDescription>
                             </div>
                             <Badge variant={subscription.status === 'active' ? 'default' : 'destructive'}
                                 className={subscription.status === 'active' ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200' : ''}>
-                                {subscription.status === 'active' ? 'Actif' : subscription.status}
+                                {subscription.status === 'active' ? d.billing.statusActive : subscription.status}
                             </Badge>
                         </div>
                     </CardHeader>
                     <CardContent className="space-y-6">
-
-                        {/* DATES GRID */}
                         <div className="grid grid-cols-2 gap-4 bg-slate-50 p-4 rounded-lg border border-slate-100">
                             <div>
-                                <div className="text-xs text-slate-500 uppercase font-semibold mb-1">Début d'engagement</div>
+                                <div className="text-xs text-slate-500 uppercase font-semibold mb-1">{d.billing.startDateLabel}</div>
                                 <div className="font-medium text-slate-700">
-                                    {format(startDate, 'd MMMM yyyy', { locale: fr })}
+                                    {format(startDate, 'dd MMM yyyy')}
                                 </div>
                             </div>
                             <div>
-                                <div className="text-xs text-slate-500 uppercase font-semibold mb-1">Date Anniversaire</div>
+                                <div className="text-xs text-slate-500 uppercase font-semibold mb-1">{d.billing.anniversaryDateLabel}</div>
                                 <div className="font-medium text-[#D59B2B]">
-                                    {format(anniversaryDate, 'd MMMM yyyy', { locale: fr })}
+                                    {format(anniversaryDate, 'dd MMM yyyy')}
                                 </div>
                             </div>
                         </div>
 
-                        {/* CANCELLATION LOGIC UI */}
                         <div className="pt-2">
                             {isCanceled ? (
                                 <div className="bg-orange-50 border border-orange-100 p-4 rounded-lg flex gap-3 text-sm text-orange-800">
                                     <AlertCircle className="w-5 h-5 shrink-0" />
                                     <div>
-                                        <strong>Résiliation programmée.</strong><br />
-                                        Votre abonnement prendra fin le {format(new Date(subscription.current_period_end * 1000), 'd MMMM yyyy')}.
+                                        <strong>{d.billing.cancelScheduledTitle}</strong><br />
+                                        {d.billing.cancelScheduledText} {format(new Date(subscription.current_period_end * 1000), 'dd MMM yyyy')}.
                                     </div>
                                 </div>
                             ) : (
@@ -143,56 +134,54 @@ export function BillingView({ invoices, subscription }: BillingViewProps) {
                                         onClick={handleCancel}
                                     >
                                         {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Ban className="w-4 h-4" />}
-                                        {canCancel ? "Demander la résiliation (Fin de contrat)" : "Résilier l'abonnement"}
+                                        {d.billing.requestCancelBtn}
                                     </Button>
 
                                     {!canCancel && (
                                         <div className="mt-3 text-xs text-slate-500 bg-slate-50 p-3 rounded border border-slate-100">
                                             <p className="font-semibold mb-1 flex items-center gap-1">
-                                                <AlertCircle className="w-3 h-3 text-[#D59B2B]" /> Option verrouillée (Engagement 12 mois)
+                                                <AlertCircle className="w-3 h-3 text-[#D59B2B]" /> {d.billing.cancelLockedTitle}
                                             </p>
-                                            La résiliation sera possible à partir du <strong>{format(cancellationOpenDate, 'd MMMM yyyy', { locale: fr })}</strong> (1 mois avant la date anniversaire).
+                                            {d.billing.cancelLockedText} <strong>{format(cancellationOpenDate, 'dd MMM yyyy')}</strong>.
                                         </div>
                                     )}
                                 </div>
                             )}
                         </div>
-
                     </CardContent>
                 </Card>
 
-                {/* --- 2. INVOICE HISTORY TABLE --- */}
+                {/* 2. INVOICE HISTORY TABLE */}
                 <Card className="border-slate-200 shadow-sm h-full flex flex-col">
                     <CardHeader className="border-b border-slate-100 bg-slate-50/50 pb-4">
                         <CardTitle className="text-base font-semibold text-slate-800 flex items-center gap-2">
                             <Calendar className="h-5 w-5 text-slate-500" />
-                            Historique des Factures
+                            {d.billing.invoiceHistoryTitle}
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="p-0 flex-1 overflow-auto">
                         {invoices.length === 0 ? (
                             <div className="flex flex-col items-center justify-center h-48 text-slate-400 text-sm">
                                 <CreditCard className="w-8 h-8 mb-2 opacity-20" />
-                                Aucune facture disponible pour le moment.
+                                {d.billing.noInvoices}
                             </div>
                         ) : (
                             <Table>
                                 <TableHeader>
                                     <TableRow>
-                                        <TableHead>Date</TableHead>
-                                        <TableHead>Montant</TableHead>
-                                        <TableHead className="text-right">Action</TableHead>
+                                        <TableHead>{d.billing.dateCol}</TableHead>
+                                        <TableHead>{d.billing.amountCol}</TableHead>
+                                        <TableHead className="text-right">{d.billing.actionCol}</TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
                                     {invoices.map((inv) => (
                                         <TableRow key={inv.id}>
                                             <TableCell className="font-medium text-slate-700">
-                                                {format(new Date(inv.created * 1000), 'd MMM yyyy', { locale: fr })}
+                                                {format(new Date(inv.created * 1000), 'dd MMM yyyy')}
                                             </TableCell>
                                             <TableCell>
-                                                {(inv.total / 100).toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' })}
-                                                <span className="text-xs text-slate-400 ml-1">TTC</span>
+                                                {(inv.total / 100).toLocaleString('en-US', { style: 'currency', currency: 'EUR' })}
                                             </TableCell>
                                             <TableCell className="text-right">
                                                 {inv.hosted_invoice_url && (
@@ -214,7 +203,6 @@ export function BillingView({ invoices, subscription }: BillingViewProps) {
                         )}
                     </CardContent>
                 </Card>
-
             </div>
         </div>
     );

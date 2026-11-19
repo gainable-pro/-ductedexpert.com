@@ -7,9 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
-import { Select } from "@/components/ui/select";
 import {
-    Building2,
     CheckCircle2,
     Loader2
 } from "lucide-react";
@@ -17,7 +15,6 @@ import {
     EXPERT_TECHNOLOGIES,
     EXPERT_INTERVENTIONS_CLIM,
     EXPERT_INTERVENTIONS_ETUDE,
-    EXPERT_INTERVENTIONS_DIAG,
     EXPERT_BRANDS,
     EXPERT_BATIMENTS,
     EXPERT_CERTIFICATIONS
@@ -25,12 +22,11 @@ import {
 import Link from "next/link";
 import { useLanguage } from "@/components/layout/language-provider";
 import { translateTerm } from "@/lib/i18n";
+import { getDashboardDictionary } from "@/lib/dashboard-i18n";
 
-// Map constants to ID/Label format
 const TECH_LIST = EXPERT_TECHNOLOGIES.map(t => ({ id: t, label: t }));
 const INTERVENTION_CLIM_LIST = EXPERT_INTERVENTIONS_CLIM.map(t => ({ id: t, label: t }));
 const INTERVENTION_ETUDE_LIST = EXPERT_INTERVENTIONS_ETUDE.map(t => ({ id: t, label: t }));
-const INTERVENTION_DIAG_LIST = EXPERT_INTERVENTIONS_DIAG.map(t => ({ id: t, label: t }));
 const BATIMENT_LIST = EXPERT_BATIMENTS.map(t => ({ id: t, label: t }));
 const MARQUE_LIST = EXPERT_BRANDS.map(t => ({ id: t, label: t }));
 const CERT_LIST = EXPERT_CERTIFICATIONS.map(t => ({ id: t, label: t }));
@@ -40,11 +36,11 @@ const EditMap = dynamicModule(() => import("./edit-map"), { ssr: false });
 
 export default function ProfileForm() {
     const { locale, t } = useLanguage();
+    const d = getDashboardDictionary(locale);
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
     const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
 
-    // Form State
     const [expertType, setExpertType] = useState<string | null>(null);
     const [formData, setFormData] = useState({
         nom_entreprise: "",
@@ -55,7 +51,7 @@ export default function ProfileForm() {
         adresse: "",
         ville: "",
         code_postal: "",
-        pays: "fr",
+        pays: "United Kingdom",
         description: "",
         site_web: "",
         linkedin: "",
@@ -64,7 +60,6 @@ export default function ProfileForm() {
         siret: "",
         lat: 0,
         lng: 0,
-
         intervention_radius: 50,
         national_coverage: false,
         adresse_indep: false,
@@ -75,7 +70,6 @@ export default function ProfileForm() {
         metaDesc: ""
     });
 
-    // Multi-value States
     const [technologies, setTechnologies] = useState<string[]>([]);
     const [interventionsClim, setInterventionsClim] = useState<string[]>([]);
     const [interventionsEtude, setInterventionsEtude] = useState<string[]>([]);
@@ -84,18 +78,16 @@ export default function ProfileForm() {
     const [marques, setMarques] = useState<string[]>([]);
     const [certifications, setCertifications] = useState<string[]>([]);
 
-    // FETCH DATA
     useEffect(() => {
         async function fetchProfile() {
             try {
                 const res = await fetch('/api/dashboard/profile');
                 if (!res.ok) {
                     const errPayload = await res.json().catch(() => ({}));
-                    throw new Error(errPayload.message || "Impossible de charger le profil (Erreur Serveur)");
+                    throw new Error(errPayload.message || "Error loading profile");
                 }
                 const data = await res.json();
-
-                if (!data) throw new Error("Données vides reçues");
+                if (!data) throw new Error("Empty data");
 
                 setExpertType(data.expert_type);
 
@@ -103,12 +95,12 @@ export default function ProfileForm() {
                     nom_entreprise: data.nom_entreprise || "",
                     representant_nom: data.representant_nom || "",
                     representant_prenom: data.representant_prenom || "",
-                    email: data.user?.email || "", // Email usually comes from User relation or is readonly
+                    email: data.user?.email || "",
                     telephone: data.telephone || "",
                     adresse: data.adresse || "",
                     ville: data.ville || "",
                     code_postal: data.code_postal || "",
-                    pays: data.pays || "France",
+                    pays: data.pays || "United Kingdom",
                     description: data.description || "",
                     site_web: data.site_web || "",
                     linkedin: data.linkedin || "",
@@ -127,17 +119,16 @@ export default function ProfileForm() {
                     metaDesc: data.metaDesc || ""
                 });
 
-                // Populate Checkboxes (API returns objects {value: "foo"}, we need strings ["foo"])
-                if (data.technologies) setTechnologies(data.technologies.map((t: any) => t.value));
-                if (data.interventions_clim) setInterventionsClim(data.interventions_clim.map((t: any) => t.value));
-                if (data.interventions_etude) setInterventionsEtude(data.interventions_etude.map((t: any) => t.value));
-                if (data.interventions_diag) setInterventionsDiag(data.interventions_diag.map((t: any) => t.value));
-                if (data.batiments) setBatiments(data.batiments.map((t: any) => t.value));
-                if (data.marques) setMarques(data.marques.map((t: any) => t.value));
-                if (data.certifications) setCertifications(data.certifications.map((t: any) => t.value));
+                if (data.technologies) setTechnologies(data.technologies.map((x: any) => x.value));
+                if (data.interventions_clim) setInterventionsClim(data.interventions_clim.map((x: any) => x.value));
+                if (data.interventions_etude) setInterventionsEtude(data.interventions_etude.map((x: any) => x.value));
+                if (data.interventions_diag) setInterventionsDiag(data.interventions_diag.map((x: any) => x.value));
+                if (data.batiments) setBatiments(data.batiments.map((x: any) => x.value));
+                if (data.marques) setMarques(data.marques.map((x: any) => x.value));
+                if (data.certifications) setCertifications(data.certifications.map((x: any) => x.value));
             } catch (error: any) {
                 console.error(error);
-                setMessage({ type: 'error', text: error.message || "Impossible de charger le profil." });
+                setMessage({ type: 'error', text: error.message || d.profile.saveError });
             } finally {
                 setIsLoading(false);
             }
@@ -179,14 +170,11 @@ export default function ProfileForm() {
             });
 
             if (!res.ok) throw new Error("Update failed");
-            setMessage({ type: 'success', text: "Profil mis à jour avec succès !" });
-
-            // Scroll to top to see message
+            setMessage({ type: 'success', text: d.profile.savedSuccess });
             window.scrollTo({ top: 0, behavior: 'smooth' });
-
         } catch (error) {
             console.error(error);
-            setMessage({ type: 'error', text: "Erreur lors de la sauvegarde." });
+            setMessage({ type: 'error', text: d.profile.saveError });
         } finally {
             setIsSaving(false);
         }
@@ -204,10 +192,10 @@ export default function ProfileForm() {
             )}
 
             <div className="flex justify-between items-center">
-                <h2 className="text-xl font-bold text-[#1F2D3D]">Informations Générales</h2>
+                <h2 className="text-xl font-bold text-[#1F2D3D]">{d.profile.generalInfo}</h2>
                 <Button onClick={handleSave} disabled={isSaving} className="bg-[#D59B2B] hover:bg-[#b88622] text-white">
                     {isSaving && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                    Enregistrer les modifications
+                    {d.profile.saveChanges}
                 </Button>
             </div>
 
@@ -215,34 +203,34 @@ export default function ProfileForm() {
                 <CardContent className="pt-6 space-y-4">
                     <div className="grid md:grid-cols-2 gap-4">
                         <div className="space-y-2">
-                            <Label>Nom de l'entreprise</Label>
+                            <Label>{d.profile.companyName}</Label>
                             <Input name="nom_entreprise" value={formData.nom_entreprise} onChange={handleChange} />
                         </div>
                         <div className="space-y-2">
-                            <Label>SIRET</Label>
-                            <Input disabled value={formData.siret} className="bg-slate-50" />
+                            <Label>{d.profile.companyId}</Label>
+                            <Input name="siret" value={formData.siret} onChange={handleChange} />
                         </div>
                     </div>
 
                     <div className="grid md:grid-cols-2 gap-4">
                         <div className="space-y-2">
-                            <Label>Nom Représentant</Label>
+                            <Label>{d.profile.repLastName}</Label>
                             <Input name="representant_nom" value={formData.representant_nom} onChange={handleChange} />
                         </div>
                         <div className="space-y-2">
-                            <Label>Prénom Représentant</Label>
+                            <Label>{d.profile.repFirstName}</Label>
                             <Input name="representant_prenom" value={formData.representant_prenom} onChange={handleChange} />
                         </div>
                     </div>
 
                     <div className="grid md:grid-cols-2 gap-4">
                         <div className="space-y-2">
-                            <Label>Email (Non modifiable)</Label>
+                            <Label>{d.profile.emailReadOnly}</Label>
                             <Input disabled value={formData.email} className="bg-slate-50" />
                         </div>
                         <div className="space-y-2">
-                            <Label>Téléphone</Label>
-                            <Input name="telephone" value={formData.telephone} onChange={handleChange} placeholder="06 12 34 56 78" />
+                            <Label>{d.profile.phone}</Label>
+                            <Input name="telephone" value={formData.telephone} onChange={handleChange} placeholder="+44 20 1234 5678" />
                         </div>
                     </div>
                 </CardContent>
@@ -250,43 +238,43 @@ export default function ProfileForm() {
 
             <Card>
                 <CardContent className="pt-6 space-y-4">
-                    <h3 className="font-semibold text-lg text-[#1F2D3D]">Coordonnées & Présentation</h3>
+                    <h3 className="font-semibold text-lg text-[#1F2D3D]">{d.profile.contactPresentation}</h3>
                     <div className="space-y-2">
-                        <Label>Adresse</Label>
+                        <Label>{d.profile.address}</Label>
                         <Input name="adresse" value={formData.adresse} onChange={handleChange} />
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
-                            <Label>Code Postal</Label>
+                            <Label>{d.profile.postalCode}</Label>
                             <Input name="code_postal" value={formData.code_postal} onChange={handleChange} />
                         </div>
                         <div className="space-y-2">
-                            <Label>Ville</Label>
+                            <Label>{d.profile.city}</Label>
                             <Input name="ville" value={formData.ville} onChange={handleChange} />
                         </div>
                     </div>
 
                     <div className="space-y-2">
-                        <Label>Description</Label>
+                        <Label>{d.profile.description}</Label>
                         <Textarea name="description" value={formData.description} onChange={handleChange} className="h-32" />
                     </div>
 
                     <div className="grid md:grid-cols-2 gap-4">
                         <div className="space-y-2">
-                            <Label>Site Web</Label>
-                            <Input name="site_web" value={formData.site_web} onChange={handleChange} placeholder="https://www.exemple.com" />
+                            <Label>{d.profile.website}</Label>
+                            <Input name="site_web" value={formData.site_web} onChange={handleChange} placeholder="https://www.company.com" />
                         </div>
                         <div className="space-y-2">
                             <Label>LinkedIn</Label>
-                            <Input name="linkedin" value={formData.linkedin} onChange={handleChange} placeholder="URL Profil LinkedIn" />
+                            <Input name="linkedin" value={formData.linkedin} onChange={handleChange} placeholder="LinkedIn URL" />
                         </div>
                         <div className="space-y-2">
                             <Label>Facebook</Label>
-                            <Input name="facebook" value={formData.facebook} onChange={handleChange} placeholder="URL Page Facebook" />
+                            <Input name="facebook" value={formData.facebook} onChange={handleChange} placeholder="Facebook URL" />
                         </div>
                         <div className="space-y-2">
                             <Label>YouTube</Label>
-                            <Input name="youtube" value={formData.youtube} onChange={handleChange} placeholder="URL Chaîne YouTube" />
+                            <Input name="youtube" value={formData.youtube} onChange={handleChange} placeholder="YouTube URL" />
                         </div>
                     </div>
                 </CardContent>
@@ -296,14 +284,18 @@ export default function ProfileForm() {
             <Card>
                 <CardContent className="pt-6 space-y-4">
                     <div className="flex justify-between items-center mb-2">
-                        <h3 className="font-semibold text-lg text-[#1F2D3D]">Référencement (SEO)</h3>
+                        <h3 className="font-semibold text-lg text-[#1F2D3D]">{d.profile.seoTitle}</h3>
                         <Button
                             type="button"
                             variant="outline"
                             onClick={async () => {
-                                setIsLoading(true); // Re-use main loader or local
+                                setIsLoading(true);
                                 try {
-                                    const res = await fetch('/api/dashboard/seo/generate', { method: 'POST' });
+                                    const res = await fetch('/api/dashboard/seo/generate', {
+                                        method: 'POST',
+                                        headers: { 'Content-Type': 'application/json' },
+                                        body: JSON.stringify({ locale })
+                                    });
                                     const data = await res.json();
                                     if (!res.ok) throw new Error(data.message);
 
@@ -312,42 +304,42 @@ export default function ProfileForm() {
                                         metaTitle: data.data.metaTitle,
                                         metaDesc: data.data.metaDesc
                                     }));
-                                    setMessage({ type: 'success', text: "SEO régénéré avec l'IA !" });
+                                    setMessage({ type: 'success', text: d.profile.seoGeneratedSuccess });
                                 } catch (e: any) {
-                                    setMessage({ type: 'error', text: "Erreur IA: " + e.message });
+                                    setMessage({ type: 'error', text: "AI Error: " + e.message });
                                 } finally {
                                     setIsLoading(false);
                                 }
                             }}
                             className="bg-purple-50 text-purple-700 hover:bg-purple-100 border-purple-200"
                         >
-                            Orbimatic AI Booster ✨
+                            {d.profile.aiBoosterBtn}
                         </Button>
                     </div>
-                    <p className="text-sm text-slate-500 mb-4">Ces éléments apparaissent sur Google. Vous pouvez les personnaliser ou utiliser l'IA pour les optimiser.</p>
+                    <p className="text-sm text-slate-500 mb-4">{d.profile.seoHelperText}</p>
 
                     <div className="space-y-4">
                         <div className="space-y-2">
-                            <Label>Titre Meta (Max 60 chars)</Label>
+                            <Label>{d.profile.metaTitleLabel}</Label>
                             <Input
                                 name="metaTitle"
                                 value={formData.metaTitle || ""}
                                 onChange={handleChange}
                                 maxLength={60}
-                                placeholder="Titre optimisé pour Google"
+                                placeholder={d.profile.metaTitlePlaceholder}
                             />
                             <div className="text-xs text-right text-slate-400">
                                 {(formData.metaTitle || "").length} / 60
                             </div>
                         </div>
                         <div className="space-y-2">
-                            <Label>Description Meta (Max 160 chars)</Label>
+                            <Label>{d.profile.metaDescLabel}</Label>
                             <Textarea
                                 name="metaDesc"
                                 value={formData.metaDesc || ""}
                                 onChange={handleChange}
                                 maxLength={160}
-                                placeholder="Description courte qui incite au clic"
+                                placeholder={d.profile.metaDescPlaceholder}
                                 className="h-20"
                             />
                             <div className="text-xs text-right text-slate-400">
@@ -361,9 +353,8 @@ export default function ProfileForm() {
             {/* GEO LOCALISATION & RAYON */}
             <Card>
                 <CardContent className="pt-6 space-y-6">
-                    <h3 className="font-semibold text-lg text-[#1F2D3D] mb-4">Localisation & Zone d'Intervention</h3>
+                    <h3 className="font-semibold text-lg text-[#1F2D3D] mb-4">{d.profile.locationTitle}</h3>
 
-                    {/* INTERVENTION ADDRESS TOGGLE */}
                     <div className="bg-amber-50 border border-amber-100 p-4 rounded-lg mb-4">
                         <div className="flex items-center space-x-2 mb-4">
                             <Checkbox
@@ -372,23 +363,23 @@ export default function ProfileForm() {
                                 onCheckedChange={(checked) => setFormData(prev => ({ ...prev, adresse_indep: checked as boolean }))}
                             />
                             <label htmlFor="adresse_indep" className="text-sm font-medium leading-none cursor-pointer">
-                                Mon atelier / lieu d'intervention est différent de mon adresse de domiciliation
+                                {d.profile.differentWorkshopLabel}
                             </label>
                         </div>
 
                         {formData.adresse_indep && (
                             <div className="space-y-4 pl-6 border-l-2 border-amber-200">
                                 <div className="space-y-2">
-                                    <Label>Adresse de l'atelier</Label>
-                                    <Input name="adresse_inter" value={formData.adresse_inter} onChange={handleChange} placeholder="Ex: 12 Rue de l'Industrie" />
+                                    <Label>{d.profile.workshopAddress}</Label>
+                                    <Input name="adresse_inter" value={formData.adresse_inter} onChange={handleChange} />
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-2">
-                                        <Label>Code Postal (Atelier)</Label>
+                                        <Label>{d.profile.workshopPostalCode}</Label>
                                         <Input name="cp_inter" value={formData.cp_inter} onChange={handleChange} />
                                     </div>
                                     <div className="space-y-2">
-                                        <Label>Ville (Atelier)</Label>
+                                        <Label>{d.profile.workshopCity}</Label>
                                         <Input name="ville_inter" value={formData.ville_inter} onChange={handleChange} />
                                     </div>
                                 </div>
@@ -396,7 +387,6 @@ export default function ProfileForm() {
                         )}
                     </div>
 
-                    {/* NATIONAL COVERAGE FOR BUREAU ETUDE */}
                     {(expertType === 'bureau_etude' || expertType === "Bureau d'étude" || expertType === 'bureau_detude') && (
                         <div className="bg-blue-50 border border-blue-200 p-4 rounded-lg mb-4">
                             <div className="flex items-center space-x-3">
@@ -406,7 +396,7 @@ export default function ProfileForm() {
                                     onCheckedChange={(checked) => setFormData(prev => ({ ...prev, national_coverage: checked as boolean }))}
                                 />
                                 <label htmlFor="national_coverage" className="text-sm font-semibold text-blue-900 cursor-pointer">
-                                    ⚡ J'interviens sur toute la France (Études sur plans, etc.)
+                                    {d.profile.nationalCoverageLabel}
                                 </label>
                             </div>
                         </div>
@@ -416,53 +406,51 @@ export default function ProfileForm() {
                         <>
                             <div className="space-y-4">
                                 <div className="flex justify-between items-center bg-slate-50 p-4 rounded-lg">
-                            <div>
-                                <Label className="block mb-1 font-bold text-base">Rayon d'intervention</Label>
-                                <p className="text-sm text-slate-500">Jusqu'à quelle distance intervenez-vous ?</p>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <span className="font-bold text-2xl text-[#D59B2B]">{formData.intervention_radius} km</span>
-                            </div>
-                        </div>
-                        <div className="px-2">
-                            <input
-                                type="range"
-                                min="10"
-                                max="200"
-                                step="10"
-                                value={formData.intervention_radius}
-                                onChange={(e) => setFormData(prev => ({ ...prev, intervention_radius: parseInt(e.target.value) }))}
-                                className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-[#D59B2B]"
-                            />
-                            <div className="flex justify-between text-xs text-slate-400 mt-1">
-                                <span>10 km</span>
-                                <span>200 km</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="h-[400px] w-full rounded-xl border border-slate-200 overflow-hidden relative z-0">
-                        {formData.ville || (formData.adresse_indep && formData.ville_inter) ? (
-                            <EditMap
-                                address={formData.adresse_indep ? formData.adresse_inter : formData.adresse}
-                                city={formData.adresse_indep ? formData.ville_inter : formData.ville}
-                                initialLat={formData.lat}
-                                initialLng={formData.lng}
-                                radius={formData.intervention_radius}
-                                onLocationChange={(lat, lng) => setFormData(prev => ({ ...prev, lat, lng }))}
-                            />
-                        ) : (
-                            <div className="h-full flex items-center justify-center bg-slate-100 text-slate-400">
-                                    Renseignez votre ville pour afficher la carte
+                                    <div>
+                                        <Label className="block mb-1 font-bold text-base">{d.profile.radiusTitle}</Label>
+                                        <p className="text-sm text-slate-500">{d.profile.radiusSubtitle}</p>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <span className="font-bold text-2xl text-[#D59B2B]">{formData.intervention_radius} km</span>
+                                    </div>
                                 </div>
-                            )}
-                        </div>
+                                <div className="px-2">
+                                    <input
+                                        type="range"
+                                        min="10"
+                                        max="200"
+                                        step="10"
+                                        value={formData.intervention_radius}
+                                        onChange={(e) => setFormData(prev => ({ ...prev, intervention_radius: parseInt(e.target.value) }))}
+                                        className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-[#D59B2B]"
+                                    />
+                                    <div className="flex justify-between text-xs text-slate-400 mt-1">
+                                        <span>10 km</span>
+                                        <span>200 km</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="h-[400px] w-full rounded-xl border border-slate-200 overflow-hidden relative z-0">
+                                {formData.ville || (formData.adresse_indep && formData.ville_inter) ? (
+                                    <EditMap
+                                        address={formData.adresse_indep ? formData.adresse_inter : formData.adresse}
+                                        city={formData.adresse_indep ? formData.ville_inter : formData.ville}
+                                        initialLat={formData.lat}
+                                        initialLng={formData.lng}
+                                        radius={formData.intervention_radius}
+                                        onLocationChange={(lat, lng) => setFormData(prev => ({ ...prev, lat, lng }))}
+                                    />
+                                ) : (
+                                    <div className="h-full flex items-center justify-center bg-slate-100 text-slate-400">
+                                        {d.profile.enterCityForMap}
+                                    </div>
+                                )}
+                            </div>
                         </>
                     )}
                 </CardContent>
             </Card>
-
-            {/* DYNAMIC FIELDS based on expertType */}
 
             {/* COMMON: BATIMENTS */}
             <Card>
@@ -540,7 +528,6 @@ export default function ProfileForm() {
                         </CardContent>
                     </Card>
 
-
                     <Card>
                         <CardContent className="pt-6 space-y-4">
                             <h3 className="font-semibold text-lg text-[#1F2D3D] mb-4">{t.signup.certificationsHeading}</h3>
@@ -559,65 +546,39 @@ export default function ProfileForm() {
                         </CardContent>
                     </Card>
                 </>
-            )
-            }
+            )}
 
             {/* BUREAU ETUDE SPECIFIC */}
-            {
-                (expertType === 'bureau_etude' || expertType === 'bureau_detude' || expertType === "Bureau d'étude") && (
-                    <Card>
-                        <CardContent className="pt-6 space-y-4">
-                            <h3 className="font-semibold text-lg text-[#1F2D3D] mb-4">{t.signup.interventionsHeading}</h3>
-                            <div className="grid gap-3">
-                                {INTERVENTION_ETUDE_LIST.map(item => (
-                                    <div key={item.id} className="flex items-center space-x-2">
-                                        <Checkbox
-                                            id={`etude-${item.id}`}
-                                            checked={interventionsEtude.includes(item.id)}
-                                            onCheckedChange={() => toggleSelection(interventionsEtude, setInterventionsEtude, item.id)}
-                                        />
-                                        <label htmlFor={`etude-${item.id}`} className="text-sm font-medium leading-none cursor-pointer">{translateTerm(item.id, locale)}</label>
-                                    </div>
-                                ))}
-                            </div>
-                        </CardContent>
-                    </Card>
-                )
-            }
+            {(expertType === 'bureau_etude' || expertType === 'bureau_detude' || expertType === "Bureau d'étude") && (
+                <Card>
+                    <CardContent className="pt-6 space-y-4">
+                        <h3 className="font-semibold text-lg text-[#1F2D3D] mb-4">{t.signup.interventionsHeading}</h3>
+                        <div className="grid gap-3">
+                            {INTERVENTION_ETUDE_LIST.map(item => (
+                                <div key={item.id} className="flex items-center space-x-2">
+                                    <Checkbox
+                                        id={`etude-${item.id}`}
+                                        checked={interventionsEtude.includes(item.id)}
+                                        onCheckedChange={() => toggleSelection(interventionsEtude, setInterventionsEtude, item.id)}
+                                    />
+                                    <label htmlFor={`etude-${item.id}`} className="text-sm font-medium leading-none cursor-pointer">{translateTerm(item.id, locale)}</label>
+                                </div>
+                            ))}
+                        </div>
+                    </CardContent>
+                </Card>
+            )}
 
-            {/* DIAGNOSTIQUEUR SPECIFIC */}
-            {
-                (expertType === 'diagnostiqueur' || expertType === 'Diagnostiqueur' || expertType === 'diagnostics_dpe') && (
-                    <Card>
-                        <CardContent className="pt-6 space-y-4">
-                            <h3 className="font-semibold text-lg text-[#1F2D3D] mb-4">Diagnostics Réalisés</h3>
-                            <div className="grid grid-cols-2 gap-3">
-                                {INTERVENTION_DIAG_LIST.map(item => (
-                                    <div key={item.id} className="flex items-center space-x-2">
-                                        <Checkbox
-                                            id={`diag-${item.id}`}
-                                            checked={interventionsDiag.includes(item.id)}
-                                            onCheckedChange={() => toggleSelection(interventionsDiag, setInterventionsDiag, item.id)}
-                                        />
-                                        <label htmlFor={`diag-${item.id}`} className="text-sm font-medium leading-none cursor-pointer">{item.label}</label>
-                                    </div>
-                                ))}
-                            </div>
-                        </CardContent>
-                    </Card>
-                )
-            }
-
-            {/* FACTURATION REDIRECT */}
+            {/* BILLING REDIRECT */}
             <Card className="bg-slate-50 border-slate-200">
                 <CardContent className="pt-6 flex flex-col md:flex-row items-center justify-between gap-4">
                     <div>
-                        <h3 className="font-semibold text-lg text-[#1F2D3D]">Facturation & Abonnement</h3>
-                        <p className="text-sm text-slate-500">Gérez vos factures, moyens de paiement et abonnements.</p>
+                        <h3 className="font-semibold text-lg text-[#1F2D3D]">{d.profile.billingCardTitle}</h3>
+                        <p className="text-sm text-slate-500">{d.profile.billingCardSubtitle}</p>
                     </div>
                     <Link href="/dashboard/factures" className="w-full md:w-auto">
                         <Button variant="outline" className="w-full text-slate-700 border-slate-300 hover:bg-slate-100 whitespace-nowrap">
-                            Accéder à la facturation
+                            {d.profile.goToBillingBtn}
                         </Button>
                     </Link>
                 </CardContent>
@@ -626,9 +587,9 @@ export default function ProfileForm() {
             <div className="flex justify-end pt-6">
                 <Button onClick={handleSave} disabled={isSaving} className="bg-[#D59B2B] hover:bg-[#b88622] text-white size-lg text-lg px-8">
                     {isSaving && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                    Enregistrer les modifications
+                    {d.profile.saveChanges}
                 </Button>
             </div>
-        </div >
+        </div>
     );
 }

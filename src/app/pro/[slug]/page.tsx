@@ -8,6 +8,7 @@ import {
     Building2, Wrench, GraduationCap, Mail
 } from "lucide-react";
 import { ContactWizard } from "@/components/features/contact/contact-wizard";
+import { ExpertArticles } from "@/components/features/expert/expert-articles";
 import { PhoneCallButton } from "@/components/features/expert/phone-call-button";
 import { BrandLogo } from "@/components/ui/brand-logo";
 import { VerifiedExpertBadge } from "@/components/ui/verified-expert-badge";
@@ -28,6 +29,19 @@ async function getExpertBySlug(slug: string) {
                 marques: true,
                 certifications: true,
                 photos: true,
+                articles: {
+                    where: { status: 'PUBLISHED' },
+                    orderBy: { createdAt: 'desc' },
+                    take: 50,
+                    select: {
+                        slug: true,
+                        title: true,
+                        introduction: true,
+                        mainImage: true,
+                        publishedAt: true,
+                        createdAt: true
+                    }
+                },
                 user: {
                     select: { email: true }
                 }
@@ -397,6 +411,13 @@ export default async function PublicProfilePage({ params }: { params: Promise<{ 
                                 </div>
                             )}
                         </section>
+
+                        {/* EXPERT'S OWN SEO ARTICLES PUBLISHED FROM PRO DASHBOARD */}
+                        <ExpertArticles
+                            articles={expert.articles}
+                            expertSlug={expert.slug}
+                            expertName={expert.nom_entreprise}
+                        />
                     </div>
 
                     {/* RIGHT COLUMN: CONTACT & MAP */}

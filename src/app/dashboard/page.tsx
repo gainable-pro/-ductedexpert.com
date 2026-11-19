@@ -5,6 +5,10 @@ import Link from "next/link";
 import { cookies } from "next/headers";
 import { prisma } from "@/lib/prisma";
 import jwt from "jsonwebtoken";
+import AdminPendingList from "@/components/dashboard/admin-pending-list";
+import { getServerLocale } from "@/lib/server-locale";
+import { getDashboardDictionary } from "@/lib/dashboard-i18n";
+import { withLocalePath } from "@/lib/i18n";
 
 const JWT_SECRET = process.env.JWT_SECRET || "default_super_secret_for_dev_only";
 
@@ -19,31 +23,31 @@ async function getUserSlug() {
             select: { slug: true }
         });
         return expert?.slug;
-    } catch (e) {
+    } catch {
         return null;
     }
 }
 
-import AdminPendingList from "@/components/dashboard/admin-pending-list";
-
 export default async function DashboardPage() {
     const slug = await getUserSlug();
+    const locale = await getServerLocale();
+    const d = getDashboardDictionary(locale);
 
     return (
         <div className="space-y-6">
-            {/* ADMIN ONLY: PENDING VALIDATIONS */}
+            {/* ADMIN ONLY: PENDING VALIDATIONS (Same validation & control process as Gainable.fr) */}
             <AdminPendingList />
 
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h2 className="text-2xl font-bold text-[#1F2D3D]">Mon Profil Public</h2>
-                    <p className="text-slate-500">Gérez les informations affichées sur votre page dédiée.</p>
+                    <h2 className="text-2xl font-bold text-[#1F2D3D]">{d.profile.pageTitle}</h2>
+                    <p className="text-slate-500">{d.profile.pageSubtitle}</p>
                 </div>
                 {slug && (
-                    <Link href={`/pro/${slug}`} target="_blank">
+                    <Link href={withLocalePath(`/pro/${slug}`, locale)} target="_blank">
                         <Button variant="outline" className="gap-2 text-[#D59B2B] border-[#D59B2B] hover:bg-[#D59B2B]/10">
                             <ExternalLink className="w-4 h-4" />
-                            Voir ma fiche en ligne
+                            {d.profile.viewOnlineBtn}
                         </Button>
                     </Link>
                 )}

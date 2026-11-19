@@ -85,7 +85,7 @@ export async function POST(req: Request) {
                     metaTitle: generateExpertMetaTitle({ nomEntreprise, ville, codePostal }),
                     metaDesc: generateExpertMetaDescription({ nomEntreprise, ville, codePostal, description }),
                     slug: finalSlug,
-                    status: 'active',
+                    status: 'pending_validation', // Same validation & control process as gainable.fr
                 },
             });
 

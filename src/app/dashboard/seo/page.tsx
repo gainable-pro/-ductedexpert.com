@@ -11,6 +11,8 @@ import {
   ChevronRight, BarChart3, Info, RefreshCw, Check, AlertTriangle, HelpCircle,
   Eye, TrendingUp, TrendingDown, BookOpen, Key
 } from "lucide-react";
+import { useLanguage } from "@/components/layout/language-provider";
+import { getDashboardDictionary } from "@/lib/dashboard-i18n";
 
 interface Recommendation {
   id: string;
@@ -22,8 +24,10 @@ interface Recommendation {
 }
 
 export default function ArtisanSeoPage() {
+  const { locale, t } = useLanguage();
+  const d = getDashboardDictionary(locale);
   const [siteWeb, setSiteWeb] = useState("");
-  const [targetCity, setTargetCity] = useState("Paris");
+  const [targetCity, setTargetCity] = useState("London");
   const [isSaving, setIsSaving] = useState(false);
   const [profileLoaded, setProfileLoaded] = useState(false);
   
@@ -405,21 +409,60 @@ add_header Content-Security-Policy "default-src 'self' https: data: 'unsafe-inli
     gainableDailyData, artisanDailyData, competitorDailyData
   } = getChartPoints();
 
-  // Localized keywords tailored to the artisan's targeted geographic zone (city) with local competitor monitoring
+  // Localized keywords tailored to the artisan's targeted geographic zone (city) and language
+  const kwTemplates: Record<string, string[]> = {
+    en: [
+      `ducted air conditioning ${targetCity}`,
+      `hvac installer ${targetCity}`,
+      `heat pump installation ${targetCity}`,
+      `air conditioning service ${targetCity}`,
+      `vrv vrf system ${targetCity}`
+    ],
+    de: [
+      `kanal-klimaanlage ${targetCity}`,
+      `klimaanlage fachbetrieb ${targetCity}`,
+      `wärmepumpe installation ${targetCity}`,
+      `klimatechnik wartung ${targetCity}`,
+      `vrv vrf klimasystem ${targetCity}`
+    ],
+    fi: [
+      `kanavailmastointi ${targetCity}`,
+      `ilmalämpöpumppu asennus ${targetCity}`,
+      `lvi-urakoitsija ${targetCity}`,
+      `ilmastointihuolto ${targetCity}`,
+      `ilma-vesilämpöpumppu ${targetCity}`
+    ],
+    es: [
+      `aire acondicionado por conductos ${targetCity}`,
+      `instalador climatización ${targetCity}`,
+      `aerotermia y bomba de calor ${targetCity}`,
+      `mantenimiento aire acondicionado ${targetCity}`,
+      `sistema vrv vrf ${targetCity}`
+    ],
+    it: [
+      `climatizzazione canalizzata ${targetCity}`,
+      `installatore aria condizionata ${targetCity}`,
+      `pompa di calore ${targetCity}`,
+      `assistenza climatizzatori ${targetCity}`,
+      `impianto vrv vrf ${targetCity}`
+    ]
+  };
+  const kwList = kwTemplates[locale] || kwTemplates.en;
+
   const localKeywords = [
-    { text: `climatisation gainable ${targetCity}`, volume: 320, position: 8.4, gainablePos: 1.2, competitorPos: 4.5, status: "top-10", difficulty: "Moyenne" },
-    { text: `installateur climatisation ${targetCity}`, volume: 280, position: 12.1, gainablePos: 2.4, competitorPos: 7.8, status: "top-20", difficulty: "Faible" },
-    { text: `prix clim réversible ${targetCity}`, volume: 190, position: 6.2, gainablePos: 1.8, competitorPos: 3.1, status: "top-10", difficulty: "Faible" },
-    { text: `dépannage clim ${targetCity}`, volume: 140, position: 18.5, gainablePos: 3.2, competitorPos: 9.6, status: "top-20", difficulty: "Moyenne" },
-    { text: `pompe à chaleur ${targetCity}`, volume: 450, position: 32.4, gainablePos: 5.6, competitorPos: 14.2, status: "top-50", difficulty: "Elevée" }
+    { text: kwList[0], volume: 320, position: 8.4, gainablePos: 1.2, competitorPos: 4.5, status: "top-10", difficulty: "Medium" },
+    { text: kwList[1], volume: 280, position: 12.1, gainablePos: 2.4, competitorPos: 7.8, status: "top-20", difficulty: "Low" },
+    { text: kwList[2], volume: 190, position: 6.2, gainablePos: 1.8, competitorPos: 3.1, status: "top-10", difficulty: "Low" },
+    { text: kwList[3], volume: 140, position: 18.5, gainablePos: 3.2, competitorPos: 9.6, status: "top-20", difficulty: "Medium" },
+    { text: kwList[4], volume: 450, position: 32.4, gainablePos: 5.6, competitorPos: 14.2, status: "top-50", difficulty: "High" }
   ];
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-[#1F2D3D]">Visibilité SEO & Comparateur de Performance</h2>
-          <p className="text-slate-500 text-sm">Comparez votre site internet par rapport aux performances de Gainable.fr et des leaders nationaux.</p>
+          <h2 className="text-2xl font-bold text-[#1F2D3D]">{d.seoPage.title}</h2>
+          <p className="text-slate-500 text-sm">{d.seoPage.subtitle}</p>
         </div>
       </div>
 
@@ -428,19 +471,19 @@ add_header Content-Security-Policy "default-src 'self' https: data: 'unsafe-inli
         <CardHeader>
           <CardTitle className="text-base font-semibold flex items-center gap-2">
             <Globe className="w-5 h-5 text-[#D59B2B]" />
-            Mon Site Internet
+            {d.seoPage.websiteUrlLabel}
           </CardTitle>
           <CardDescription>
-            Renseignez l'URL de votre propre site web pour l'intégrer au comparateur de performance de la plateforme.
+            {d.seoPage.subtitle}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSaveAndAnalyze} className="flex flex-col md:flex-row gap-4 items-end">
             <div className="flex-1 space-y-1">
-              <label className="text-xs font-bold text-slate-700">Adresse de mon site web (URL)</label>
+              <label className="text-xs font-bold text-slate-700">{d.seoPage.websiteUrlLabel}</label>
               <input
                 type="text"
-                placeholder="Ex: www.entreprise-climatisation.fr"
+                placeholder="www.your-hvac-company.com"
                 value={siteWeb}
                 onChange={(e) => setSiteWeb(e.target.value)}
                 className="w-full text-sm rounded border border-slate-200 bg-slate-50 p-2.5 focus:ring-1 focus:ring-[#D59B2B] focus:outline-none"
@@ -455,12 +498,12 @@ add_header Content-Security-Policy "default-src 'self' https: data: 'unsafe-inli
               {isAuditing ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  Analyse en cours...
+                  {d.seoPage.analyzingBtn}
                 </>
               ) : (
                 <>
                   <RefreshCw className="w-4 h-4" />
-                  Enregistrer & Analyser mon Site
+                  {d.seoPage.analyzeBtn}
                 </>
               )}
             </Button>
@@ -518,14 +561,14 @@ add_header Content-Security-Policy "default-src 'self' https: data: 'unsafe-inli
                       <TableCell className="text-sm text-indigo-600 font-semibold">12%</TableCell>
                     </TableRow>
 
-                    {/* Artisan's profile page on Gainable.fr */}
+                    {/* Artisan's profile page on DuctedExpert.com */}
                     <TableRow className="bg-[#D59B2B]/10 font-bold border-b border-[#D59B2B]/20 animate-fade-in">
                       <TableCell className="text-sm font-semibold text-[#D59B2B]">
                         <div className="flex items-center flex-wrap gap-2">
-                          <span className="truncate max-w-[240px]" title={`gainable.fr/pro/${expertSlug}`}>
-                            gainable.fr/pro/{expertSlug}
+                          <span className="truncate max-w-[240px]" title={`ductedexpert.com/pro/${expertSlug}`}>
+                            ductedexpert.com/pro/{expertSlug}
                           </span>
-                          <Badge className="bg-[#D59B2B] text-white text-[9px] px-1.5 py-0.5 select-none shrink-0 rounded-md">Ma Page Gainable</Badge>
+                          <Badge className="bg-[#D59B2B] text-white text-[9px] px-1.5 py-0.5 select-none shrink-0 rounded-md">DuctedExpert Pro</Badge>
                         </div>
                       </TableCell>
                       <TableCell className="text-sm text-slate-600">~ {2 + publishedArticlesCount} pages</TableCell>
@@ -538,7 +581,7 @@ add_header Content-Security-Policy "default-src 'self' https: data: 'unsafe-inli
                     
                     {/* Platform */}
                     <TableRow className="bg-[#D59B2B]/5 font-semibold">
-                      <TableCell className="text-sm font-semibold text-slate-700">gainable.fr</TableCell>
+                      <TableCell className="text-sm font-semibold text-slate-700">ductedexpert.com</TableCell>
                       <TableCell className="text-sm text-slate-700 font-semibold">58 921 pages</TableCell>
                       <TableCell className="text-emerald-600 text-sm font-bold">94%</TableCell>
                       <TableCell className="text-amber-500 text-sm font-medium">★ 4.9</TableCell>

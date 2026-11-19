@@ -1,10 +1,11 @@
 import { prisma } from "@/lib/prisma";
 import { cookies } from "next/headers";
 import jwt from "jsonwebtoken";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
-import { fr } from "date-fns/locale";
+import { getServerLocale } from "@/lib/server-locale";
+import { getDashboardDictionary } from "@/lib/dashboard-i18n";
 
 const JWT_SECRET = process.env.JWT_SECRET || "default_super_secret_for_dev_only";
 
@@ -19,7 +20,7 @@ async function getExpertId() {
             select: { id: true }
         });
         return expert?.id;
-    } catch (e) {
+    } catch {
         return null;
     }
 }
@@ -28,9 +29,11 @@ export const dynamic = "force-dynamic";
 
 export default async function LeadsPage() {
     const expertId = await getExpertId();
+    const locale = await getServerLocale();
+    const d = getDashboardDictionary(locale);
 
     if (!expertId) {
-        return <div className="p-10 text-center">Veuillez vous connecter.</div>;
+        return <div className="p-10 text-center">{d.leads.pleaseLogin}</div>;
     }
 
     const assignments = await prisma.leadAssignment.findMany({
@@ -44,14 +47,14 @@ export default async function LeadsPage() {
     return (
         <div className="space-y-6">
             <div>
-                <h2 className="text-2xl font-bold text-[#1F2D3D]">Mes Demandes (Leads)</h2>
-                <p className="text-slate-500">Retrouvez ici toutes les demandes reçues via Gainable.fr</p>
+                <h2 className="text-2xl font-bold text-[#1F2D3D]">{d.leads.title}</h2>
+                <p className="text-slate-500">{d.leads.subtitle}</p>
             </div>
 
             {assignments.length === 0 ? (
                 <Card>
                     <CardContent className="py-10 text-center text-slate-500">
-                        Aucune demande reçue pour le moment.
+                        {d.leads.noLeads}
                     </CardContent>
                 </Card>
             ) : (
@@ -73,13 +76,13 @@ export default async function LeadsPage() {
                                             <span className="font-semibold text-[#1F2D3D]">{lead.prenom} {lead.nom}</span>
                                         </div>
                                         <div className="text-sm text-slate-400">
-                                            Reçu le {format(new Date(sentAt), "d MMMM yyyy à HH:mm", { locale: fr })}
+                                            {d.leads.receivedOn} {format(new Date(sentAt), "dd MMM yyyy HH:mm")}
                                         </div>
                                     </div>
                                 </CardHeader>
                                 <CardContent className="pt-4 grid md:grid-cols-3 gap-6">
                                     <div className="space-y-1">
-                                        <p className="text-xs font-bold uppercase text-slate-400">Contact</p>
+                                        <p className="text-xs font-bold uppercase text-slate-400">{d.leads.contactHeading}</p>
                                         <div className="text-sm">
                                             <p>{lead.telephone}</p>
                                             <p className="text-[#D59B2B]">{lead.email}</p>
@@ -88,7 +91,7 @@ export default async function LeadsPage() {
                                     </div>
 
                                     <div className="space-y-1 md:col-span-2">
-                                        <p className="text-xs font-bold uppercase text-slate-400">Projet</p>
+                                        <p className="text-xs font-bold uppercase text-slate-400">{d.leads.projectHeading}</p>
                                         <div className="text-sm space-y-2">
                                             <div className="flex gap-4">
                                                 {projet && <Badge variant="outline">{projet}</Badge>}
@@ -96,14 +99,13 @@ export default async function LeadsPage() {
                                             </div>
                                             {message && (
                                                 <div className="bg-slate-50 p-3 rounded text-slate-600 italic border">
-                                                    "{message}"
+                                                    &ldquo;{message}&rdquo;
                                                 </div>
                                             )}
 
-                                            {/* Files */}
                                             {files && files.length > 0 && (
                                                 <div className="mt-2 space-y-1">
-                                                    <p className="text-xs font-bold uppercase text-slate-400">Pièces jointes</p>
+                                                    <p className="text-xs font-bold uppercase text-slate-400">{d.leads.attachmentsHeading}</p>
                                                     <div className="flex flex-wrap gap-2">
                                                         {files.map((file: any, index: number) => (
                                                             <a
