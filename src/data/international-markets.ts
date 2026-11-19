@@ -423,8 +423,15 @@ export const INTERNATIONAL_MARKETS: MarketCountry[] = [
             { slug: "riyadh", name: "Riyadh", region: "Ar Riyad", population: 7676654, summerHighC: 45, winterLowC: 10, priceLow: 18000, priceHigh: 45000, buildingTypeTip: { ar: "فلل وقصور الرياض بتصاميم جبس بورد ديكورية تخفي دكت التكييف الكونسيلد مع فتحات جريلات خطية فائقة الأناقة." } },
             { slug: "jeddah", name: "Jeddah", region: "Makkah", population: 4697000, summerHighC: 39, winterLowC: 19, priceLow: 17000, priceHigh: 42000, buildingTypeTip: { ar: "رطوبة ساحلية عالية تتطلب تكييف كونسيلد بقدرة سحب رطوبة استثنائية وعزل نحاس وجريلات ضد التكثيف." } },
             { slug: "dammam", name: "Dammam", region: "Eastern Province", population: 1253000, summerHighC: 44, winterLowC: 11, priceLow: 16500, priceHigh: 40000, buildingTypeTip: { ar: "المنطقة الشرقية: كومبريسورات استوائية T3 معتمدة تتحمل العمل الشاق ودرجات حرارة تتجاوز 50 درجة مئوية." } },
+            { slug: "khobar", name: "Al Khobar", region: "Eastern Province", population: 658000, summerHighC: 44, winterLowC: 12, priceLow: 17000, priceHigh: 42000, buildingTypeTip: { ar: "مجمعات سكنية وأبراج راقية على الخليج العربي تعتمد التكييف المخفي الصامت." } },
             { slug: "mecca", name: "Mecca", region: "Makkah", population: 2042000, summerHighC: 43, winterLowC: 20, priceLow: 17000, priceHigh: 42000, buildingTypeTip: { ar: "مشاريع سكنية وفندقية تعتمد على تكييف كونسيلد دكت فائق الهدوء وموفر للطاقة." } },
             { slug: "medina", name: "Medina", region: "Al Madinah", population: 1411000, summerHighC: 42, winterLowC: 12, priceLow: 16000, priceHigh: 38000, buildingTypeTip: { ar: "فلل ومجمعات سكنية مزودة بأنظمة تحكم ذكية في كل غرفة لخفض استهلاك الكهرباء." } },
+            { slug: "tabuk", name: "Tabuk", region: "Tabuk", population: 657000, summerHighC: 38, winterLowC: 4, priceLow: 15500, priceHigh: 37000, buildingTypeTip: { ar: "منطقة شمالية تشهد برودة شتوية وحرارة صيفية، وتناسبها أنظمة التكييف الحار والبارد الموفرة." } },
+            { slug: "buraidah", name: "Buraidah", region: "Al Qassim", population: 671000, summerHighC: 44, winterLowC: 7, priceLow: 15500, priceHigh: 36000, buildingTypeTip: { ar: "فلل منطقة القصيم مع عزل حراري فائق ومجاري هواء دكت معزولة بالصوف الزجاجي." } },
+            { slug: "abha", name: "Abha", region: "Asir", population: 420000, summerHighC: 30, winterLowC: 6, priceLow: 15000, priceHigh: 35000, buildingTypeTip: { ar: "طبيعة جبلية تتطلب كفاءة تسخين وتبريد متوازنة مع تدفق هواء هادئ." } },
+            { slug: "taif", name: "Taif", region: "Makkah", population: 688000, summerHighC: 35, winterLowC: 8, priceLow: 15500, priceHigh: 36000, buildingTypeTip: { ar: "فلل واستراحات الطائف مع تحكم حراري رقمي في الغرف." } },
+            { slug: "jubail", name: "Jubail", region: "Eastern Province", population: 492000, summerHighC: 43, winterLowC: 10, priceLow: 16500, priceHigh: 39000, buildingTypeTip: { ar: "مدينة صناعية ساحلية تتطلب أجهزة معالجة هواء مقاومة للتآكل والأملاح." } },
+            { slug: "yanbu", name: "Yanbu", region: "Al Madinah", population: 331000, summerHighC: 41, winterLowC: 14, priceLow: 16000, priceHigh: 38000, buildingTypeTip: { ar: "مشاريع الهيئة الملكية بينبع السكنية بمواصفات عالية لكفاءة استهلاك الكهرباء." } },
         ]
     },
     {
@@ -461,6 +468,47 @@ export const INTERNATIONAL_MARKETS: MarketCountry[] = [
             { slug: "dubai", name: "Dubai", region: "Dubai", population: 3549900, summerHighC: 42, winterLowC: 15, priceLow: 20000, priceHigh: 55000, buildingTypeTip: { ar: "فلل نخلة جميرا ودبي هيلز والبراري: تكييف كونسيلد عالي الفخامة مدمج مع الديكور المعماري وأنظمة سمارت هوم." } },
             { slug: "abu-dhabi", name: "Abu Dhabi", region: "Abu Dhabi", population: 1540000, summerHighC: 42, winterLowC: 14, priceLow: 19000, priceHigh: 50000, buildingTypeTip: { ar: "فلل جزيرة السعديات وياس بمواصفات استدامة ومعايير لؤلؤة الصارمة لكفاءة التبريد." } },
             { slug: "sharjah", name: "Sharjah", region: "Sharjah", population: 1786000, summerHighC: 41, winterLowC: 13, priceLow: 16000, priceHigh: 38000, buildingTypeTip: { ar: "مشاريع سكنية عائلية مع عزل هوائي مزدوج يمنع تسرب البرودة ويقلل الضوضاء." } },
+            { slug: "al-ain", name: "Al Ain", region: "Abu Dhabi", population: 766000, summerHighC: 44, winterLowC: 12, priceLow: 17500, priceHigh: 42000, buildingTypeTip: { ar: "طبيعة صحراوية تتطلب تدفق هواء قوي وفلاتر مضادة للغبار." } },
+            { slug: "ajman", name: "Ajman", region: "Ajman", population: 504000, summerHighC: 41, winterLowC: 14, priceLow: 15500, priceHigh: 36000, buildingTypeTip: { ar: "فلل ومجمعات سكنية حديثة بتكلفة تركيب اقتصادية وعائد ترشيد عالي." } },
+            { slug: "ras-al-khaimah", name: "Ras Al Khaimah", region: "RAK", population: 400000, summerHighC: 41, winterLowC: 13, priceLow: 16000, priceHigh: 38000, buildingTypeTip: { ar: "مشاريع فلل الجولف والواجهات البحرية بنظام تكييف مركزي متكامل." } },
+        ]
+    },
+    {
+        slug: "qatar",
+        code: "QA",
+        name: {
+            en: "Qatar",
+            de: "Katar",
+            es: "Catar",
+            it: "Qatar",
+            fi: "Qatar",
+            ar: "دولة قطر",
+        },
+        defaultLocale: "ar",
+        currency: { code: "QAR", symbol: "ر.ق" },
+        primaryTerm: {
+            en: "Concealed Ducted Air Conditioning & District Cooling Compatibility",
+            de: "Verdeckte Kanal-Klimaanlagen in Katar",
+            es: "Climatización por conductos en Catar",
+            it: "Climatizzatori canalizzati in Qatar",
+            fi: "Kanavoidut ilmastointilaitteet Qatarissa",
+            ar: "تكييف كونسيلد مخفي دكت للفلل والقصور في قطر",
+        },
+        grantName: {
+            en: "Tarsheed Kahramaa National Energy Efficiency Program",
+            de: "Tarsheed Kahramaa Energieprogramm",
+            es: "Programa Nacional de Eficiencia Energética Tarsheed",
+            it: "Programma Tarsheed Kahramaa",
+            fi: "Tarsheed Kahramaa -energiatehokkuus",
+            ar: "البرنامج الوطني للترشيد وكفاءة الطاقة (ترشيد / كهرماء قطر)",
+        },
+        grantAmount: "وفر حتى 35% من استهلاك الكهرباء",
+        cities: [
+            { slug: "doha", name: "Doha", region: "Ad Dawhah", population: 2382000, summerHighC: 43, winterLowC: 14, priceLow: 19000, priceHigh: 48000, buildingTypeTip: { ar: "فلل الدوحة واللؤلؤة بمواصفات تكييف كونسيلد استثنائية مع شبكات دكت صامتة وفتحات جريلات عصرية." } },
+            { slug: "lusail", name: "Lusail", region: "Al Daayen", population: 200000, summerHighC: 43, winterLowC: 14, priceLow: 21000, priceHigh: 52000, buildingTypeTip: { ar: "مدينة لوسيل المستقبلية الذكية: تكامل التكييف المخفي مع أنظمة المباني الخضراء GSAS." } },
+            { slug: "al-rayyan", name: "Al Rayyan", region: "Al Rayyan", population: 605000, summerHighC: 43, winterLowC: 13, priceLow: 18500, priceHigh: 46000, buildingTypeTip: { ar: "فلل سكنية عائلية فسيحة مع توزيع هواء متوازن عبر مجاري هواء معزولة بالكامل." } },
+            { slug: "al-wakrah", name: "Al Wakrah", region: "Al Wakrah", population: 300000, summerHighC: 42, winterLowC: 14, priceLow: 18000, priceHigh: 44000, buildingTypeTip: { ar: "مشاريع سكنية ساحلية جنوب الدوحة مع أجهزة تكييف كونسيلد مقاومة للرطوبة." } },
+            { slug: "al-khor", name: "Al Khor", region: "Al Khor", population: 202000, summerHighC: 42, winterLowC: 13, priceLow: 17500, priceHigh: 42000, buildingTypeTip: { ar: "فلل ساحلية شمالية بتصاميم تجمع بين العزل القوي وخفض الضوضاء داخل غرف النوم." } },
         ]
     },
     {
@@ -498,6 +546,9 @@ export const INTERNATIONAL_MARKETS: MarketCountry[] = [
             { slug: "rabat", name: "Rabat", region: "Rabat-Salé-Kénitra", population: 1932000, summerHighC: 28, winterLowC: 8, priceLow: 35000, priceHigh: 80000, buildingTypeTip: { ar: "فيلات السويسي وحي الرياض مع أنظمة إنفرتر صامتة وموفرة للطاقة." } },
             { slug: "marrakech", name: "Marrakech", region: "Marrakech-Safi", population: 1027000, summerHighC: 39, winterLowC: 6, priceLow: 38000, priceHigh: 90000, buildingTypeTip: { ar: "حرارة صيفية شديدة في مراكش تتطلب تكييف دكت قوي مع تحكم مستقل في كل غرفة." } },
             { slug: "tangier", name: "Tanger", region: "Tanger-Tétouan-Al Hoceïma", population: 1065000, summerHighC: 29, winterLowC: 9, priceLow: 33000, priceHigh: 78000, buildingTypeTip: { ar: "مشاريع سكنية ساحلية حديثة تطل على المضيق مع حلول تكييف وتدفئة مدمجة." } },
+            { slug: "fes", name: "Fès", region: "Fès-Meknès", population: 1150000, summerHighC: 36, winterLowC: 5, priceLow: 32000, priceHigh: 75000, buildingTypeTip: { ar: "صيف حار وشتاء بارد في فاس: أنظمة تكييف gainable إنفرتر للتدفئة والتبريد معاً." } },
+            { slug: "agadir", name: "Agadir", region: "Souss-Massa", population: 924000, summerHighC: 30, winterLowC: 10, priceLow: 32000, priceHigh: 76000, buildingTypeTip: { ar: "مناخ ساحلي سوسي معتدل يناسبه تكييف الهواء المخفي عالي التوفير في استهلاك الكهرباء." } },
+            { slug: "meknes", name: "Meknès", region: "Fès-Meknès", population: 632000, summerHighC: 36, winterLowC: 5, priceLow: 31000, priceHigh: 72000, buildingTypeTip: { ar: "فيلات ومنازل عائلية مع عزل هوائي وتوزيع دكت عبر فتحات ديكورية راقية." } },
         ]
     }
 ];
