@@ -14,10 +14,7 @@ interface PageProps {
 }
 
 export async function generateStaticParams() {
-    const allRegions = Array.from(new Set(ALL_CITIES.map(c => slugify(c.region))));
-    return allRegions.map(regionSlug => ({
-        regionSlug
-    }));
+    return [];
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {

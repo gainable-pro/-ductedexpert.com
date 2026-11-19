@@ -1,26 +1,10 @@
 import { NextResponse } from 'next/server';
 import { prisma, withDbRetry } from '@/lib/prisma';
 
-export const revalidate = 3600; // Revalidate every hour
+export const dynamic = 'force-dynamic';
 
-const BASE_URL = 'https://www.gainable.fr';
+const BASE_URL = 'https://www.ductedexpert.com';
 const SYSTEM_EXPERT_SLUGS = ['gainable-fr', 'redaction-gainable', 'bureau-etude-gainable'];
-
-export async function generateStaticParams() {
-    try {
-        const articleCount = await withDbRetry(() =>
-            prisma.article.count({
-                where: { status: 'PUBLISHED' }
-            })
-        );
-        const articleSitemapsCount = Math.max(1, Math.ceil(articleCount / 5000));
-        const totalSitemaps = 1 + articleSitemapsCount;
-        return Array.from({ length: totalSitemaps }, (_, i) => ({ id: String(i) }));
-    } catch (e) {
-        console.error("Error in generateStaticParams for sitemap:", e);
-        return Array.from({ length: 13 }, (_, i) => ({ id: String(i) }));
-    }
-}
 
 export async function GET(
     request: Request,

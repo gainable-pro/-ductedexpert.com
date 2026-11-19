@@ -1,10 +1,10 @@
 import { NextResponse } from 'next/server';
 import { prisma, withDbRetry } from '@/lib/prisma';
 
-export const revalidate = 3600; // Cache sitemap index for 1 hour
+export const dynamic = 'force-dynamic';
 
 export async function GET() {
-    const baseUrl = 'https://www.gainable.fr';
+    const baseUrl = 'https://www.ductedexpert.com';
     const now = new Date().toISOString();
 
     let totalSitemapsCount = 13;

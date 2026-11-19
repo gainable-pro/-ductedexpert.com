@@ -7,13 +7,13 @@ import { slugify } from '@/lib/utils';
 import { prisma, withDbRetry } from '@/lib/prisma';
 import { ItemListJsonLd } from '@/components/seo/JsonLd';
 
-export const revalidate = 3600;
+export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-    title: "Annuaire Installateurs Climatisation Gainable RGE | Gainable.fr",
-    description: "Trouvez un installateur de climatisation réversible & pompe à chaleur gainable qualifié RGE près de chez vous. Annuaire vérifié par région.",
+    title: "Ducted Air Conditioning & Heat Pump Installers Directory | DuctedExpert.com",
+    description: "Find a certified ducted air conditioning, reversible heat pump, and VRV/VRF installer near you.",
     alternates: {
-        canonical: 'https://www.gainable.fr/trouver-installateur',
+        canonical: 'https://www.ductedexpert.com/trouver-installateur',
     },
 };
 
@@ -30,19 +30,24 @@ export default async function DirectoryPage() {
         regionsMap.get(region)!.push(city);
     });
 
-    const activeExperts = await withDbRetry(() =>
-        prisma.expert.findMany({
-            where: { status: 'active' },
-            take: 12,
-            select: {
-                slug: true,
-                nom_entreprise: true,
-                ville: true,
-                expert_type: true,
-                is_labeled: true
-            }
-        })
-    );
+    let activeExperts: any[] = [];
+    try {
+        activeExperts = await withDbRetry(() =>
+            prisma.expert.findMany({
+                where: { status: 'active' },
+                take: 12,
+                select: {
+                    slug: true,
+                    nom_entreprise: true,
+                    ville: true,
+                    expert_type: true,
+                    is_labeled: true
+                }
+            })
+        );
+    } catch {
+        activeExperts = [];
+    }
 
     return (
         <div className="bg-slate-50 min-h-screen pb-20">
