@@ -104,7 +104,7 @@ export function Header() {
     const isLandingPage = stripped === '/demo' || stripped.startsWith('/demo');
     const { locale, t } = useLanguage();
 
-    const logoSrc = "/gainable-fr-logo-officiel-climatisation.png";
+    const logoSrc = "/ductedexpert-logo.png";
 
     if (isLandingPage) {
         return (
