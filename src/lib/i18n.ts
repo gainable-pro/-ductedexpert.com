@@ -1,14 +1,15 @@
-export type Locale = 'en' | 'de' | 'fi' | 'es' | 'it';
+export type Locale = 'en' | 'de' | 'fi' | 'es' | 'it' | 'ar';
 
-export const SUPPORTED_LOCALES: Locale[] = ['en', 'de', 'fi', 'es', 'it'];
+export const SUPPORTED_LOCALES: Locale[] = ['en', 'de', 'fi', 'es', 'it', 'ar'];
 export const DEFAULT_LOCALE: Locale = 'en';
 
-export const LOCALE_LABELS: Record<Locale, { name: string; flag: string; htmlLang: string; ogLocale: string }> = {
-    en: { name: 'English', flag: '🇬🇧', htmlLang: 'en', ogLocale: 'en_US' },
-    de: { name: 'Deutsch', flag: '🇩🇪', htmlLang: 'de', ogLocale: 'de_DE' },
-    fi: { name: 'Suomi', flag: '🇫🇮', htmlLang: 'fi', ogLocale: 'fi_FI' },
-    es: { name: 'Español', flag: '🇪🇸', htmlLang: 'es', ogLocale: 'es_ES' },
-    it: { name: 'Italiano', flag: '🇮🇹', htmlLang: 'it', ogLocale: 'it_IT' },
+export const LOCALE_LABELS: Record<Locale, { name: string; flag: string; htmlLang: string; ogLocale: string; dir?: 'ltr' | 'rtl' }> = {
+    en: { name: 'English', flag: '🇬🇧', htmlLang: 'en', ogLocale: 'en_US', dir: 'ltr' },
+    de: { name: 'Deutsch', flag: '🇩🇪', htmlLang: 'de', ogLocale: 'de_DE', dir: 'ltr' },
+    fi: { name: 'Suomi', flag: '🇫🇮', htmlLang: 'fi', ogLocale: 'fi_FI', dir: 'ltr' },
+    es: { name: 'Español', flag: '🇪🇸', htmlLang: 'es', ogLocale: 'es_ES', dir: 'ltr' },
+    it: { name: 'Italiano', flag: '🇮🇹', htmlLang: 'it', ogLocale: 'it_IT', dir: 'ltr' },
+    ar: { name: 'العربية', flag: '🇸🇦', htmlLang: 'ar', ogLocale: 'ar_AR', dir: 'rtl' },
 };
 
 export function isValidLocale(val?: string | null): val is Locale {
@@ -42,6 +43,10 @@ export function getAlternatesUrls(pathname: string) {
         'fi': `${base}/fi${suffix}`,
         'es': `${base}/es${suffix}`,
         'it': `${base}/it${suffix}`,
+        'ar': `${base}/ar${suffix}`,
+        'ar-SA': `${base}/ar${suffix}`,
+        'ar-AE': `${base}/ar${suffix}`,
+        'ar-QA': `${base}/ar${suffix}`,
         'x-default': `${base}/en${suffix}`,
     };
 }
@@ -57,84 +62,96 @@ export const DB_VALUE_TRANSLATIONS: Record<string, Record<Locale, string>> = {
         de: "Kanal-Klimaanlage",
         fi: "Kanavailmastointi",
         es: "Aire Acondicionado por Conductos",
-        it: "Climatizzazione Canalizzata"
+        it: "Climatizzazione Canalizzata",
+        ar: "تكييف مركزي مخفي (دكت)"
     },
     "PAC Air-Air": {
         en: "Air-to-Air Heat Pump",
         de: "Luft-Luft-Wärmepumpe",
         fi: "Ilma-ilmalämpöpumppu",
         es: "Bomba de Calor Aire-Aire",
-        it: "Pompa di Calore Aria-Aria"
+        it: "Pompa di Calore Aria-Aria",
+        ar: "مضخة حرارية هواء-هواء"
     },
     "PAC Air-Eau": {
         en: "Air-to-Water Heat Pump",
         de: "Luft-Wasser-Wärmepumpe",
         fi: "Ilma-vesilämpöpumppu",
         es: "Bomba de Calor Aire-Agua (Aerotermia)",
-        it: "Pompa di Calore Aria-Acqua"
+        it: "Pompa di Calore Aria-Acqua",
+        ar: "مضخة حرارية هواء-ماء"
     },
     "VRV": {
         en: "VRV System",
         de: "VRV-System",
         fi: "VRV-järjestelmä",
         es: "Sistema VRV",
-        it: "Sistema VRV"
+        it: "Sistema VRV",
+        ar: "نظام VRV"
     },
     "DRV": {
         en: "VRF System",
         de: "VRF-System",
         fi: "VRF-järjestelmä",
         es: "Sistema VRF",
-        it: "Sistema VRF"
+        it: "Sistema VRF",
+        ar: "نظام VRF / تدفق متغير"
     },
     "CTA": {
         en: "Air Handling Unit (AHU)",
         de: "Raumlufttechnische Anlage (RLT)",
         fi: "Ilmanvaihtokone (IV-kone)",
         es: "Unidad de Tratamiento de Aire (UTA)",
-        it: "Unità di Trattamento Aria (UTA)"
+        it: "Unità di Trattamento Aria (UTA)",
+        ar: "وحدة مناولة الهواء (AHU)"
     },
     "Console": {
         en: "Floor Console Unit",
         de: "Truhengerät",
         fi: "Lattiamalli",
         es: "Consola de Suelo",
-        it: "Console a Pavimento"
+        it: "Console a Pavimento",
+        ar: "وحدة كونسول أرضية"
     },
     "Cassette": {
         en: "Ceiling Cassette",
         de: "Deckenkassette",
         fi: "Kattokasetti",
         es: "Cassette de Techo",
-        it: "Cassetta a Soffitto"
+        it: "Cassetta a Soffitto",
+        ar: "كاسيت سقفي"
     },
     "PAC CO2": {
         en: "CO2 Heat Pump",
         de: "CO2-Wärmepumpe",
         fi: "CO2-lämpöpumppu",
         es: "Bomba de Calor CO2",
-        it: "Pompa di Calore CO2"
+        it: "Pompa di Calore CO2",
+        ar: "مضخة حرارية CO2"
     },
     "PAC Eau Glacée": {
         en: "Chilled Water System (Chiller)",
         de: "Kaltwassersatz (Chiller)",
         fi: "Vedenjäähdytin (Chiller)",
         es: "Enfriadora de Agua (Chiller)",
-        it: "Gruppo Frigorifero (Chiller)"
+        it: "Gruppo Frigorifero (Chiller)",
+        ar: "نظام مياه مثلجة (تشيلر)"
     },
     "Split": {
         en: "Single Split System",
         de: "Single-Split-Klimaanlage",
         fi: "Split-ilmalämpöpumppu",
         es: "Split Mural",
-        it: "Climatizzatore Split"
+        it: "Climatizzatore Split",
+        ar: "مكيف سبليت جداري"
     },
     "Multi-Split": {
         en: "Multi-Split System",
         de: "Multi-Split-Klimaanlage",
         fi: "Multi-Split-järjestelmä",
         es: "Sistema Multi-Split",
-        it: "Sistema Multi-Split"
+        it: "Sistema Multi-Split",
+        ar: "نظام متعدد السبليت"
     },
 
     // Building types (Batiments)
@@ -143,56 +160,64 @@ export const DB_VALUE_TRANSLATIONS: Record<string, Record<Locale, string>> = {
         de: "Einfamilienhaus / Villa",
         fi: "Omakotitalo / Huvila",
         es: "Vivienda Unifamiliar / Chalet",
-        it: "Casa Indipendente / Villa"
+        it: "Casa Indipendente / Villa",
+        ar: "فيلا سكنية / منزل مستقل"
     },
     "Appartement": {
         en: "Apartment / Flat",
         de: "Wohnung / Apartment",
         fi: "Kerrostaloasunto",
         es: "Apartamento / Piso",
-        it: "Appartamento"
+        it: "Appartamento",
+        ar: "شقة سكنية"
     },
     "Immeuble Collectif": {
         en: "Residential Building",
         de: "Mehrfamilienhaus / Wohngebäude",
         fi: "Asuinkerrostalo",
         es: "Edificio Residencial",
-        it: "Condominio / Edificio Residenziale"
+        it: "Condominio / Edificio Residenziale",
+        ar: "مبنى سكني / عمارة"
     },
     "Locaux Professionnels": {
         en: "Commercial Offices",
         de: "Büro- & Gewerberäume",
         fi: "Toimitilat & Toimistot",
         es: "Oficinas y Locales Profesionales",
-        it: "Uffici e Locali Professionali"
+        it: "Uffici e Locali Professionali",
+        ar: "مكاتب ومقرات إدارية"
     },
     "Commerces": {
         en: "Retail & Shops",
         de: "Einzelhandel & Geschäfte",
         fi: "Liiketilat & Myymälät",
         es: "Comercios y Tiendas",
-        it: "Negozi e Attività Commerciali"
+        it: "Negozi e Attività Commerciali",
+        ar: "محلات ومراكز تجارية"
     },
     "Industrie": {
         en: "Industrial Facilities",
         de: "Industrieanlagen",
         fi: "Teollisuustilat",
         es: "Naves Industriales",
-        it: "Impianti Industriali"
+        it: "Impianti Industriali",
+        ar: "منشآت ومستودعات صناعية"
     },
     "Hôtellerie / Restauration": {
         en: "Hotels & Restaurants",
         de: "Hotellerie & Gastronomie",
         fi: "Hotellit & Ravintolat",
         es: "Hotelería y Restauración",
-        it: "Hotel e Ristorazione"
+        it: "Hotel e Ristorazione",
+        ar: "فنادق ومطاعم"
     },
     "Santé (Hôpitaux, Cliniques)": {
         en: "Healthcare (Hospitals, Clinics)",
         de: "Gesundheitswesen (Kliniken, Praxen)",
         fi: "Terveydenhuolto (Sairaalat, Klinikat)",
         es: "Salud (Hospitales, Clínicas)",
-        it: "Sanità (Ospedali, Cliniche)"
+        it: "Sanità (Ospedali, Cliniche)",
+        ar: "مستشفيات ومراكز صحية"
     },
 
     // Interventions Climatisation
@@ -201,56 +226,64 @@ export const DB_VALUE_TRANSLATIONS: Record<string, Record<Locale, string>> = {
         de: "Installation & Inbetriebnahme",
         fi: "Asennus & Käyttöönotto",
         es: "Instalación y Puesta en Marcha",
-        it: "Installazione e Messa in Servizio"
+        it: "Installazione e Messa in Servizio",
+        ar: "توريد وتركيب وتشغيل"
     },
     "Dimensionnement": {
         en: "System Sizing & Load Calculation",
         de: "Dimensionierung & Heiz-/Kühllast",
         fi: "Mitoitus & Teholaskenta",
         es: "Dimensionamiento y Cálculo de Cargas",
-        it: "Dimensionamento Impianto"
+        it: "Dimensionamento Impianto",
+        ar: "حساب الأحمال وتصميم المنظومة"
     },
     "Dépannage": {
         en: "Repair & Troubleshooting",
         de: "Reparatur & Störungsdienst",
         fi: "Huolto & Vikakorjaus",
         es: "Reparación y Averías",
-        it: "Riparazione e Assistenza"
+        it: "Riparazione e Assistenza",
+        ar: "إصلاح وصيانة طارئة"
     },
     "Nettoyage & Entretien": {
         en: "Maintenance & Servicing",
         de: "Wartung & Reinigung",
         fi: "Puhdistus & Vuosihuolto",
         es: "Mantenimiento y Limpieza",
-        it: "Manutenzione e Sanificazione"
+        it: "Manutenzione e Sanificazione",
+        ar: "تنظيف وصيانة دورية"
     },
     "Étude de faisabilité": {
         en: "Feasibility Study",
         de: "Machbarkeitsstudie",
         fi: "Toteutettavuustutkimus",
         es: "Estudio de Viabilidad",
-        it: "Studio di Fattibilità"
+        it: "Studio di Fattibilità",
+        ar: "دراسة الجدوى الفنية"
     },
     "Audit Énergétique": {
         en: "Energy Audit",
         de: "Energieaudit",
         fi: "Energiakatselmus",
         es: "Auditoría Energética",
-        it: "Diagnosi Energetica"
+        it: "Diagnosi Energetica",
+        ar: "تدقيق فني وكفاءة الطاقة"
     },
     "Audits Énergétiques": {
         en: "Energy Audits",
         de: "Energieaudits",
         fi: "Energiakatselmukset",
         es: "Auditorías Energéticas",
-        it: "Diagnosi Energetiche"
+        it: "Diagnosi Energetiche",
+        ar: "تدقيق كفاءة الطاقة"
     },
     "Autre": {
         en: "Other",
         de: "Sonstiges",
         fi: "Muu",
         es: "Otro",
-        it: "Altro"
+        it: "Altro",
+        ar: "أخرى"
     },
 
     // Interventions Bureau d'étude
@@ -259,42 +292,48 @@ export const DB_VALUE_TRANSLATIONS: Record<string, Record<Locale, string>> = {
         de: "Thermische Berechnungen & Studien",
         fi: "Lämpötekniset Laskelmat",
         es: "Estudios Térmicos",
-        it: "Studi Termotecnici"
+        it: "Studi Termotecnici",
+        ar: "دراسات واستشارات هندسية حرارية"
     },
     "RE2020": {
         en: "Energy Efficiency & Building Compliance",
         de: "GEG / Energieeffizienz-Nachweis",
         fi: "Energiatehokkuusmääräykset",
         es: "Certificación y Normativa Energética",
-        it: "Conformità Energetica Edilizia"
+        it: "Conformità Energetica Edilizia",
+        ar: "كفاءة الطاقة والامتثال للمواصفات"
     },
     "Dimensionnement CVC": {
         en: "HVAC Duct & Load Sizing",
         de: "HLK- & Kanalnetz-Dimensionierung",
         fi: "LVI- ja Kanavistomitoitus",
         es: "Dimensionamiento HVAC y Conductos",
-        it: "Dimensionamento HVAC e Canali"
+        it: "Dimensionamento HVAC e Canali",
+        ar: "حساب الأحمال وتصميم شبكات الدكت"
     },
     "Calculs & Plans": {
         en: "CAD / BIM Drawings & Calculations",
         de: "CAD / BIM-Planung & Berechnungen",
         fi: "CAD / BIM-suunnitelmat & Laskelmat",
         es: "Cálculos y Planos CAD / BIM",
-        it: "Calcoli e Progetti CAD / BIM"
+        it: "Calcoli e Progetti CAD / BIM",
+        ar: "مخططات تنفيذية CAD / BIM وحسابات"
     },
     "Simulations Techniques": {
         en: "Dynamic Thermal Simulations",
         de: "Thermische Gebäudesimulation",
         fi: "Dynaamiset Lämpösimuloinnit",
         es: "Simulaciones Térmicas Dinámicas",
-        it: "Simulazioni Termiche Dinamiche"
+        it: "Simulazioni Termiche Dinamiche",
+        ar: "محاكاة حرارية ديناميكية"
     },
     "Maîtrise d'Œuvre (MOE)": {
         en: "Project Management & Supervision",
         de: "Bauleitung & Fachbauüberwachung",
         fi: "Projektinjohto & Valvonta",
         es: "Dirección de Obra y Proyectos",
-        it: "Direzione Lavori e Progettazione"
+        it: "Direzione Lavori e Progettazione",
+        ar: "إشراف هندسي وإدارة مشاريع"
     },
 
     // Certifications
@@ -303,14 +342,16 @@ export const DB_VALUE_TRANSLATIONS: Record<string, Record<Locale, string>> = {
         de: "Zertifizierter Wärmepumpen-Fachbetrieb",
         fi: "Sertifioitu Lämpöpumppuasentaja",
         es: "Instalador Certificado de Bombas de Calor",
-        it: "Installatore Certificato Pompe di Calore"
+        it: "Installatore Certificato Pompe di Calore",
+        ar: "مقاول معتمد للمضخات الحرارية"
     },
     "Capacité Fluides Frigorigènes": {
         en: "F-Gas / Refrigerant Handling Certified",
         de: "Kälteschein / F-Gase-Zertifizierung",
         fi: "Kylmäainelupa (Tukes / F-kaasu)",
         es: "Certificado de Gases Fluorados",
-        it: "Patentino Frigoristi (F-Gas)"
+        it: "Patentino Frigoristi (F-Gas)",
+        ar: "شهادة التعامل مع وسائط التبريد (F-Gas)"
     },
 
     // Expert types
@@ -319,29 +360,46 @@ export const DB_VALUE_TRANSLATIONS: Record<string, Record<Locale, string>> = {
         de: "Fachbetrieb für Klima- & Wärmepumpentechnik",
         fi: "LVI- ja Ilmastointiurakoitsija",
         es: "Empresa Instaladora de Climatización",
-        it: "Azienda Installatrice Climatizzazione & HVAC"
+        it: "Azienda Installatrice Climatizzazione & HVAC",
+        ar: "مقاول تكييف مركزي ومضخات حرارية"
     },
     "bureau_detude": {
         en: "HVAC & Thermal Engineering Office",
         de: "Ingenieurbüro für TGA & Klimatechnik",
         fi: "LVI- ja Lämpösuunnittelutoimisto",
         es: "Ingeniería Térmica y Oficina Técnica HVAC",
-        it: "Studio Termotecnico e Progettazione HVAC"
+        it: "Studio Termotecnico e Progettazione HVAC",
+        ar: "مكتب دراسات واستشارات هندسية حرارية"
     },
 
     // Countries
-    "France": { en: "France", de: "Frankreich", fi: "Ranska", es: "Francia", it: "Francia" },
-    "Suisse": { en: "Switzerland", de: "Schweiz", fi: "Sveitsi", es: "Suiza", it: "Svizzera" },
-    "Belgique": { en: "Belgium", de: "Belgien", fi: "Belgia", es: "Bélgica", it: "Belgio" },
-    "Maroc": { en: "Morocco", de: "Marokko", fi: "Marokko", es: "Marruecos", it: "Marocco" },
-    "United Kingdom": { en: "United Kingdom", de: "Vereinigtes Königreich", fi: "Yhdistynyt kuningaskunta", es: "Reino Unido", it: "Regno Unito" },
-    "United States": { en: "United States", de: "USA", fi: "Yhdysvallat", es: "Estados Unidos", it: "Stati Uniti" },
-    "Germany": { en: "Germany", de: "Deutschland", fi: "Saksa", es: "Alemania", it: "Germania" },
-    "Finland": { en: "Finland", de: "Finnland", fi: "Suomi", es: "Finlandia", it: "Finlandia" },
-    "Spain": { en: "Spain", de: "Spanien", fi: "Espanja", es: "España", it: "Spagna" },
-    "Italy": { en: "Italy", de: "Italien", fi: "Italia", es: "Italia", it: "Italia" },
-    "Canada": { en: "Canada", de: "Kanada", fi: "Kanada", es: "Canadá", it: "Canada" },
-    "Australia": { en: "Australia", de: "Australien", fi: "Australia", es: "Australia", it: "Australia" },
+    "France": { en: "France", de: "Frankreich", fi: "Ranska", es: "Francia", it: "Francia",
+        ar: "فرنسا" },
+    "Suisse": { en: "Switzerland", de: "Schweiz", fi: "Sveitsi", es: "Suiza", it: "Svizzera",
+        ar: "سويسرا" },
+    "Belgique": { en: "Belgium", de: "Belgien", fi: "Belgia", es: "Bélgica", it: "Belgio",
+        ar: "بلجيكا" },
+    "Maroc": { en: "Morocco", de: "Marokko", fi: "Marokko", es: "Marruecos", it: "Marocco",
+        ar: "المغرب" },
+    "United Kingdom": { en: "United Kingdom", de: "Vereinigtes Königreich", fi: "Yhdistynyt kuningaskunta", es: "Reino Unido", it: "Regno Unito",
+        ar: "المملكة المتحدة" },
+    "United States": { en: "United States", de: "USA", fi: "Yhdysvallat", es: "Estados Unidos", it: "Stati Uniti",
+        ar: "الولايات المتحدة" },
+    "Germany": { en: "Germany", de: "Deutschland", fi: "Saksa", es: "Alemania", it: "Germania",
+        ar: "ألمانيا" },
+    "Finland": { en: "Finland", de: "Finnland", fi: "Suomi", es: "Finlandia", it: "Finlandia",
+        ar: "فنلندا" },
+    "Spain": { en: "Spain", de: "Spanien", fi: "Espanja", es: "España", it: "Spagna",
+        ar: "إسبانيا" },
+    "Italy": { en: "Italy", de: "Italien", fi: "Italia", es: "Italia", it: "Italia",
+        ar: "إيطاليا" },
+    "Canada": { en: "Canada", de: "Kanada", fi: "Kanada", es: "Canadá", it: "Canada",
+        ar: "كندا" },
+    "Saudi Arabia": { en: "Saudi Arabia", de: "Saudi-Arabien", fi: "Saudi-Arabia", es: "Arabia Saudita", it: "Arabia Saudita", ar: "المملكة العربية السعودية" },
+    "United Arab Emirates": { en: "United Arab Emirates", de: "Vereinigte Arabische Emirate", fi: "Arabiemiirikunnat", es: "Emiratos Árabes Unidos", it: "Emirati Arabi Uniti", ar: "الإمارات العربية المتحدة" },
+    "Qatar": { en: "Qatar", de: "Katar", fi: "Qatar", es: "Catar", it: "Qatar", ar: "قطر" },
+    "Australia": { en: "Australia", de: "Australien", fi: "Australia", es: "Australia", it: "Australia",
+        ar: "أستراليا" },
 };
 
 export function translateTerm(term: string, locale: Locale): string {
@@ -363,6 +421,10 @@ export const INTERNATIONAL_COUNTRIES = [
     { value: "Canada", flag: "🇨🇦" },
     { value: "Australia", flag: "🇦🇺" },
     { value: "Maroc", flag: "🇲🇦" },
+    { value: "Saudi Arabia", flag: "🇸🇦" },
+    { value: "United Arab Emirates", flag: "🇦🇪" },
+    { value: "Qatar", flag: "🇶🇦" },
+
 ];
 
 export const DICTIONARY: Record<Locale, {
@@ -1671,6 +1733,238 @@ export const DICTIONARY: Record<Locale, {
             contact: "Contatti",
             proSpace: "Area Pro",
             rightsReserved: "Tutti i diritti riservati."
+        }
+    },
+    ar: {
+        siteName: "DuctedExpert.com",
+        nav: {
+            experts: "خبراؤنا المعتمدون",
+            climatisation: "مقاول تكييف",
+            bureauEtude: "مكتب دراسات هندسية",
+            verifiedExpert: "خبير معتمد",
+            whyUs: "لماذا DuctedExpert",
+            contact: "اتصل بنا",
+            proSpace: "مساحة المحترفين",
+            myAccount: "حسابي",
+            dashboard: "لوحة التحكم",
+            publicProfile: "صفحتي العامة",
+            logout: "تسجيل الخروج",
+            loginTitle: "تسجيل الدخول للمحترفين",
+            email: "البريد الإلكتروني",
+            password: "كلمة المرور",
+            rememberMe: "تذكرني",
+            signIn: "تسجيل الدخول",
+            signingIn: "جاري تسجيل الدخول...",
+            forgotPassword: "نسيت كلمة المرور؟",
+            noAccount: "ليس لديك حساب بعد؟",
+            createAccount: "تسجيل شركة جديدة",
+        },
+        home: {
+            metaTitle: "DuctedExpert.com | المنصة العالمية الأولى لخبراء التكييف المركزي والمكاتب الهندسية",
+            metaDesc: "ابحث عن نخبة مقاولي التكييف المركزي المخفي والمكاتب الهندسية المعتمدة في المملكة العربية السعودية، الإمارات، قطر، وحول العالم. 0% عمولة.",
+            filterLabel: "فلترة وتصفية الخبراء",
+            showFilters: "عرض الفلاتر المتقدمة",
+            hideFilters: "إخفاء الفلاتر المتقدمة",
+            expertTypeFilter: "نوع التخصص المهني",
+            hvacCompany: "شركة مقاولات تكييف (CVC)",
+            engineeringOffice: "مكتب دراسات واستشارات هندسية",
+            technologiesFilter: "الأنظمة والتقنيات",
+            buildingTypeFilter: "نوع المبنى أو المشروع",
+            countryFilter: "الدولة",
+            cityPlaceholder: "أدخل اسم المدينة (مثال: الرياض، دبي، الدوحة)...",
+            searchBtn: "بحث عن الخبراء",
+            nearbyExperts: "الخبراء المعتمدون المتاحون",
+            loadingExperts: "جاري تحميل قائمة الخبراء المعتمدين...",
+            viewProfile: "عرض الملف المهني الكامل",
+            freeQuote: "طلب عرض سعر مجاني",
+            selectedPros: "الخبراء المختارون",
+            freeNoCommitment: "طلب مجاني 100% وبدون أي التزام",
+            requestQuote: "إرسال طلب عرض السعر",
+            maxSelectionAlert: "يمكنك اختيار حتى 3 خبراء كحد أقصى للمقارنة.",
+            geoBadge: "تغطية محلية ودولية",
+            geoTitle: "خبراء معتمدون بالقرب من مشروعك",
+            geoText: "سواء كنت تبني فيلا سكنية فاخرة أو تنفذ برجاً تجارياً، شبكتنا تضم نخبة المقاولين والمهندسين المعتمدين لتنفيذ أنظمة التكييف المركزي المخفي وأنظمة VRF بأعلى معايير الجودة.",
+            geoCheck1: "حسابات دقيقة للأحمال وتصاميم هندسية معتمدة",
+            geoCheck2: "تنفيذ متقن لمجاري الهواء وعزل صوتي فائق الهدوء",
+            geoCheck3: "تواصل مباشر وبنسبة 0% عمولة",
+            seoMainTitle: "لماذا تختار شبكة DuctedExpert.com لمشروع التكييف المركزي؟",
+            seoBlock1Title: "1. تخصص دقيق في التكييف المركزي المخفي (الدكت)",
+            seoBlock1Text: "التكييف المخفي يتطلب دقة هندسية عالية في تصنيع الدكت وتوزيع مخارج الهواء. نربطك مباشرة مع أفضل الخبراء المتخصصين في هذا المجال لضمان راحة وهدوء تام.",
+            seoBlock2Title: "2. فحص وتدقيق التراخيص وسابقة الأعمال",
+            seoBlock2Text: "كل مقاول أو مكتب استشاري مسجل في شبكتنا يخضع لتدقيق التراخيص المهنية وسابقة المشاريع المنجزة لضمان أعلى معايير الأمان والجودة.",
+            seoBlock3Title: "3. دراسات أحمال حرارية وتوفير الطاقة",
+            seoBlock3Text: "احصل على دراسات هندسية تضمن اختيار السعة المثالية للتكييف دون زيادة في استهلاك الكهرباء، مع تطبيق أحدث معايير كفاءة الطاقة للمباني الحديثة.",
+            seoBlock4Title: "4. تواصل مباشر بدون أي عمولات خفية",
+            seoBlock4Text: "لا توجد أي رسوم أو عمولات وسيطة. تواصل مباشرة مع المهندسين والمقاولين، وقارن بين عروض الأسعار بكل شفافية وحرية.",
+            faqTitle: "الأسئلة الشائعة حول التكييف المركزي وشبكة الخبراء",
+            faq: [
+                {
+                    question: "ما هي مزايا نظام التكييف المركزي المخفي (Gainable / Concealed)؟",
+                    answer: "يتميز التكييف المخفي بجمالية فائقة حيث تُخفى الماكينات ومجاري الهواء داخل الأسقف المستعارة ولا يظهر سوى فتحات التوزيع (Grilles / Diffusers)، بالإضافة إلى التوزيع المتساوي لدرجة الحرارة والتشغيل الهادئ جداً."
+                },
+                {
+                    question: "كيف أختار بين التكييف المركزي بنظام VRF ومكيفات الدكت المنفصلة؟",
+                    answer: "نظام VRF / VRV مثالي للمباني الكبيرة والفلل المتعددة الغرف حيث يسمح بتوصيل عدة وحدات داخلية بوحدة خارجية واحدة مع توفير هائل في الطاقة وتحكم مستقل لكل غرفة، بينما التكييف المنفصل مناسب للمساحات المحدودة والميزانيات المتوسطة."
+                },
+                {
+                    question: "هل الخدمة مجانية لأصحاب المشاريع والمنازل؟",
+                    answer: "نعم! البحث وطلب عروض الأسعار والتواصل مع الشركات والمكاتب الهندسية مجاني 100% وبدون أي عمولات أو التزامات."
+                },
+                {
+                    question: "كيف يمكنني تسجيل شركتي كخبير معتمد في DuctedExpert.com؟",
+                    answer: "يمكنك الضغط على 'مساحة المحترفين' أو 'تسجيل شركة جديدة'، وملء بيانات مؤسستك والتراخيص الرسمية للبدء في استقبال طلبات المشاريع المباشرة."
+                }
+            ]
+        },
+        climatisationPage: {
+            metaTitle: "مقاول تكييف مركزي مخفي ومضخات حرارية معتمد | DuctedExpert.com",
+            metaDesc: "ابحث عن مقاول تكييف مركزي معتمد لتوريد وتركيب وصيانة أنظمة التكييف المخفي (الدكت) وأنظمة VRV/VRF في فيلتك أو مشروعك التجاري.",
+            heroTitle1: "مقاول تكييف مركزي",
+            heroTitle2: "ومضخات حرارية معتمد CVC",
+            heroSubtitleHighlight: "نخبة مقاولي التكييف المركزي المخفي المعتمدين.",
+            heroSubtitleRest: "تركيب متقن، صيانة دورية، وتحكم ذكي بالحرارة لكل غرفة بأعلى درجات الهدوء والراحة.",
+            findExpertBtn: "البحث عن مقاول في منطقتي",
+            becomeMemberBtn: "تسجيل شركتي كمقاول معتمد",
+            freeQuotesNote: "طلب عروض أسعار مجاني 100% وبدون أي التزام",
+            sectionWhyTitle: "لماذا تختار مقاول تكييف معتمد من شبكتنا؟",
+            sectionWhyText: "تركيب التكييف المخفي يتطلب خبرة خاصة في عزل الدكت، ضبط ضغط الهواء، والتشغيل الهادئ. خبراؤنا المعتمدون يضمنون لك أداءً مثالياً وضماناً شاملاً.",
+            benefits: [
+                {
+                    title: "توزيع هواء متوازن وعزل صوتي فائق",
+                    desc: "تصميم وتنفيذ شبكات مجاري هواء معزولة صوتياً وحرارياً لضمان أعلى مستويات الهدوء والراحة في كل غرفة."
+                },
+                {
+                    title: "أنظمة تدفق متغير VRV / VRF موفرة للطاقة",
+                    desc: "أحدث تقنيات الإنفرتر الذكية التي تخفض استهلاك الكهرباء بنسبة تصل إلى 40% مقارنة بالأنظمة التقليدية."
+                },
+                {
+                    title: "ضمانات رسمية وخدمة ما بعد البيع",
+                    desc: "عقود صيانة دورية وضمانات معتمدة من كبرى الشركات العالمية المصنعة لأجهزة التكييف."
+                }
+            ]
+        },
+        bureauPage: {
+            metaTitle: "مكاتب الاستشارات والدراسات الهندسية للتكييف وحساب الأحمال | DuctedExpert.com",
+            metaDesc: "ابحث عن مكتب استشارات هندسية معتمد لحساب الأحمال الحرارية، تصميم شبكات مجاري الهواء وتدقيق كفاءة الطاقة للمباني.",
+            heroTitle1: "المكاتب الهندسية",
+            heroTitle2: "والاستشارات الحرارية CVC",
+            heroLead: "تحسين الراحة الحرارية، تقليل استهلاك الطاقة، وضمان كفاءة أنظمة التكييف في المباني الجديدة والمشاريع المجددة.",
+            heroDesc: "حسابات دقيقة للأحمال الحرارية، تصميم شبكات مجاري الهواء (الدكت)، مخططات VRV/VRF، وتدقيق كفاءة الطاقة مع نخبة المكاتب المعتمدة.",
+            findOfficeBtn: "البحث عن مكتب استشاري",
+            joinOfficeBtn: "تسجيل مكتبي الهندسي",
+            roleTitle: "ما هو دور مكتب الاستشارات الهندسية الحرارية؟",
+            roleText: "يقوم المكتب الهندسي بدراسة الغلاف الحراري للمبنى، وحساب سعات أجهزة التكييف والتهوية بدقة، وتصميم مسارات الهواء ومقاسات الدكت لضمان أقصى درجات الهدوء وتوافق المنظومة مع الكود الهندسي.",
+            roleQuote: "\"الهدف: أقصى درجات الراحة الحرارية بأقل استهلاك كهربائي مع منظومة تكييف موثوقة تدوم لسنوات طويلة.\"",
+            studiesTitle: "ما هي الدراسات الهندسية التي يقدمها خبراؤنا؟",
+            studiesList: [
+                "حساب الأحمال الحرارية للتبريد والتدفئة للمباني",
+                "تصميم وحساب مقاسات شبكات مجاري الهواء (Duct Sizing)",
+                "تصميم أنظمة التدفق المتغير VRV / VRF والمضخات الحرارية",
+                "مخططات تنفيذية هندسية ثنائية وثلاثية الأبعاد (CAD / BIM)",
+                "دراسات كفاءة الطاقة والامتثال للمواصفات القياسية",
+                "الإشراف الميداني على التركيب واختبارات التشغيل (Commissioning)"
+            ]
+        },
+        signup: {
+            metaTitle: "تسجيل المحترفين - انضم إلى شبكة DuctedExpert.com | مقاولي التكييف والمكاتب الهندسية",
+            metaDesc: "انضم إلى شبكة DuctedExpert.com العالمية كمقاول تكييف مركزي أو مكتب استشارات هندسية واستقبل عملاء مباشرين بنسبة 0% عمولة.",
+            visionTitle: "رؤيتنا",
+            visionP1: "سوق التكييف والهندسة الحرارية تطور بسرعة. بين الحملات الإعلانية المكلفة ومنصات بيع العملاء التي تعيد بيع نفس الطلب لعشر شركات متنافسة، تستحق الشركات المتميزة نموذجاً عادلاً ومباشراً.",
+            visionP2: "في DuctedExpert.com، نوفر للمقاولين والمكاتب الهندسية منصة شفافة بـ 0% عمولة، مع قوة ظهور حقيقية على جوجل للوصول إلى عملاء مباشرين.",
+            visionBoxTitle: "نموذجنا الشفاف في نقاط:",
+            visionBullets: [
+                "0% عمولة على المبيعات وعقود المشاريع",
+                "تواصل مباشر بينك وبين العميل دون أي وسيط",
+                "صفحة متقدمة مهيأة للظهور في محركات البحث (SEO)",
+                "أدوات كتابة المقالات والتحليل بالذكاء الاصطناعي"
+            ],
+            promoBanner: "عرض التدشين: باقة التميز لأول 100 عضو مسجل",
+            chooseTitle1: "اختر الباقة المناسبة",
+            chooseTitleHighlight: "لنشاط شركتك",
+            chooseTitle2: "وابدأ الآن",
+            chooseSubtitle: "تسجيل فوري وشفاف بدون أي التزامات مخفية",
+            zeroCommissionBadge: "0% عمولة على عقودك",
+            recommendedBadge: "الأكثر طلباً",
+            freeLabel: "مجاناً",
+            first100Badge: "أول 100 عضو",
+            yearly: "سنوي",
+            monthly: "شهري",
+            perYearExclTax: "€ / سنوياً (غير شامل الضريبة)",
+            perMonthExclTax: "€ / شهرياً (غير شامل الضريبة)",
+            privilegeRate: "سعر خاص للتدشين",
+            selectOfferBtn: "اختيار هذه الباقة",
+            selectedBtn: "تم الاختيار ✓",
+            officeCardTitle: "مكتب استشارات هندسية",
+            officeCardSub: "لدراسات وتصاميم التكييف والأحمال الحرارية",
+            officeFeatures: [
+                "صفحة مهنية مخصصة لشركتك على جوجل",
+                "استقبال طلبات دراسات وأحمال حرارية مباشرة",
+                "نشر المشاريع وسابقة الأعمال الميدانية",
+                "شارة مكتب هندسي معتمد",
+                "0% عمولة على أتعاب الاستشارات"
+            ],
+            hvacCardTitle: "مقاول تكييف مركزي ومضخات حرارية",
+            hvacCardSub: "لشركات التركيب والصيانة المعتمدة",
+            hvacFeatures: [
+                "ظهور مباشر في دليل الخبراء وعلى الخريطة",
+                "استقبال طلبات عروض أسعار مباشرة من العملاء",
+                "شارة خبير معتمد لتعزيز ثقة العملاء",
+                "أدوات مقالات بالذكاء الاصطناعي وتدقيق SEO",
+                "0% عمولة على كافة مبيعاتك وعقودك"
+            ],
+            step1Title: "1. بيانات الحساب والمسؤول",
+            repNameLabel: "اسم المفوض / المسؤول *",
+            emailLabel: "البريد الإلكتروني للعمل *",
+            phoneLabel: "رقم الجوال *",
+            passwordLabel: "كلمة المرور *",
+            confirmPasswordLabel: "تأكيد كلمة المرور *",
+            step2Title: "2. بيانات الشركة أو المؤسسة",
+            countryLabel: "الدولة *",
+            companyIdLabel: "رقم السجل التجاري / الترخيص *",
+            companyIdPlaceholder: "رقم السجل التجاري أو الرخصة المهنية",
+            companyNameLabel: "اسم الشركة *",
+            taxNumberLabel: "الرقم الضريبي (إن وجد)",
+            addressLabel: "عنوان المقر الرئيسي *",
+            postalCodePlaceholder: "الرمز البريدي",
+            cityPlaceholder: "المدينة",
+            descriptionLabel: "نبذة عن الشركة وسابقة الأعمال *",
+            descriptionPlaceholder: "صف نشاطكم، سنوات الخبرة، وأبرز المشاريع المنفذة...",
+            step3Title: "3. الأنظمة والتخصصات المعتمدة",
+            buildingsHeading: "أنواع المباني والمشاريع المنفذة",
+            technologiesHeading: "أنظمة التكييف والتهوية المعتمدة",
+            interventionsHeading: "مجالات العمل والخدمات",
+            brandsHeading: "الماركات العالمية المعتمدة",
+            certificationsHeading: "التراخيص والشهادات المهنية",
+            summaryTitle: "ملخص الطلب",
+            selectedPlanLabel: "الباقة المختارة",
+            subtotalExclTax: "المبلغ قبل الضريبة:",
+            vatLabel: "ضريبة القيمة المضافة:",
+            totalInclTax: "الإجمالي شامل الضريبة:",
+            noHiddenRenewal: "تجديد سنوي اختياري وبدون أي التزامات خفية",
+            instantVisibility: "تفعيل فوري لصفحتك وظهور مباشر على محركات البحث",
+            techSupportIncluded: "دعم فني مخصص للمحترفين باللغات العربية والإنجليزية والفرنسية",
+            promoCodeLabel: "رمز الخصم الترويجي",
+            submitFreeBtn: "إتمام التسجيل المجاني",
+            submitPayBtn: "الانتقال للدفع الآمن عبر Stripe",
+            secureStripeNote: "دفع مشفر وآمن 100% عبر بوابة Stripe العالمية",
+            termsAcceptNote: "بالتسجيل، فإنك توافق على الشروط العامة للاستخدام وسياسة الخصوصية.",
+            requiredFieldsAlert: "يرجى استكمال كافة الحقول الإلزامية المطلوبة.",
+            passwordMismatchAlert: "كلمتا المرور غير متطابقتين.",
+            successTitle: "تم تسجيل حسابك بنجاح!",
+            successText: "أهلاً بك في شبكة DuctedExpert.com العالمية. تم تفعيل حسابك وإرسال تفاصيل الدخول إلى بريدك الإلكتروني.",
+            backHomeBtn: "العودة إلى الصفحة الرئيسية",
+        },
+        footer: {
+            legalNotice: "الإشعار القانوني",
+            privacyPolicy: "سياسة الخصوصية",
+            cookiesPolicy: "سياسة ملفات تعريف الارتباط",
+            termsOfUse: "شروط الاستخدام العامة",
+            termsOfSale: "الشروط العامة للبيع",
+            findInstaller: "دليل مقاولي التكييف",
+            whyDuctedExpert: "لماذا DuctedExpert.com",
+            contact: "اتصل بنا",
+            proSpace: "مساحة المحترفين",
+            rightsReserved: "جميع الحقوق محفوظة."
         }
     }
 };

@@ -39,8 +39,17 @@ export function LanguageProvider({
         setLocaleState(loc);
         if (typeof document !== "undefined") {
             document.cookie = `NEXT_LOCALE=${loc}; path=/; max-age=31536000; SameSite=Lax`;
+            document.documentElement.dir = loc === "ar" ? "rtl" : "ltr";
+            document.documentElement.lang = loc;
         }
     };
+
+    useEffect(() => {
+        if (typeof document !== "undefined") {
+            document.documentElement.dir = locale === "ar" ? "rtl" : "ltr";
+            document.documentElement.lang = locale;
+        }
+    }, [locale]);
 
     return (
         <LanguageContext.Provider value={{ locale, setLocale, t: DICTIONARY[locale] || DICTIONARY[DEFAULT_LOCALE] }}>

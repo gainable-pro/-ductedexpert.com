@@ -35,6 +35,11 @@ const BADGE_TEXT: Record<Locale, { line1: string; line2: string; line3: string }
         line2: "DuctedExpert",
         line3: "(profilo verificato e accreditato • DuctedExpert.com)",
     },
+    ar: {
+        line1: "خبير معتمد",
+        line2: "DuctedExpert",
+        line3: "(ملف مهني مدقق ومعتمد • DuctedExpert.com)",
+    },
 };
 
 export function VerifiedExpertBadge({ size = "md", className = "" }: VerifiedExpertBadgeProps) {

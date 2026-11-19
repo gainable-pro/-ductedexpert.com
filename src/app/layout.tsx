@@ -85,7 +85,7 @@ export default async function RootLayout({
   const locInfo = LOCALE_LABELS[locale];
 
   return (
-    <html lang={locInfo.htmlLang}>
+    <html lang={locInfo.htmlLang} dir={locInfo.dir || 'ltr'}>
       <head>
         <OrganizationJsonLd />
       </head>
