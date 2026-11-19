@@ -20,6 +20,18 @@ export function middleware(request: NextRequest) {
         return NextResponse.redirect(new URL(cleanPath + request.nextUrl.search, request.url), 301);
     }
 
+    // Default root orientation: typing ductedexpert.com directly redirects to English (/en)
+    if (pathname === '/' || pathname === '') {
+        const redirectUrl = new URL(`/en${request.nextUrl.search}`, request.url);
+        const response = NextResponse.redirect(redirectUrl, 307);
+        response.cookies.set('NEXT_LOCALE', 'en', {
+            path: '/',
+            maxAge: 60 * 60 * 24 * 365,
+            sameSite: 'lax',
+        });
+        return response;
+    }
+
     const segments = pathname.split('/').filter(Boolean);
     const firstSegment = segments[0]?.toLowerCase();
 
