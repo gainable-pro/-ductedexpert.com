@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma, withDbRetry } from '@/lib/prisma';
 import { SUPPORTED_LOCALES, LOCALIZED_ROUTES, RouteKey } from '@/lib/i18n';
+import { INTERNATIONAL_MARKETS } from '@/data/international-markets';
 
 export const dynamic = 'force-dynamic';
 
@@ -102,7 +103,17 @@ export async function GET(
                 `  <url><loc>${BASE_URL}/climatisation/${c.slug}</loc><lastmod>${nowStr}</lastmod><changefreq>weekly</changefreq><priority>0.90</priority></url>`
             );
 
-            const all = [...staticUrls, ...expertUrls, ...artisanArticleUrls, ...productUrls, ...regionUrls, ...cityUrls];
+            // 5. International HVAC Market Pages (UK, US, CA, DE, CH, ES, IT, FI, SA, AE, MA) across all locales
+            const marketUrls: string[] = [];
+            for (const country of INTERNATIONAL_MARKETS) {
+                for (const city of country.cities) {
+                    for (const loc of SUPPORTED_LOCALES) {
+                        marketUrls.push(`  <url><loc>${BASE_URL}/${loc}/hvac/${country.slug}/${city.slug}</loc><lastmod>${nowStr}</lastmod><changefreq>weekly</changefreq><priority>0.95</priority></url>`);
+                    }
+                }
+            }
+
+            const all = [...staticUrls, ...expertUrls, ...artisanArticleUrls, ...productUrls, ...regionUrls, ...cityUrls, ...marketUrls];
             xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${all.join('\n')}\n</urlset>`;
 
         } else if (id >= 1) {

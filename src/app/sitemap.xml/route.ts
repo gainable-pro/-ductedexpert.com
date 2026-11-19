@@ -1,0 +1,36 @@
+import { NextResponse } from 'next/server';
+import { prisma, withDbRetry } from '@/lib/prisma';
+
+export const dynamic = 'force-dynamic';
+
+export async function GET() {
+    const baseUrl = 'https://www.ductedexpert.com';
+    const now = new Date().toISOString();
+
+    let totalSitemapsCount = 13;
+    try {
+        const articleCount = await withDbRetry(() =>
+            prisma.article.count({
+                where: { status: 'PUBLISHED' }
+            })
+        );
+        const articleSitemaps = Math.max(1, Math.ceil(articleCount / 5000));
+        totalSitemapsCount = 1 + articleSitemaps;
+    } catch (e) {
+        console.error("Error fetching article count for sitemap.xml:", e);
+    }
+
+    const sitemaps = Array.from({ length: totalSitemapsCount }, (_, i) =>
+        `  <sitemap>\n    <loc>${baseUrl}/sitemap/${i}.xml</loc>\n    <lastmod>${now}</lastmod>\n  </sitemap>`
+    ).join('\n');
+
+    const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${sitemaps}\n</sitemapindex>`;
+
+    return new NextResponse(xml, {
+        status: 200,
+        headers: {
+            'Content-Type': 'application/xml; charset=utf-8',
+            'Cache-Control': 'public, max-age=3600, s-maxage=3600',
+        },
+    });
+}
