@@ -5,7 +5,7 @@ import themes from "@/lib/marketing-themes.json";
 import { Resend } from "resend";
 import { supabase } from "@/lib/supabase";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const resend = new Resend(process.env.RESEND_API_KEY || "re_123");
 
 const API_KEY = process.env.MARKETING_API_KEY || "gainable_marketing_secret_2024";
 
@@ -34,7 +34,7 @@ export async function GET(req: Request) {
         const theme = themes[Math.floor(Math.random() * themes.length)];
 
         // 2. OpenAI avec l'ADN des emails HTML
-        const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+        const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY || "sk_placeholder" });
         
         const systemPrompt = `
         Tu es l'Agent Marketing de Gainable.fr. 
