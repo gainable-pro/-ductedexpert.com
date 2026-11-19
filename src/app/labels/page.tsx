@@ -1,68 +1,277 @@
 import { Button } from "@/components/ui/button";
-import { 
-    Check, 
-    ShieldCheck, 
-    Award, 
-    AlertTriangle, 
-    Briefcase, 
-    User, 
-    FileText, 
-    Star, 
-    Shield, 
-    Sparkles, 
-    HelpCircle, 
-    CheckCircle2, 
-    XCircle, 
-    ArrowRight, 
-    Clock, 
-    PhoneCall, 
+import {
+    ShieldCheck,
+    CheckCircle2,
+    XCircle,
+    ArrowRight,
     Building2,
-    AlertOctagon,
-    HeartHandshake,
-    Flame,
-    Droplets,
-    PhoneOff,
-    Building,
-    CheckCircle,
-    UserCheck,
-    Lock,
-    Scale,
     Wrench,
-    BadgeAlert,
-    FileCheck2,
-    Home,
-    ThumbsUp
+    Award,
+    Lock,
 } from "lucide-react";
 import Link from "next/link";
-import Image from "next/image";
 import { VerifiedExpertBadge } from "@/components/ui/verified-expert-badge";
 import { Metadata } from 'next';
+import { getServerLocale } from "@/lib/server-locale";
+import { getAlternatesUrls, Locale, withLocalePath } from "@/lib/i18n";
 
-export const metadata: Metadata = {
-    title: "Label Expert Vérifié Gainable.fr : La Référence Qualité en Climatisation",
-    description: "Découvrez le label Expert Vérifié Gainable.fr : la protection officielle des particuliers contre les faux artisans, les fausses décennales et les abandons de SAV.",
-    openGraph: {
-        title: "Label Expert Vérifié Gainable.fr : La Référence Qualité en Climatisation",
-        description: "Découvrez le label Expert Vérifié Gainable.fr : la protection officielle des particuliers contre les faux artisans, les fausses décennales et les abandons de SAV.",
-        images: ['/gainable-fr-label-qualite-climatisation-rge.png'],
-        type: 'website',
+const LABELS_CONTENT: Record<Locale, {
+    metaTitle: string;
+    metaDesc: string;
+    topBadge: string;
+    heroTitle1: string;
+    heroTitle2: string;
+    heroDesc: string;
+    badges: { title: string; desc: string }[];
+    findExpertBtn: string;
+    applyLabelBtn: string;
+    sectionRiskTitle: string;
+    sectionRiskSub: string;
+    badPointsTitle: string;
+    badPoints: string[];
+    goodPointsTitle: string;
+    goodPoints: string[];
+    criteriaTitle: string;
+    criteriaSub: string;
+    criteria: { title: string; desc: string }[];
+    ctaTitle: string;
+    ctaSub: string;
+}> = {
+    en: {
+        metaTitle: "Verified Expert Label DuctedExpert.com: The Quality Standard in Ducted Air Conditioning & HVAC",
+        metaDesc: "Discover the DuctedExpert® Verified Expert label: official client protection and quality distinction for certified ducted air conditioning installers and HVAC engineering offices.",
+        topBadge: "Official Seal of Trust • Client Protection • Contractor Distinction",
+        heroTitle1: "Installing ducted air conditioning should never be",
+        heroTitle2: "a gamble with your property",
+        heroDesc: "A concealed ducted HVAC system is integrated into your ceilings and attics for the next 15 to 20 years. It represents a major investment between €8,000 and €25,000. The Verified Expert DuctedExpert® label identifies established, insured, and qualified contractors while protecting clients from poor workmanship.",
+        badges: [
+            { title: "Verified Liability Insurance", desc: "Professional HVAC & construction insurance checked" },
+            { title: "Established & Active Company", desc: "Active business registration & verified track record" },
+            { title: "100% Free Direct Connection", desc: "Direct contact with the contractor • 0% commission on your quote" },
+        ],
+        findExpertBtn: "Find a Verified Expert",
+        applyLabelBtn: "Apply for the Verified Expert Label",
+        sectionRiskTitle: "Why the Verified Expert Label Makes All the Difference",
+        sectionRiskSub: "Because a concealed ducted system requires precise airflow sizing, acoustic insulation, and certified refrigerant handling.",
+        badPointsTitle: "Risks with unverified contractors:",
+        badPoints: [
+            "Undersized or noisy ductwork embedded behind closed ceilings",
+            "Missing or expired professional liability insurance",
+            "Unannounced subcontracting and no after-sales service",
+            "Opaque quotes resold by lead brokers with hidden markups",
+        ],
+        goodPointsTitle: "Guarantees of a Verified Expert DuctedExpert®:",
+        goodPoints: [
+            "Audited company registration, insurance, and F-Gas / HVAC qualifications",
+            "Direct contact and transparent pricing with 0% platform commission",
+            "Proven expertise in concealed ducted systems, multizone dampers, and heat pumps",
+            "Long-term commitment to commissioning, maintenance, and after-sales support",
+        ],
+        criteriaTitle: "Our 4 Verification & Quality Pillars",
+        criteriaSub: "Every professional carrying the Verified Expert DuctedExpert® badge commits to strict technical and ethical standards.",
+        criteria: [
+            { title: "1. Legal & Corporate Solvency", desc: "Verification of official company registration and active business standing." },
+            { title: "2. HVAC Insurance & Certifications", desc: "Validation of professional liability coverage and refrigerant handling licenses." },
+            { title: "3. Technical Mastery", desc: "Proven track record in ducted air conditioning, heat pumps, VRV/VRF, or thermal engineering." },
+            { title: "4. Customer Satisfaction Charter", desc: "Transparent quotes, respect for deadlines, and responsive after-sales service." },
+        ],
+        ctaTitle: "Ready to work with a Verified HVAC Expert?",
+        ctaSub: "Browse our directory of certified professionals or register your company to earn the Verified Expert badge.",
     },
-    twitter: {
-        card: "summary_large_image",
-        title: "Label Expert Vérifié Gainable.fr : La Référence Qualité en Climatisation",
-        description: "Découvrez le label Expert Vérifié Gainable.fr : la protection officielle des particuliers contre les faux artisans, les fausses décennales et les abandons de SAV.",
+    de: {
+        metaTitle: "Geprüfter Experte Siegel DuctedExpert.com: Der Qualitätsstandard für Klimatechnik & Wärmepumpen",
+        metaDesc: "Entdecken Sie das Siegel Geprüfter Experte DuctedExpert®: Offizieller Kundenschutz und Qualitätsauszeichnung für Kälte-Klima-Fachbetriebe und TGA-Ingenieurbüros.",
+        topBadge: "Offizielles Vertrauenssiegel • Kundenschutz • Fachbetriebs-Auszeichnung",
+        heroTitle1: "Die Installation einer Kanal-Klimaanlage sollte niemals",
+        heroTitle2: "ein Glücksspiel für Ihre Immobilie sein",
+        heroDesc: "Eine Kanal-Klimaanlage wird für die nächsten 15 bis 20 Jahre unsichtbar in Ihre Zwischendecken integriert – eine Investition zwischen 8.000 € und 25.000 €. Das Siegel Geprüfter Experte DuctedExpert® zeichnet seriöse, qualifizierte Fachbetriebe aus und schützt Bauherren vor Planungs- und Montagefehlern.",
+        badges: [
+            { title: "Geprüfte Betriebshaftpflicht", desc: "Nachweis über gültigen Versicherungsschutz für Klimatechnik" },
+            { title: "Etabliertes Fachunternehmen", desc: "Aktiver Handelsregistereintrag & geprüfte Unternehmensdaten" },
+            { title: "100 % Kostenloser Direktkontakt", desc: "Direkter Kontakt zum Fachbetrieb • 0 % Provision auf Ihr Angebot" },
+        ],
+        findExpertBtn: "Geprüften Experten finden",
+        applyLabelBtn: "Siegel Geprüfter Experte beantragen",
+        sectionRiskTitle: "Warum das Siegel Geprüfter Experte den Unterschied macht",
+        sectionRiskSub: "Weil eine verdeckte Kanal-Klimaanlage exakte Heiz-/Kühllastberechnung, Schallschutz und zertifizierte Kältetechnik erfordert.",
+        badPointsTitle: "Risiken bei ungeprüften Anbietern:",
+        badPoints: [
+            "Falsch dimensionierte oder laute Luftkanäle hinter geschlossenen Decken",
+            "Fehlende F-Gase-Zertifizierung oder unzureichende Haftpflichtversicherung",
+            "Verdeckte Subunternehmer und fehlender Kundendienst nach der Montage",
+            "Überteuerte Angebote durch Lead-Verkaufsplattformen",
+        ],
+        goodPointsTitle: "Garantien eines Geprüften Experten DuctedExpert®:",
+        goodPoints: [
+            "Geprüfte Unternehmensdaten, Versicherungen und Kälte-Klima-Qualifikationen",
+            "Direkter Kontakt und transparente Angebote mit 0 % Vermittlungsprovision",
+            "Nachgewiesene Fachkompetenz bei Kanal-Klimaanlagen, Wärmepumpen & VRV/VRF",
+            "Zuverlässige Inbetriebnahme, Wartung und langfristiger Kundendienst",
+        ],
+        criteriaTitle: "Unsere 4 Prüf- & Qualitätssäulen",
+        criteriaSub: "Jeder Fachbetrieb mit dem Abzeichen Geprüfter Experte DuctedExpert® erfüllt strenge technische und qualitative Kriterien.",
+        criteria: [
+            { title: "1. Rechtliche Unternehmensprüfung", desc: "Prüfung der offiziellen Unternehmensregistrierung und Geschäftstätigkeit." },
+            { title: "2. Versicherung & Kälteschein", desc: "Nachweis der Betriebshaftpflicht und F-Gase-/Wärmepumpen-Zertifikate." },
+            { title: "3. Technische Fachkompetenz", desc: "Spezialisierung auf Kanal-Klimaanlagen, Wärmepumpen, VRV/VRF oder TGA-Planung." },
+            { title: "4. Qualitäts- & Service-Charta", desc: "Transparente Angebote, Termintreue und verlässlicher Kundendienst." },
+        ],
+        ctaTitle: "Bereit für Ihr Projekt mit einem Geprüften Experten?",
+        ctaSub: "Finden Sie zertifizierte Fachbetriebe in Ihrer Nähe oder registrieren Sie Ihr Unternehmen auf DuctedExpert.com.",
     },
-    alternates: {
-        canonical: "https://www.gainable.fr/labels",
-    }
+    fi: {
+        metaTitle: "Varmennettu Asiantuntija -merkki DuctedExpert.com: Kanavailmastoinnin & LVI-alan Laatustandardi",
+        metaDesc: "Tutustu Varmennettu Asiantuntija DuctedExpert® -laatumerkkiin: asiakkaan turva ja ammattilaisten laatutunnus kanavailmastoinnissa ja lämpöpumpuissa.",
+        topBadge: "Virallinen Luottamusmerkki • Asiakkaan Turva • Ammattilaisen Tunnustus",
+        heroTitle1: "Ilmastointi- ja lämpöpumppujärjestelmän hankinnan ei tulisi koskaan olla",
+        heroTitle2: "uhkapeliä kiinteistölläsi",
+        heroDesc: "Kanavailmastointi integroidaan rakennuksen alakattoon seuraavaksi 15–20 vuodeksi. Se on merkittävä 8 000–25 000 € investointi. Varmennettu Asiantuntija DuctedExpert® -merkki nostaa esiin luotettavat, vakuutetut ja pätevät LVI-ammattilaiset.",
+        badges: [
+            { title: "Tarkistettu Vastuuvakuutus", desc: "Voimassa oleva toiminnan vastuuvakuutus" },
+            { title: "Luotettava & Aktiivinen Yritys", desc: "Tarkistetut yritystiedot ja vakiintunut toiminta" },
+            { title: "100 % Ilmainen Suora Yhteys", desc: "Suora yhteys urakoitsijaan • 0 % provisio tarjouksestasi" },
+        ],
+        findExpertBtn: "Etsi Varmennettu Asiantuntija",
+        applyLabelBtn: "Hae Varmennettu Asiantuntija -merkkiä",
+        sectionRiskTitle: "Miksi Varmennettu Asiantuntija -merkki on tärkeä?",
+        sectionRiskSub: "Koska kanavailmastointi vaatii tarkan ilmavirtojen mitoituksen, äänenvaimennuksen ja kylmäainepätevyyden.",
+        badPointsTitle: "Riskit tarkistamattomien toimijoiden kanssa:",
+        badPoints: [
+            "Väärin mitoitetut tai äänekkäät kanavistot alakaton sisällä",
+            "Puuttuvat kylmäaineluvat (Tukes) tai puutteellinen vakuutusturva",
+            "Ketjutettu aliurakointi ja puuttuva huoltotuki",
+            "Piilokulut liidien jälleenmyyntialustoilla",
+        ],
+        goodPointsTitle: "Varmennettu Asiantuntija DuctedExpert® -takuut:",
+        goodPoints: [
+            "Tarkistetut yritystiedot, vakuutukset ja LVI-/kylmäainepätevyydet",
+            "Suora yhteydenotto ja selkeä hinnoittelu 0 % provisiolla",
+            "Todistettu osaaminen kanavailmastoinnissa, lämpöpumpuissa ja LVI-suunnittelussa",
+            "Sitoutuminen laadukkaaseen käyttöönottoon ja huoltoon",
+        ],
+        criteriaTitle: "4 Laatu- ja Tarkistuskriteeriämme",
+        criteriaSub: "Jokainen Varmennettu Asiantuntija DuctedExpert® -merkin saanut yritys sitoutuu korkeisiin laatukriteereihin.",
+        criteria: [
+            { title: "1. Yrityksen Taustat & Rekisteröinti", desc: "Virallisten yritystietojen ja toiminnan aktiivisuuden varmistus." },
+            { title: "2. Vakuutukset & Kylmäaineluvat", desc: "Vastuuvakuutuksen ja F-kaasu-/lämpöpumppupätevyyksien tarkistus." },
+            { title: "3. Tekninen Erikoisosaaminen", desc: "Kokemus kanavailmastoinnista, lämpöpumpuista, VRV/VRF-järjestelmistä tai LVI-suunnittelusta." },
+            { title: "4. Asiakastyytyväisyyslupaus", desc: "Läpinäkyvät tarjoukset, sovitut aikataulut ja toimiva jälkipalvelu." },
+        ],
+        ctaTitle: "Valmis aloittamaan projektisi Varmennetun Asiantuntijan kanssa?",
+        ctaSub: "Selaa asiantuntijahakemistoa tai rekisteröi yrityksesi DuctedExpert.com-verkostoon.",
+    },
+    es: {
+        metaTitle: "Sello Experto Verificado DuctedExpert.com: Referencia de Calidad en Climatización por Conductos",
+        metaDesc: "Descubra el sello Experto Verificado DuctedExpert®: protección oficial para clientes y distinción de calidad para instaladores de climatización e ingenierías térmicas.",
+        topBadge: "Garantía Oficial de Confianza • Protección al Cliente • Distinción Profesional",
+        heroTitle1: "Instalar aire acondicionado por conductos nunca debería ser",
+        heroTitle2: "una lotería con su vivienda o local",
+        heroDesc: "Un sistema por conductos se integra en el corazón de sus falsos techos para los próximos 15 a 20 años. Representa una inversión importante entre 8.000 € y 25.000 €. El Sello Experto Verificado DuctedExpert® selecciona a los instaladores serios, protege a los clientes frente a malas ejecuciones y pone en valor a los profesionales de excelencia.",
+        badges: [
+            { title: "Seguro de Responsabilidad Verificado", desc: "Cobertura profesional de climatización comprobada" },
+            { title: "Empresa Sólida y Activa", desc: "Registro empresarial activo y trayectoria verificada" },
+            { title: "Contacto Directo 100 % Gratuito", desc: "Trato directo con el instalador • 0 % de comisión en su presupuesto" },
+        ],
+        findExpertBtn: "Buscar un Experto Verificado",
+        applyLabelBtn: "Solicitar el Sello Experto Verificado",
+        sectionRiskTitle: "Por qué el Sello Experto Verificado marca la diferencia",
+        sectionRiskSub: "Porque una instalación por conductos requiere un cálculo preciso de caudales, aislamiento acústico y manipulación certificada de gases fluorados.",
+        badPointsTitle: "Riesgos con instaladores no verificados:",
+        badPoints: [
+            "Conductos mal dimensionados o ruidosos ocultos tras el falso techo",
+            "Ausencia de seguro de responsabilidad civil o certificaciones oficiales",
+            "Subcontratación oculta y abandono del servicio postventa",
+            "Presupuestos inflados por plataformas que revenden contactos",
+        ],
+        goodPointsTitle: "Garantías de un Experto Verificado DuctedExpert®:",
+        goodPoints: [
+            "Empresa registrada, asegurada y con habilitaciones HVAC / gases fluorados",
+            "Contacto directo y presupuesto transparente con 0 % de comisión",
+            "Especialización demostrada en conductos, zonificación (Airzone) y aerotermia",
+            "Compromiso de puesta en marcha, garantía y mantenimiento postventa",
+        ],
+        criteriaTitle: "Nuestros 4 Pilares de Verificación y Calidad",
+        criteriaSub: "Cada empresa con el distintivo Experto Verificado DuctedExpert® cumple con estándares técnicos y éticos rigurosos.",
+        criteria: [
+            { title: "1. Solvencia y Registro Legal", desc: "Comprobación de la existencia legal y actividad real de la empresa." },
+            { title: "2. Seguros y Certificaciones HVAC", desc: "Validación del seguro de responsabilidad civil y certificados técnicos." },
+            { title: "3. Dominio Técnico", desc: "Experiencia probada en aire acondicionado por conductos, aerotermia, VRV/VRF o ingeniería térmica." },
+            { title: "4. Carta de Compromiso con el Cliente", desc: "Presupuestos detallados, cumplimiento de plazos y servicio postventa fiable." },
+        ],
+        ctaTitle: "¿Listo para confiar su proyecto a un Experto Verificado?",
+        ctaSub: "Consulte nuestro directorio de profesionales certificados o registre su empresa en DuctedExpert.com.",
+    },
+    it: {
+        metaTitle: "Marchio Esperto Verificato DuctedExpert.com: Il Riferimento Qualità nella Climatizzazione Canalizzata",
+        metaDesc: "Scopri il marchio Esperto Verificato DuctedExpert®: tutela ufficiale per i clienti e riconoscimento di qualità per installatori HVAC e studi termotecnici.",
+        topBadge: "Sigillo Ufficiale di Fiducia • Tutela Cliente • Eccellenza Professionale",
+        heroTitle1: "Installare un impianto di climatizzazione canalizzata non dovrebbe mai essere",
+        heroTitle2: "una scommessa sulla tua casa o azienda",
+        heroDesc: "Un impianto canalizzato viene incassato nei controsoffitti per i prossimi 15–20 anni ed è un investimento importante tra 8.000 € e 25.000 €. Il Marchio Esperto Verificato DuctedExpert® seleziona gli installatori qualificati, tutela i clienti da errori progettuali e valorizza le aziende d'eccellenza.",
+        badges: [
+            { title: "Polizza RC Professionale Verificata", desc: "Copertura assicurativa per impianti HVAC controllata" },
+            { title: "Azienda Solida e Attiva", desc: "Iscrizione aziendale attiva e referenze verificate" },
+            { title: "Contatto Diretto 100% Gratuito", desc: "Contatto diretto con l'installatore • Zero commissioni sul preventivo" },
+        ],
+        findExpertBtn: "Trova un Esperto Verificato",
+        applyLabelBtn: "Richiedi il Marchio Esperto Verificato",
+        sectionRiskTitle: "Perché il Marchio Esperto Verificato fa la differenza",
+        sectionRiskSub: "Perché un impianto canalizzato richiede un dimensionamento aeraulico preciso, isolamento acustico e certificazione F-Gas.",
+        badPointsTitle: "Rischi con installatori improvvisati:",
+        badPoints: [
+            "Canalizzazioni sottodimensionate o rumorose chiuse nel controsoffitto",
+            "Mancanza di patentino F-Gas o assicurazione professionale",
+            "Subappalti non dichiarati e assenza di assistenza post-vendita",
+            "Preventivi gonfiati da intermediari e rivenditori di lead",
+        ],
+        goodPointsTitle: "Garanzie di un Esperto Verificato DuctedExpert®:",
+        goodPoints: [
+            "Azienda verificata, assicurata e abilitata per impianti HVAC e F-Gas",
+            "Contatto diretto e preventivo trasparente con 0% di commissioni",
+            "Competenza specifica in impianti canalizzati, multi-zona e pompe di calore",
+            "Assistenza tecnica, collaudo e manutenzione programmata nel tempo",
+        ],
+        criteriaTitle: "I Nostri 4 Pilastri di Verifica e Qualità",
+        criteriaSub: "Ogni azienda con il badge Esperto Verificato DuctedExpert® rispetta rigorosi standard tecnici e professionali.",
+        criteria: [
+            { title: "1. Solidità e Regolarità Aziendale", desc: "Verifica dell'iscrizione aziendale e dell'operatività sul mercato." },
+            { title: "2. Assicurazione e Certificazioni F-Gas", desc: "Controllo della polizza RC e delle abilitazioni tecniche termoidrauliche." },
+            { title: "3. Competenza Tecnica HVAC", desc: "Esperienza comprovata in climatizzazione canalizzata, pompe di calore, VRV/VRF o progettazione termotecnica." },
+            { title: "4. Carta Qualità e Assistenza", desc: "Preventivi chiari, rispetto delle tempistiche e servizio post-vendita garantito." },
+        ],
+        ctaTitle: "Pronto a collaborare con un Esperto Verificato?",
+        ctaSub: "Trova un professionista certificato nella tua zona o registra la tua azienda su DuctedExpert.com.",
+    },
 };
 
-export default function LabelsPage() {
+export async function generateMetadata(): Promise<Metadata> {
+    const locale = await getServerLocale();
+    const c = LABELS_CONTENT[locale] || LABELS_CONTENT.en;
+
+    return {
+        title: c.metaTitle,
+        description: c.metaDesc,
+        openGraph: {
+            title: c.metaTitle,
+            description: c.metaDesc,
+            images: ['/gainable-fr-label-qualite-climatisation-rge.png'],
+            type: 'website',
+        },
+        alternates: {
+            canonical: `https://www.ductedexpert.com/${locale}/labels`,
+            languages: getAlternatesUrls('/labels'),
+        }
+    };
+}
+
+export default async function LabelsPage() {
+    const locale = await getServerLocale();
+    const c = LABELS_CONTENT[locale] || LABELS_CONTENT.en;
+
     return (
         <div className="flex min-h-screen flex-col font-sans text-[#1F2D3D] bg-white">
-
             {/* HERO SECTION */}
-            <section className="relative min-h-[500px] flex items-center justify-center py-20 px-4 overflow-hidden">
+            <section className="relative min-h-[520px] flex items-center justify-center py-20 px-4 overflow-hidden">
                 <div
                     className="absolute inset-0 z-0 bg-cover bg-center"
                     style={{ backgroundImage: "url('/gainable-fr-label-qualite-climatisation-rge.png')" }}
@@ -73,814 +282,153 @@ export default function LabelsPage() {
                 <div className="container relative z-10 mx-auto text-center px-4 max-w-5xl">
                     <div className="inline-flex items-center gap-2 p-2.5 px-6 rounded-full bg-[#D59B2B] text-white font-black text-xs md:text-sm tracking-wider mb-6 uppercase shadow-xl">
                         <ShieldCheck className="w-4 h-4 text-white" />
-                        Gage Officiel de Confiance • Protection Client • Distinction Artisan
+                        {c.topBadge}
                     </div>
 
                     <h1 className="text-3xl md:text-5xl lg:text-6xl font-black mb-6 tracking-tight leading-tight uppercase font-montserrat text-white">
-                        Installer une climatisation ne devrait jamais être <br />
+                        {c.heroTitle1} <br />
                         <span className="text-[#D59B2B] normal-case block mt-3 font-extrabold text-2xl md:text-4xl">
-                            un coup de poker avec votre maison
+                            {c.heroTitle2}
                         </span>
                     </h1>
 
                     <p className="text-base md:text-xl text-slate-200 mb-10 max-w-3xl mx-auto font-normal leading-relaxed">
-                        Un système gainable s’encastre au cœur de vos plafonds et de vos combles pour les 15 prochaines années. 
-                        Ce n'est pas un simple appareil électroménager : c'est un investissement lourd entre <strong>8 000 € et 25 000 €</strong>. 
-                        Le Label <strong>Expert Vérifié Réseau Gainable®</strong> sélectionne sur pièces justificatives les installateurs sérieux, 
-                        protège les particuliers contre les malfaçons et valorise les artisans d'excellence.
+                        {c.heroDesc}
                     </p>
 
                     {/* 3 Reassurance Badges */}
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-3xl mx-auto text-left">
-                        {[
-                            { 
-                                title: "Attestation Décennale Vérifiée", 
-                                desc: "Attestation CVC vérifiée sur pièces justificatives" 
-                            },
-                            { 
-                                title: "Entreprise Solide & Active", 
-                                desc: "SIRET actif à l'INSEE, pièces vérifiées, zéro société éphémère" 
-                            },
-                            { 
-                                title: "Mise en Relation 100 % Gratuite", 
-                                desc: "Contact direct avec l'artisan • Zéro commission ni surcoût sur votre devis" 
-                            }
-                        ].map((item, idx) => (
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-4xl mx-auto text-left mb-10">
+                        {c.badges.map((item, idx) => (
                             <div key={idx} className="bg-white/10 backdrop-blur-md border border-white/15 p-4 rounded-2xl text-white shadow-sm flex items-start gap-3">
                                 <div className="w-8 h-8 rounded-xl bg-[#D59B2B] text-white flex items-center justify-center font-bold shrink-0 shadow-sm mt-0.5">
                                     ✓
                                 </div>
                                 <div>
                                     <p className="text-sm font-bold text-white">{item.title}</p>
-                                    <p className="text-xs text-slate-300 font-medium">{item.desc}</p>
+                                    <p className="text-xs text-slate-300 font-medium mt-0.5">{item.desc}</p>
                                 </div>
                             </div>
                         ))}
                     </div>
 
-                    <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center items-center">
-                        <Link href="/trouver-installateur">
-                            <Button size="lg" className="bg-[#D59B2B] hover:bg-[#b88622] text-white px-8 py-6 rounded-2xl font-black text-base shadow-xl transition-all hover:scale-105">
-                                Trouver un installateur vérifié près de chez moi
+                    <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                        <Link href={withLocalePath("/", locale)}>
+                            <Button size="lg" className="bg-[#D59B2B] hover:bg-[#b88622] text-white font-bold px-8 py-6 rounded-xl text-base shadow-xl">
+                                {c.findExpertBtn}
                             </Button>
                         </Link>
-                        <Link href="/inscription">
-                            <Button size="lg" variant="outline" className="border-white/40 bg-white/10 text-white hover:bg-white/20 px-8 py-6 rounded-2xl font-bold text-base transition-all">
-                                Vous êtes installateur ? Rejoindre le Réseau
+                        <Link href={withLocalePath("/inscription", locale)}>
+                            <Button size="lg" variant="outline" className="bg-white/10 hover:bg-white/20 text-white border-white/30 font-bold px-8 py-6 rounded-xl text-base">
+                                {c.applyLabelBtn}
                             </Button>
                         </Link>
                     </div>
                 </div>
             </section>
 
-            {/* SECTION 1: LE BADGE OFFICIEL MIS EN AVANT EN PREMIER (DEMANDE UTILISATEUR) */}
-            <section className="py-16 bg-gradient-to-b from-slate-100 via-white to-slate-50 border-b border-slate-200">
-                <div className="container max-w-5xl mx-auto px-4 text-center">
-                    <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-100 text-amber-900 border border-amber-200 text-xs font-bold uppercase tracking-wider mb-4 shadow-sm">
-                        <Sparkles className="w-4 h-4 text-[#D59B2B]" /> Signature Visuelle de Confiance
-                    </div>
-
-                    <h2 className="text-3xl md:text-5xl font-black font-montserrat text-[#1F2D3D] mb-4">
-                        Le Badge Officiel « Expert Vérifié »
-                    </h2>
-                    <p className="text-slate-600 text-base md:text-lg max-w-2xl mx-auto mb-10 leading-relaxed">
-                        Repérez ce macaron officiel sur les fiches des professionnels et sur leurs véhicules d'intervention. 
-                        Le battement de cœur régulier du badge signale une entreprise active, dont les pièces justificatives et assurances ont fait l'objet d'une modération et d'une vérification documentaire.
-                    </p>
-
-                    <div className="bg-white rounded-3xl p-8 md:p-12 border-2 border-slate-200/90 shadow-2xl max-w-2xl mx-auto flex flex-col items-center justify-center space-y-6">
-                        <VerifiedExpertBadge size="lg" />
-                        <div className="pt-5 border-t border-slate-100 text-xs md:text-sm text-slate-500 max-w-md leading-relaxed">
-                            Ce badge est une marque déposée propriété exclusive de Gainable.fr. Toute reproduction ou affichage frauduleux 
-                            par une entreprise non vérifiée fait l’objet de poursuites judiciaires immédiates.
+            {/* BADGE SHOWCASE & COMPARISON */}
+            <section className="py-20 px-4 bg-slate-50 border-b border-slate-100">
+                <div className="container max-w-6xl mx-auto">
+                    <div className="flex justify-center mb-10">
+                        <div className="bg-white p-6 rounded-3xl shadow-lg border border-slate-100">
+                            <VerifiedExpertBadge size="lg" />
                         </div>
                     </div>
-                </div>
-            </section>
 
-            {/* SECTION 2 : LE CONSTAT SANS FILTRE (LE MIX PARFAIT ENTRE CONTENU CHOC & LISIBILITÉ CLAIRE) */}
-            <section className="py-20 bg-white border-b border-slate-200">
-                <div className="container max-w-6xl mx-auto px-4">
-                    <div className="text-center max-w-3xl mx-auto mb-16">
-                        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-rose-50 text-rose-800 border border-rose-200 text-xs font-bold uppercase tracking-wider mb-4 shadow-sm">
-                            <AlertTriangle className="w-4 h-4 text-rose-600" /> La réalité du marché • Ce que personne ne vous dit
-                        </div>
-                        <h2 className="text-3xl md:text-5xl font-black font-montserrat text-[#1F2D3D] mb-6 leading-tight">
-                            Les 4 Pièges Cachés de la Climatisation <br />
-                            <span className="text-[#D59B2B]">(et comment notre label vous en protège)</span>
+                    <div className="text-center max-w-3xl mx-auto mb-14">
+                        <h2 className="text-3xl md:text-4xl font-bold text-[#1F2D3D] mb-4">
+                            {c.sectionRiskTitle}
                         </h2>
-                        <p className="text-slate-600 text-base md:text-lg leading-relaxed font-normal">
-                            La climatisation gainable est un métier d’ingénierie et de précision frigorifique. 
-                            Pourtant, le secteur a attiré des démarcheurs sans scrupules et des poseurs improvisés. 
-                            Voici les 4 réalités brutales auxquelles des centaines de propriétaires se heurtent chaque mois, et la réponse ferme de Gainable.fr :
+                        <p className="text-lg text-slate-600">
+                            {c.sectionRiskSub}
                         </p>
                     </div>
 
-                    <div className="grid md:grid-cols-2 gap-8 mb-14">
-                        {/* PIÈGE 1 : LE GHOSTING SAV */}
-                        <div className="bg-slate-50 border-2 border-slate-200 rounded-3xl p-8 space-y-4 hover:border-[#D59B2B]/60 transition-all shadow-sm">
-                            <div className="flex items-center justify-between">
-                                <div className="w-12 h-12 rounded-2xl bg-rose-100 text-rose-700 flex items-center justify-center font-black">
-                                    <PhoneOff className="w-6 h-6 text-rose-600" />
-                                </div>
-                                <span className="text-xs font-black uppercase px-3 py-1 rounded-full bg-rose-100 text-rose-800">
-                                    Piège N°1
-                                </span>
-                            </div>
-                            <h3 className="text-xl font-bold text-[#1F2D3D]">
-                                1. Le syndrome de l'artisan « fantôme » dès la facture soldée
+                    <div className="grid md:grid-cols-2 gap-8">
+                        {/* Risks */}
+                        <div className="bg-white p-8 rounded-2xl border border-red-100 shadow-sm">
+                            <h3 className="text-xl font-bold text-red-700 mb-6 flex items-center gap-2">
+                                <XCircle className="w-6 h-6 text-red-500" />
+                                {c.badPointsTitle}
                             </h3>
-                            <div className="space-y-3 text-sm leading-relaxed text-slate-600">
-                                <p>
-                                    <strong className="text-rose-700">Le cauchemar vécu :</strong> Tant qu’il faut faire signer le devis et encaisser l’acompte, 
-                                    le commercial répond dans les 5 minutes. Mais quand les premiers froids arrivent en décembre et que l’appareil se bloque avec un code erreur, 
-                                    le téléphone sonne dans le vide, les messages vocaux restent sans réponse et votre numéro finit bloqué. 
-                                    Vous avez versé 12 000 € et vous vous retrouvez seul, en plein hiver, avec une maison glacée.
-                                </p>
-                                <div className="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-900 font-medium flex items-start gap-2 text-xs">
-                                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                                    <span><strong>L'engagement du réseau :</strong> Des entreprises locales établies qui signent notre charte de déontologie : devis transparent sans surprise, mise en service soignée et proposition d'un contrat d'entretien régulier.</span>
-                                </div>
-                            </div>
+                            <ul className="space-y-4">
+                                {c.badPoints.map((pt, i) => (
+                                    <li key={i} className="flex items-start gap-3 text-slate-700">
+                                        <XCircle className="w-5 h-5 text-red-400 shrink-0 mt-0.5" />
+                                        <span>{pt}</span>
+                                    </li>
+                                ))}
+                            </ul>
                         </div>
 
-                        {/* PIÈGE 2 : SOCIÉTÉS ÉPHÉMÈRES ET LIQUIDATIONS */}
-                        <div className="bg-slate-50 border-2 border-slate-200 rounded-3xl p-8 space-y-4 hover:border-[#D59B2B]/60 transition-all shadow-sm">
-                            <div className="flex items-center justify-between">
-                                <div className="w-12 h-12 rounded-2xl bg-rose-100 text-rose-700 flex items-center justify-center font-black">
-                                    <Building className="w-6 h-6 text-rose-600" />
-                                </div>
-                                <span className="text-xs font-black uppercase px-3 py-1 rounded-full bg-rose-100 text-rose-800">
-                                    Piège N°2
-                                </span>
-                            </div>
-                            <h3 className="text-xl font-bold text-[#1F2D3D]">
-                                2. Les sociétés éphémères et les liquidations opportunistes
+                        {/* Guarantees */}
+                        <div className="bg-white p-8 rounded-2xl border-2 border-[#D59B2B] shadow-md">
+                            <h3 className="text-xl font-bold text-[#1F2D3D] mb-6 flex items-center gap-2">
+                                <CheckCircle2 className="w-6 h-6 text-[#D59B2B]" />
+                                {c.goodPointsTitle}
                             </h3>
-                            <div className="space-y-3 text-sm leading-relaxed text-slate-600">
-                                <p>
-                                    <strong className="text-rose-700">Le cauchemar vécu :</strong> Des structures commerciales montées en hâte qui sous-traitent des poses à bas coût à la chaîne. 
-                                    Dès que les premières malfaçons éclatent ou que les mises en demeure pleuvent, la société est mise en <strong>liquidation judiciaire express</strong>. 
-                                    Le dirigeant rouvre une nouvelle entité 3 mois plus tard sous un autre nom. Résultat : zéro recours, des créances irrécouvrables et personne pour réparer vos combles.
-                                </p>
-                                <div className="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-900 font-medium flex items-start gap-2 text-xs">
-                                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                                    <span><strong>La garantie Expert Vérifié :</strong> Vérification d'existence légale auprès de l'INSEE, de l'ancienneté, de la solvabilité et absence de redressement judiciaire.</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* PIÈGE 3 : FAUSSE DÉCENNALE SANS CVC */}
-                        <div className="bg-slate-50 border-2 border-slate-200 rounded-3xl p-8 space-y-4 hover:border-[#D59B2B]/60 transition-all shadow-sm">
-                            <div className="flex items-center justify-between">
-                                <div className="w-12 h-12 rounded-2xl bg-rose-100 text-rose-700 flex items-center justify-center font-black">
-                                    <Droplets className="w-6 h-6 text-rose-600" />
-                                </div>
-                                <span className="text-xs font-black uppercase px-3 py-1 rounded-full bg-rose-100 text-rose-800">
-                                    Piège N°3
-                                </span>
-                            </div>
-                            <h3 className="text-xl font-bold text-[#1F2D3D]">
-                                3. L'illusion d'être assuré (la fausse décennale sans CVC)
-                            </h3>
-                            <div className="space-y-3 text-sm leading-relaxed text-slate-600">
-                                <p>
-                                    <strong className="text-rose-700">Le cauchemar vécu :</strong> L'artisan vous tend une feuille d'assurance. Mais en réalité, il n'est assuré que pour de la <em>« peinture »</em> ou de la <em>« plomberie générale »</em> 
-                                    pour payer une prime dérisoire. Le jour où un raccord de condensats déborde dans les combles et fait effondrer votre plafond, l'expert d'assurance découvre le pot aux roses et <strong>refuse catégoriquement d'indemniser</strong>.
-                                </p>
-                                <div className="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-900 font-medium flex items-start gap-2 text-xs">
-                                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                                    <span><strong>La garantie Expert Vérifié :</strong> Attestation originale vérifiée avec mention obligatoire « Génie Climatique / Réseaux Aérauliques » et attestation de prime payée à jour.</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* PIÈGE 4 : FAUX AVIS & BRICOLEURS NON AGRÉÉS FLUIDES */}
-                        <div className="bg-slate-50 border-2 border-slate-200 rounded-3xl p-8 space-y-4 hover:border-[#D59B2B]/60 transition-all shadow-sm">
-                            <div className="flex items-center justify-between">
-                                <div className="w-12 h-12 rounded-2xl bg-rose-100 text-rose-700 flex items-center justify-center font-black">
-                                    <AlertOctagon className="w-6 h-6 text-rose-600" />
-                                </div>
-                                <span className="text-xs font-black uppercase px-3 py-1 rounded-full bg-rose-100 text-rose-800">
-                                    Piège N°4
-                                </span>
-                            </div>
-                            <h3 className="text-xl font-bold text-[#1F2D3D]">
-                                4. Les faux avis et poseurs sans habilitation fluides (gaz R32)
-                            </h3>
-                            <div className="space-y-3 text-sm leading-relaxed text-slate-600">
-                                <p>
-                                    <strong className="text-rose-700">Le cauchemar vécu :</strong> Vous confiez votre installation à un poseur qui n'a pas l'attestation légale de manipulation des fluides frigorigènes. 
-                                    Sans tirage au vide soigné, l'humidité résiduelle acidifie l'huile du circuit : le compresseur grille en 4 mois et le fabricant (Daikin, Atlantic) refuse la garantie pièces.
-                                </p>
-                                <div className="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-900 font-medium flex items-start gap-2 text-xs">
-                                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                                    <span><strong>La garantie Expert Vérifié :</strong> Attestation de capacité Catégorie I officielle délivrée par Dekra, Veritas ou Cemafroid exigée et vérifiée.</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* ENCADRÉ VISUEL DESIGN : LE RÉSULTAT QUAND ON CHOISIT UN EXPERT VÉRIFIÉ */}
-                    <div className="bg-gradient-to-r from-slate-900 to-[#1F2D3D] text-white p-6 md:p-10 rounded-3xl shadow-2xl flex flex-col md:flex-row items-center gap-8">
-                        <div className="w-full md:w-5/12 shrink-0 rounded-2xl overflow-hidden border-2 border-white/20 shadow-xl">
-                            <Image
-                                src="/gainable-fr-climatisation-maison-design.png"
-                                alt="Intérieur contemporain d'exception avec climatisation gainable invisible installée par un Expert Vérifié"
-                                width={550}
-                                height={360}
-                                className="w-full h-auto object-cover"
-                            />
-                        </div>
-                        <div className="space-y-4">
-                            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#D59B2B]/20 text-[#D59B2B] border border-[#D59B2B]/30 text-xs font-bold">
-                                <Home className="w-4 h-4" /> La Sérénité au Quotidien
-                            </div>
-                            <h4 className="text-xl md:text-3xl font-black font-montserrat text-white leading-snug">
-                                Voilà ce que mérite votre maison : <br />
-                                <span className="text-[#D59B2B]">Un confort invisible, silencieux et pérenne.</span>
-                            </h4>
-                            <p className="text-slate-300 text-sm md:text-base leading-relaxed font-normal">
-                                En faisant appel à un <strong>Expert Vérifié Réseau Gainable®</strong>, vous transformez un projet source d'angoisse en une expérience fluide et rassurante. 
-                                Vous profitez d'une diffusion d'air ultra-douce, d'une acoustique imperceptible et de la certitude que votre investissement est protégé pour les 15 prochaines années.
-                            </p>
+                            <ul className="space-y-4">
+                                {c.goodPoints.map((pt, i) => (
+                                    <li key={i} className="flex items-start gap-3 text-slate-800 font-medium">
+                                        <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
+                                        <span>{pt}</span>
+                                    </li>
+                                ))}
+                            </ul>
                         </div>
                     </div>
                 </div>
             </section>
 
-            {/* SECTION 3: LES 4 ÉTAPES DE MODÉRATION DOCUMENTAIRE */}
-            <section className="py-24 bg-gradient-to-b from-slate-50 via-white to-slate-50 border-b border-slate-200">
-                <div className="container max-w-6xl mx-auto px-4">
-                    
-                    {/* Header Section */}
-                    <div className="text-center max-w-3xl mx-auto mb-16">
-                        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-500/10 text-emerald-700 border border-emerald-500/20 text-xs font-black uppercase tracking-wider mb-4 shadow-sm">
-                            <ShieldCheck className="w-4 h-4 text-emerald-600" /> Modération &amp; Vérification Gainable.fr
-                        </div>
-                        <h2 className="text-3xl md:text-5xl font-black font-montserrat text-[#1F2D3D] mb-5 tracking-tight">
-                            Les 4 Étapes de Modération &amp; Vérification Gainable.fr
+            {/* 4 PILLARS */}
+            <section className="py-20 px-4 bg-white">
+                <div className="container max-w-6xl mx-auto">
+                    <div className="text-center max-w-3xl mx-auto mb-14">
+                        <h2 className="text-3xl md:text-4xl font-bold text-[#1F2D3D] mb-4">
+                            {c.criteriaTitle}
                         </h2>
-                        <p className="text-slate-600 text-base md:text-lg leading-relaxed">
-                            Nous ne distribuons pas de macarons de complaisance. Chaque installateur partenaire fait l'objet d'une modération et d'une vérification attentive de ses pièces déclaratives :
+                        <p className="text-lg text-slate-600">
+                            {c.criteriaSub}
                         </p>
                     </div>
 
-                    {/* The 4 Grand Verrous Grid */}
-                    <div className="space-y-6">
-
-                        {/* VERROU 01: DÉCENNALE CVC */}
-                        <div className="bg-white rounded-3xl border-2 border-slate-200 hover:border-emerald-500/60 p-6 md:p-8 shadow-lg hover:shadow-xl transition-all duration-300">
-                            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 pb-6 border-b border-slate-100">
-                                <div className="flex items-start sm:items-center gap-4">
-                                    <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white flex items-center justify-center font-black text-xl shadow-lg shrink-0">
-                                        01
+                    <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                        {c.criteria.map((item, idx) => {
+                            const icons = [Building2, Lock, Wrench, Award];
+                            const IconComp = icons[idx % icons.length];
+                            return (
+                                <div key={idx} className="bg-slate-50 p-6 rounded-2xl border border-slate-100 hover:border-[#D59B2B] transition-all">
+                                    <div className="w-12 h-12 rounded-xl bg-[#1F2D3D] text-[#D59B2B] flex items-center justify-center mb-4">
+                                        <IconComp className="w-6 h-6" />
                                     </div>
-                                    <div>
-                                        <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-emerald-50 text-emerald-800 text-xs font-bold uppercase mb-1">
-                                            <Shield className="w-3.5 h-3.5" /> Étape 1 • Assurance Chantier
-                                        </div>
-                                        <h3 className="text-xl md:text-2xl font-black text-[#1F2D3D]">
-                                            Assurance Décennale CVC Spécifique & Validée
-                                        </h3>
-                                    </div>
+                                    <h3 className="font-bold text-lg text-[#1F2D3D] mb-2">{item.title}</h3>
+                                    <p className="text-sm text-slate-600 leading-relaxed">{item.desc}</p>
                                 </div>
-                                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-500/10 text-emerald-700 font-bold text-xs uppercase tracking-wider shrink-0 self-start lg:self-auto border border-emerald-500/20">
-                                    <CheckCircle2 className="w-4 h-4 text-emerald-600" /> Attestation Originale Vérifiée
-                                </div>
-                            </div>
-
-                            <div className="grid md:grid-cols-2 gap-6 pt-6">
-                                <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-2">
-                                    <p className="text-sm text-slate-700 leading-relaxed font-medium">
-                                        Attestation d'assurance de l'année en cours avec vérification des lignes d'activité déclarées : 
-                                        mention expresse <strong>« Génie Climatique / Climatisation Réversible / Aéraulique »</strong>. 
-                                        La prime doit être à jour pour garantir une couverture active.
-                                    </p>
-                                </div>
-
-                                <div className="p-5 rounded-2xl bg-emerald-50/50 border border-emerald-200 space-y-2">
-                                    <p className="text-xs font-black uppercase text-emerald-800 tracking-wider flex items-center gap-1.5">
-                                        <ShieldCheck className="w-4 h-4 text-emerald-600" /> Rôle de l'assureur professionnel :
-                                    </p>
-                                    <p className="text-sm text-slate-700 leading-relaxed font-normal">
-                                        L'assurance décennale souscrite par l'installateur auprès de sa propre compagnie couvre ses travaux pendant 10 ans selon les conditions de sa police. Gainable.fr n'est pas assureur mais effectue une modération documentaire de l'attestation déclarée.
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* VERROU 02: IDENTITÉ & SOLVABILITÉ */}
-                        <div className="bg-white rounded-3xl border-2 border-slate-200 hover:border-blue-500/60 p-6 md:p-8 shadow-lg hover:shadow-xl transition-all duration-300">
-                            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 pb-6 border-b border-slate-100">
-                                <div className="flex items-start sm:items-center gap-4">
-                                    <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white flex items-center justify-center font-black text-xl shadow-lg shrink-0">
-                                        02
-                                    </div>
-                                    <div>
-                                        <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-blue-50 text-blue-800 text-xs font-bold uppercase mb-1">
-                                            <Building2 className="w-3.5 h-3.5" /> Étape 2 • Existence Juridique
-                                        </div>
-                                        <h3 className="text-xl md:text-2xl font-black text-[#1F2D3D]">
-                                            SIRET Actif, Ancienneté & Solvabilité Vérifiée
-                                        </h3>
-                                    </div>
-                                </div>
-                                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-500/10 text-blue-700 font-bold text-xs uppercase tracking-wider shrink-0 self-start lg:self-auto border border-blue-500/20">
-                                    <CheckCircle2 className="w-4 h-4 text-blue-600" /> Registre INSEE & Infogreffe en Direct
-                                </div>
-                            </div>
-
-                            <div className="grid md:grid-cols-2 gap-6 pt-6">
-                                <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-2">
-                                    <p className="text-sm text-slate-700 leading-relaxed font-medium">
-                                        Vérification du numéro SIRET/SIREN, code NAF/APE compatible (4322B Installation de climatisation), 
-                                        siège social réel en France, absence de procédure collective ou de radiation, compte bancaire professionnel officiel.
-                                    </p>
-                                </div>
-
-                                <div className="p-5 rounded-2xl bg-blue-50/50 border border-blue-200 space-y-2">
-                                    <p className="text-xs font-black uppercase text-blue-800 tracking-wider flex items-center gap-1.5">
-                                        <Building className="w-4 h-4 text-blue-600" /> Entreprise en direct :
-                                    </p>
-                                    <p className="text-sm text-slate-700 leading-relaxed font-normal">
-                                        Vous contractualisez avec une entreprise établie et pérenne. L'ensemble des prestations et devis relèvent de la responsabilité exclusive de l'artisan.
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* VERROU 03: CAPACITÉ FLUIDES */}
-                        <div className="bg-white rounded-3xl border-2 border-slate-200 hover:border-amber-500/60 p-6 md:p-8 shadow-lg hover:shadow-xl transition-all duration-300">
-                            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 pb-6 border-b border-slate-100">
-                                <div className="flex items-start sm:items-center gap-4">
-                                    <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 text-white flex items-center justify-center font-black text-xl shadow-lg shrink-0">
-                                        03
-                                    </div>
-                                    <div>
-                                        <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-amber-50 text-amber-800 text-xs font-bold uppercase mb-1">
-                                            <Wrench className="w-3.5 h-3.5" /> Étape 3 • Compétence Frigoriste
-                                        </div>
-                                        <h3 className="text-xl md:text-2xl font-black text-[#1F2D3D]">
-                                            Attestation de Capacité Fluides Frigorigènes
-                                        </h3>
-                                    </div>
-                                </div>
-                                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-500/10 text-amber-700 font-bold text-xs uppercase tracking-wider shrink-0 self-start lg:self-auto border border-amber-500/20">
-                                    <CheckCircle2 className="w-4 h-4 text-amber-600" /> Agrément Déposé (Dekra / Veritas / Cemafroid)
-                                </div>
-                            </div>
-
-                            <div className="grid md:grid-cols-2 gap-6 pt-6">
-                                <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-2">
-                                    <p className="text-sm text-slate-700 leading-relaxed font-medium">
-                                        Certificat officiel de manipulation des fluides frigorigènes (Catégorie I). 
-                                        Seuls les frigoristes agréés sont autorisés par la réglementation à manipuler les gaz sous pression (R32 / R410A) et raccorder les circuits thermodynamiques.
-                                    </p>
-                                </div>
-
-                                <div className="p-5 rounded-2xl bg-amber-50/50 border border-amber-200 space-y-2">
-                                    <p className="text-xs font-black uppercase text-amber-800 tracking-wider flex items-center gap-1.5">
-                                        <Wrench className="w-4 h-4 text-[#D59B2B]" /> Rôle du frigoriste :
-                                    </p>
-                                    <p className="text-sm text-slate-700 leading-relaxed font-normal">
-                                        L'artisan engage sa responsabilité professionnelle sur la mise en œuvre technique et le raccordement étanche de votre circuit sous pression, conformément à son habilitation légale.
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* VERROU 04: GRANDES MARQUES ET MATÉRIEL OFFICIEL */}
-                        <div className="bg-white rounded-3xl border-2 border-slate-200 hover:border-purple-500/60 p-6 md:p-8 shadow-lg hover:shadow-xl transition-all duration-300">
-                            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 pb-6 border-b border-slate-100">
-                                <div className="flex items-start sm:items-center gap-4">
-                                    <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-600 to-violet-600 text-white flex items-center justify-center font-black text-xl shadow-lg shrink-0">
-                                        04
-                                    </div>
-                                    <div>
-                                        <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-purple-50 text-purple-800 text-xs font-bold uppercase mb-1">
-                                            <Award className="w-3.5 h-3.5" /> Étape 4 • Matériel Constructeur
-                                        </div>
-                                        <h3 className="text-xl md:text-2xl font-black text-[#1F2D3D]">
-                                            Filière Grandes Marques & Airzone
-                                        </h3>
-                                    </div>
-                                </div>
-                                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-purple-500/10 text-purple-700 font-bold text-xs uppercase tracking-wider shrink-0 self-start lg:self-auto border border-purple-500/20">
-                                    <CheckCircle2 className="w-4 h-4 text-purple-600" /> Daikin, Mitsubishi, Atlantic, Toshiba
-                                </div>
-                            </div>
-
-                            <div className="grid md:grid-cols-2 gap-6 pt-6">
-                                <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-2">
-                                    <p className="text-sm text-slate-700 leading-relaxed font-medium">
-                                        Approvisionnement via les réseaux distributeurs officiels français. 
-                                        Maîtrise technique reconnue pour l'intégration des systèmes de zonage Airzone et le calcul acoustique des bouches de soufflage.
-                                    </p>
-                                </div>
-
-                                <div className="p-5 rounded-2xl bg-purple-50/50 border border-purple-200 space-y-2">
-                                    <p className="text-xs font-black uppercase text-purple-800 tracking-wider flex items-center gap-1.5">
-                                        <Award className="w-4 h-4 text-purple-600" /> Rôle de l'installateur :
-                                    </p>
-                                    <p className="text-sm text-slate-700 leading-relaxed font-normal">
-                                        L'installateur gère en direct avec ses distributeurs l'approvisionnement et l'application des garanties constructeur. Gainable.fr n'étant ni fabricant ni revendeur, le choix du matériel et ses garanties relèvent de la relation contractuelle directe entre le client, l'artisan et le fabricant.
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-
-                    </div>
-
-                </div>
-            </section>
-
-            {/* SECTION 4: LA RELATION DE CONFIANCE (Avec photo Business Handshake) */}
-            <section className="py-20 bg-white border-b border-slate-100">
-                <div className="container max-w-6xl mx-auto px-4">
-                    <div className="grid lg:grid-cols-12 gap-12 items-center">
-                        
-                        {/* Text Col */}
-                        <div className="lg:col-span-7 space-y-6">
-                            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-amber-50 text-[#D59B2B] text-xs font-bold uppercase tracking-wider">
-                                <HeartHandshake className="w-4 h-4" /> Un Vrai Contrat Moral et Technique
-                            </div>
-
-                            <h2 className="text-3xl md:text-4xl font-black font-montserrat text-[#1F2D3D] leading-snug">
-                                Retrouvez le plaisir d'échanger avec <br />
-                                <span className="text-[#D59B2B]">un véritable artisan de confiance</span>
-                            </h2>
-
-                            <p className="text-slate-600 text-base md:text-lg leading-relaxed font-normal">
-                                Lorsque vous confiez votre projet à un <strong>Expert Vérifié Gainable.fr</strong>, 
-                                vous ne parlez pas à une plateforme de télémarketing délocalisée qui cherche à revendre votre numéro de téléphone à 5 démarcheurs en concurrence féroce.
-                            </p>
-
-                            <p className="text-slate-600 text-base leading-relaxed">
-                                Vous échangez avec une entreprise locale, fière de son travail, qui connaît les contraintes de votre région, 
-                                monte dans vos combles pour mesurer la hauteur réelle sous toiture, calcule précisément les pertes de charge aérauliques 
-                                et dimensionne chaque grille pour que votre salon soit à 21°C sans le moindre bruit de souffle.
-                            </p>
-
-                            <div className="grid sm:grid-cols-2 gap-4 pt-2">
-                                <div className="p-4 rounded-2xl bg-amber-50/60 border border-amber-200/60">
-                                    <p className="font-bold text-[#1F2D3D] text-sm mb-1 flex items-center gap-1.5">
-                                        <CheckCircle className="w-4 h-4 text-[#D59B2B]" /> Présent avant, pendant ET après
-                                    </p>
-                                    <p className="text-xs text-slate-600 leading-relaxed font-normal">
-                                        L'artisan vous livre une installation finie, vous forme à l'utilisation du thermostat Airzone et reste joignable pour l'entretien annuel.
-                                    </p>
-                                </div>
-                                <div className="p-4 rounded-2xl bg-emerald-50/60 border border-emerald-200/60">
-                                    <p className="font-bold text-[#1F2D3D] text-sm mb-1 flex items-center gap-1.5">
-                                        <Lock className="w-4 h-4 text-emerald-600" /> Décennale authentifiée sur pièces
-                                    </p>
-                                    <p className="text-xs text-slate-600 leading-relaxed font-normal">
-                                        Votre réseau de gaines, votre groupe thermodynamique et vos liaisons frigorifiques sont couverts par une police d'assurance active et certifiée.
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Image Col (Handshake Business) */}
-                        <div className="lg:col-span-5 relative">
-                            <div className="relative rounded-3xl overflow-hidden shadow-2xl border-4 border-white bg-slate-100 group">
-                                <Image
-                                    src="/blog/b2b-handshake.png"
-                                    alt="Serrage de main et partenariat de confiance pour climatisation gainable"
-                                    width={600}
-                                    height={450}
-                                    className="w-full h-auto object-cover transition-transform duration-700 group-hover:scale-105"
-                                    priority
-                                />
-                                <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-transparent to-transparent"></div>
-                                <div className="absolute bottom-4 left-4 right-4 text-white p-3.5 bg-slate-900/70 backdrop-blur-md rounded-2xl border border-white/20">
-                                    <p className="font-bold text-sm flex items-center gap-2 text-amber-300">
-                                        <ShieldCheck className="w-4 h-4 text-amber-300" /> Le respect de la parole donnée
-                                    </p>
-                                    <p className="text-xs text-slate-200 mt-1">
-                                        Un engagement réciproque : un devis clair sans surprise, un travail soigné et un client protégé.
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-
+                            );
+                        })}
                     </div>
                 </div>
             </section>
 
-            {/* SECTION 5: COMPARATIF SERENITE (Avec photo Relation Pro-Client) */}
-            <section className="py-20 bg-slate-50/60 border-b border-slate-200">
-                <div className="container max-w-6xl mx-auto px-4">
-                    <div className="grid lg:grid-cols-12 gap-12 items-center">
-                        
-                        {/* Image Col (Client & Pro Handshake / Meeting) */}
-                        <div className="lg:col-span-5 order-2 lg:order-1 relative">
-                            <div className="relative rounded-3xl overflow-hidden shadow-2xl border-4 border-white bg-slate-100 group">
-                                <Image
-                                    src="/images/relation-pro-client.png"
-                                    alt="Client et artisan en climatisation vérifié échangeant en toute confiance"
-                                    width={600}
-                                    height={450}
-                                    className="w-full h-auto object-cover transition-transform duration-700 group-hover:scale-105"
-                                />
-                                <div className="absolute inset-0 bg-gradient-to-t from-slate-900/85 via-transparent to-transparent"></div>
-                                <div className="absolute bottom-4 left-4 right-4 text-white p-3.5 bg-slate-900/70 backdrop-blur-md rounded-2xl border border-white/20">
-                                    <p className="font-bold text-sm flex items-center gap-2 text-emerald-400">
-                                        <CheckCircle2 className="w-4 h-4 text-emerald-400" /> Tranquillité d'esprit absolue
-                                    </p>
-                                    <p className="text-xs text-slate-200 mt-1">
-                                        Vous savez qui entre chez vous, qui pose vos gaines et qui répondra présent si vous avez besoin d'aide.
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Comparison Table Col */}
-                        <div className="lg:col-span-7 order-1 lg:order-2 space-y-6">
-                            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-blue-50 text-blue-700 text-xs font-bold uppercase tracking-wider">
-                                <ShieldCheck className="w-4 h-4" /> La Différence Gainable.fr
-                            </div>
-
-                            <h2 className="text-3xl md:text-4xl font-black font-montserrat text-[#1F2D3D] leading-snug">
-                                Pourquoi choisir un artisan <br />
-                                <span className="text-[#D59B2B]">labellisé Expert Vérifié ?</span>
-                            </h2>
-
-                            <div className="space-y-4 pt-2">
-                                <div className="p-5 rounded-2xl bg-emerald-50/70 border border-emerald-200 space-y-3">
-                                    <div className="flex items-center gap-2 text-emerald-800 font-bold text-base">
-                                        <Check className="w-5 h-5 text-emerald-600 shrink-0" />
-                                        <span>Avec un Expert Vérifié Gainable.fr</span>
-                                    </div>
-                                    <ul className="text-xs md:text-sm text-slate-700 space-y-2 pl-7 list-disc">
-                                        <li><strong>Modération &amp; vérification documentaire sur pièces</strong> : Siret en règle, assurance décennale CVC valide et capacité gaz vérifiée.</li>
-                                        <li><strong>Contact direct et transparent</strong> : Aucun intermédiaire commercial, devis au tarif réel de l'artisan sans marge de plateforme.</li>
-                                        <li><strong>Étude thermique et acoustique</strong> : Dimensionnement sur-mesure pour éviter les sifflements d'air et la surconsommation électrique.</li>
-                                        <li><strong>Grandes marques et mise en service soignée</strong> : Matériel réputé posé par l'artisan dans le respect des règles de l'art.</li>
-                                    </ul>
-                                </div>
-
-                                <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
-                                    <div className="flex items-center gap-2 text-slate-700 font-bold text-base">
-                                        <XCircle className="w-5 h-5 text-slate-400 shrink-0" />
-                                        <span>Sur les plateformes de devis généralistes</span>
-                                    </div>
-                                    <ul className="text-xs md:text-sm text-slate-600 space-y-2 pl-7 list-disc">
-                                        <li>Vos coordonnées sont revendues à 3 à 5 entreprises qui vous harcèlent jour et nuit pour vous faire signer d'urgence.</li>
-                                        <li>Aucune vérification réelle des polices d'assurance décennale : risque de pose par des sous-traitants non déclarés.</li>
-                                        <li>Devis artificiellement bas pour décrocher le chantier, suivis d'avenants exorbitants une fois vos plafonds ouverts.</li>
-                                        <li>Entreprises volatiles : au premier problème d'eau ou de bruit, l'interlocuteur ne répond plus ou a liquidé son affaire.</li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-
-                    </div>
-                </div>
-            </section>
-
-            {/* SECTION 6: DÉDIÉE AUX PROFESSIONNELS : POURQUOI AVOIR LE BADGE CHANGE TOUT */}
-            <section className="py-20 bg-white border-b border-slate-200">
-                <div className="container max-w-6xl mx-auto px-4">
-                    <div className="grid lg:grid-cols-12 gap-12 items-center">
-                        <div className="lg:col-span-7 space-y-6">
-                            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-blue-50 text-blue-700 text-xs font-bold uppercase tracking-wider">
-                                <Award className="w-4 h-4 text-blue-600" /> Espace Installateurs & Bureaux d'Études
-                            </div>
-
-                            <h2 className="text-3xl md:text-4xl font-black font-montserrat text-[#1F2D3D] leading-tight">
-                                Vous êtes un installateur sérieux ? <br />
-                                <span className="text-[#D59B2B]">Ne laissez plus les poseurs sauvages voler vos chantiers.</span>
-                            </h2>
-
-                            <p className="text-slate-600 text-base md:text-lg leading-relaxed font-normal">
-                                Vous payez vos assurances décennales au prix fort. Vous formez vos techniciens, vous prenez le temps de soigner vos plenums, 
-                                vous équilibrez vos débits d'air et vous répondez au téléphone même deux ans après la fin du chantier.
-                            </p>
-
-                            <p className="text-slate-600 text-base leading-relaxed">
-                                Et pourtant, face à des clients méfiants échaudés par les scandales du bâtiment, vous devez sans cesse vous justifier face à des concurrents 
-                                qui cassent les prix de 30% parce qu’ils n'ont ni assurance, ni charges, ni SAV. 
-                                <strong> Le Badge Expert Vérifié est votre arme de différenciation massive :</strong>
-                            </p>
-
-                            <div className="space-y-3 pt-2">
-                                <div className="flex items-start gap-3">
-                                    <div className="w-6 h-6 rounded-full bg-emerald-500 text-white flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">✓</div>
-                                    <p className="text-sm text-slate-700">
-                                        <strong>Crédibilité immédiate auprès du particulier :</strong> Le client voit le badge indépendant et sait instantanément que vous n'êtes pas un arnaqueur éphémère.
-                                    </p>
-                                </div>
-                                <div className="flex items-start gap-3">
-                                    <div className="w-6 h-6 rounded-full bg-emerald-500 text-white flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">✓</div>
-                                    <p className="text-sm text-slate-700">
-                                        <strong>Défendez votre juste valeur :</strong> Expliquez simplement pourquoi votre devis est sérieux et pérenne comparé aux poseurs sans garantie.
-                                    </p>
-                                </div>
-                                <div className="flex items-start gap-3">
-                                    <div className="w-6 h-6 rounded-full bg-emerald-500 text-white flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">✓</div>
-                                    <p className="text-sm text-slate-700">
-                                        <strong>0 % de commission sur vos affaires :</strong> Vous restez 100% maître de vos tarifs, de votre relation client et de votre marge.
-                                    </p>
-                                </div>
-                            </div>
-
-                            <div className="pt-4">
-                                <Link href="/inscription">
-                                    <Button size="lg" className="bg-[#1F2D3D] hover:bg-slate-800 text-white px-8 py-6 rounded-2xl font-black text-base shadow-xl transition-all hover:scale-105">
-                                        Candidater pour obtenir le Badge Expert Vérifié
-                                    </Button>
-                                </Link>
-                            </div>
-                        </div>
-
-                        <div className="lg:col-span-5 relative">
-                            <div className="relative rounded-3xl overflow-hidden shadow-2xl border-4 border-white bg-slate-100 group">
-                                <Image
-                                    src="/blog/gainable-fr-climatisation-artisan-client-partenaire.png"
-                                    alt="Installateur sérieux valorisé par le label Expert Vérifié Gainable.fr"
-                                    width={600}
-                                    height={450}
-                                    className="w-full h-auto object-cover transition-transform duration-700 group-hover:scale-105"
-                                />
-                                <div className="absolute inset-0 bg-gradient-to-t from-slate-900/85 via-transparent to-transparent"></div>
-                                <div className="absolute bottom-4 left-4 right-4 text-white p-3.5 bg-slate-900/70 backdrop-blur-md rounded-2xl border border-white/20">
-                                    <p className="font-bold text-sm flex items-center gap-2 text-amber-300">
-                                        <Award className="w-4 h-4 text-amber-300" /> Valorisez votre savoir-faire
-                                    </p>
-                                    <p className="text-xs text-slate-200 mt-1">
-                                        Rejoignez le réseau des installateurs CVC les plus recommandés de France.
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            {/* SECTION 7: CONDITIONS D'OBTENTION (CONTRASTES ÉCLATANTS & LISIBILITÉ PARFAITE) */}
-            <section className="py-20 bg-[#1F2D3D] text-white">
-                <div className="container max-w-5xl mx-auto px-4 text-center">
-                    
-                    <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#D59B2B]/20 text-[#D59B2B] text-xs font-bold uppercase tracking-wider mb-4 border border-[#D59B2B]/30">
-                        <ShieldCheck className="w-4 h-4" /> Critères d'Excellence & Transparence
-                    </div>
-
-                    <h2 className="text-3xl md:text-4xl font-black font-montserrat text-white mb-4">
-                        Conditions d'obtention du Label <span className="text-[#D59B2B]">Gainable.fr</span>
-                    </h2>
-                    <p className="text-slate-300 text-sm md:text-base max-w-2xl mx-auto mb-14 font-normal">
-                        Nous ne transigeons pas avec la sécurité des foyers. Voici la liste des prérequis administratifs 
-                        et qualitatifs exigés sur pièces justificatives pour tout installateur ou bureau d'études partenaire.
-                    </p>
-
-                    <div className="grid md:grid-cols-2 gap-8 text-left">
-                        {/* DOCS OBLIGATOIRES */}
-                        <div className="bg-slate-800/95 border-2 border-slate-700/80 p-8 rounded-3xl shadow-xl">
-                            <div className="flex items-center gap-3 mb-6 pb-4 border-b border-slate-700">
-                                <div className="w-12 h-12 rounded-2xl bg-[#D59B2B]/20 text-[#D59B2B] flex items-center justify-center font-bold">
-                                    <FileText className="w-6 h-6 text-[#D59B2B]" />
-                                </div>
-                                <div>
-                                    <h3 className="text-xl font-bold text-white">Documents Obligatoires</h3>
-                                    <p className="text-xs text-slate-400 font-normal">Fournis et vérifiés lors de la modération</p>
-                                </div>
-                            </div>
-                            
-                            <ul className="space-y-4 text-slate-100 text-sm font-medium">
-                                <li className="flex items-start gap-3">
-                                    <div className="w-5 h-5 rounded-full bg-[#D59B2B] text-white flex items-center justify-center font-black text-xs shrink-0 mt-0.5">✓</div>
-                                    <span className="text-white">SIREN / SIRET actif auprès de l'INSEE sans antécédent de faillite suspecte</span>
-                                </li>
-                                <li className="flex items-start gap-3">
-                                    <div className="w-5 h-5 rounded-full bg-[#D59B2B] text-white flex items-center justify-center font-black text-xs shrink-0 mt-0.5">✓</div>
-                                    <span className="text-white">Numéro de TVA intracommunautaire officiel et compte bancaire professionnel</span>
-                                </li>
-                                <li className="flex items-start gap-3">
-                                    <div className="w-5 h-5 rounded-full bg-[#D59B2B] text-white flex items-center justify-center font-black text-xs shrink-0 mt-0.5">✓</div>
-                                    <span className="text-white">Attestation d'Assurance Décennale & RC Pro couvrant expressément le Génie Climatique</span>
-                                </li>
-                                <li className="flex items-start gap-3">
-                                    <div className="w-5 h-5 rounded-full bg-[#D59B2B] text-white flex items-center justify-center font-black text-xs shrink-0 mt-0.5">✓</div>
-                                    <span className="text-white">Attestation de capacité fluides frigorigènes (Catégorie I manipulation gaz)</span>
-                                </li>
-                                <li className="flex items-start gap-3">
-                                    <div className="w-5 h-5 rounded-full bg-[#D59B2B] text-white flex items-center justify-center font-black text-xs shrink-0 mt-0.5">✓</div>
-                                    <span className="text-white">Fourniture de matériel certifié grandes marques (Daikin, Mitsubishi, Atlantic, etc.)</span>
-                                </li>
-                                <li className="flex items-start gap-3">
-                                    <div className="w-5 h-5 rounded-full bg-[#D59B2B] text-white flex items-center justify-center font-black text-xs shrink-0 mt-0.5">✓</div>
-                                    <span className="text-white">Périmètre d'intervention géographique clairement délimité pour garantir le SAV local</span>
-                                </li>
-                            </ul>
-                        </div>
-
-                        {/* ENGAGEMENTS QUALITÉ */}
-                        <div className="bg-slate-800/95 border-2 border-slate-700/80 p-8 rounded-3xl shadow-xl">
-                            <div className="flex items-center gap-3 mb-6 pb-4 border-b border-slate-700">
-                                <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold">
-                                    <Award className="w-6 h-6 text-emerald-400" />
-                                </div>
-                                <div>
-                                    <h3 className="text-xl font-bold text-white">Engagements Déontologiques</h3>
-                                    <p className="text-xs text-slate-400 font-normal">Charte de confiance signée par le dirigeant</p>
-                                </div>
-                            </div>
-
-                            <ul className="space-y-4 text-slate-100 text-sm font-medium">
-                                <li className="flex items-start gap-3">
-                                    <div className="w-5 h-5 rounded-full bg-emerald-500 text-white flex items-center justify-center font-black text-xs shrink-0 mt-0.5">✓</div>
-                                    <span className="text-white">Respect scrupuleux des DTU aérauliques et des règles de sécurité électrique</span>
-                                </li>
-                                <li className="flex items-start gap-3">
-                                    <div className="w-5 h-5 rounded-full bg-emerald-500 text-white flex items-center justify-center font-black text-xs shrink-0 mt-0.5">✓</div>
-                                    <span className="text-white">Bilan thermique réel pour éviter le sous-dimensionnement ou les sifflements de gaines</span>
-                                </li>
-                                <li className="flex items-start gap-3">
-                                    <div className="w-5 h-5 rounded-full bg-emerald-500 text-white flex items-center justify-center font-black text-xs shrink-0 mt-0.5">✓</div>
-                                    <span className="text-white">Transparence totale des devis : distinction claire équipement / main-d'œuvre</span>
-                                </li>
-                                <li className="flex items-start gap-3">
-                                    <div className="w-5 h-5 rounded-full bg-emerald-500 text-white flex items-center justify-center font-black text-xs shrink-0 mt-0.5">✓</div>
-                                    <span className="text-white">Respect strict des délais d'exécution et propreté irréprochable du chantier</span>
-                                </li>
-                                <li className="flex items-start gap-3">
-                                    <div className="w-5 h-5 rounded-full bg-emerald-500 text-white flex items-center justify-center font-black text-xs shrink-0 mt-0.5">✓</div>
-                                    <span className="text-white">Charte d'écoute client et proposition systématique d'un contrat d'entretien</span>
-                                </li>
-                                <li className="flex items-start gap-3">
-                                    <div className="w-5 h-5 rounded-full bg-emerald-500 text-white flex items-center justify-center font-black text-xs shrink-0 mt-0.5">✓</div>
-                                    <span className="text-white">Interdiction formelle de sous-traitance clandestine sans l'accord écrit du client</span>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-
-                    <div className="mt-14 flex flex-col sm:flex-row items-center justify-center gap-4">
-                        <Link href="/trouver-installateur">
-                            <Button size="lg" className="bg-[#D59B2B] hover:bg-[#b88622] text-white px-9 py-6 text-base rounded-full shadow-xl font-black transition-all hover:scale-105">
-                                Consulter les Experts Vérifiés de ma région
+            {/* CTA SECTION */}
+            <section className="py-16 px-4 bg-[#1F2D3D] text-white text-center">
+                <div className="container max-w-4xl mx-auto space-y-6">
+                    <h2 className="text-3xl font-bold">{c.ctaTitle}</h2>
+                    <p className="text-slate-300 text-lg max-w-2xl mx-auto">{c.ctaSub}</p>
+                    <div className="flex flex-col sm:flex-row justify-center gap-4 pt-4">
+                        <Link href={withLocalePath("/", locale)}>
+                            <Button size="lg" className="bg-[#D59B2B] hover:bg-[#b88622] text-white font-bold px-8 py-6 rounded-xl">
+                                {c.findExpertBtn} <ArrowRight className="w-5 h-5 ml-2" />
                             </Button>
                         </Link>
-                        <Link href="/inscription">
-                            <Button size="lg" variant="outline" className="border-slate-500 bg-slate-800 text-white hover:bg-slate-700 px-8 py-6 text-base rounded-full font-bold transition-all">
-                                Postuler au Label (Espace Installateurs)
+                        <Link href={withLocalePath("/inscription", locale)}>
+                            <Button size="lg" variant="outline" className="bg-white text-[#1F2D3D] hover:bg-slate-100 font-bold px-8 py-6 rounded-xl">
+                                {c.applyLabelBtn}
                             </Button>
                         </Link>
                     </div>
                 </div>
             </section>
-
-            {/* SECTION 8: FAQ RASSURANCE SANS LANGUE DE BOIS */}
-            <section className="py-20 bg-white">
-                <div className="container max-w-4xl mx-auto px-4">
-                    <div className="text-center mb-12">
-                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-blue-50 text-blue-700 text-xs font-bold uppercase tracking-wider mb-3">
-                            <HelpCircle className="w-4 h-4" /> Réponses Sans Détours
-                        </div>
-                        <h2 className="text-3xl font-black font-montserrat text-[#1F2D3D]">
-                            Questions Fréquentes sur l'Expert Vérifié
-                        </h2>
-                    </div>
-
-                    <div className="space-y-4">
-                        {[
-                            {
-                                q: "Que risque un propriétaire si l'installateur n'a pas la bonne décennale ?",
-                                a: "Si l'artisan n'a qu'une assurance générale (ex: plomberie simple ou peinture) et non génie climatique, en cas de sinistre majeur (fuite d'eau destructrice au plafond, incendie électrique lié à un compresseur mal raccordé), la compagnie d'assurance refusera d'indemniser. Vous devrez payer l'intégralité des réparations de votre poche et engager des années de procédure judiciaire contre un artisan souvent insolvable."
-                            },
-                            {
-                                q: "Pourquoi les devis sur Gainable.fr ne subissent-ils aucune commission cachée ?",
-                                a: "Contrairement aux plateformes de courtage qui prélèvent entre 8 % et 15 % de commission sur les travaux (ce qui gonfle artificiellement la facture du client), Gainable.fr fonctionne comme un réseau de confiance indépendant. Vous traitez directement avec le gérant de l'entreprise locale sans aucun intermédiaire ni surtaxe."
-                            },
-                            {
-                                q: "Quel est le rôle exact de Gainable.fr ?",
-                                a: "Gainable.fr est une plateforme indépendante de mise en relation directe. Gainable.fr n'est ni fabricant de matériel, ni installateur, ni assureur. Nous n'intervenons pas dans les relations contractuelles, devis, exécution des travaux, garanties matérielles, pannes ou éventuels litiges entre le client et l'artisan. Chaque entreprise reste seule responsable de ses prestations et de ses garanties."
-                            },
-                            {
-                                q: "Que se passe-t-il si un professionnel ne respecte plus les critères du label ?",
-                                a: "Le label 'Expert Vérifié' est basé sur la modération et la vérification attentive des pièces justificatives fournies (SIRET actif, attestation décennale CVC valide, capacité fluides). En cas de document caduc ou de manquement constaté, le badge est suspendu et la fiche désactivée."
-                            },
-                            {
-                                q: "Je suis installateur : quel est l'intérêt concret pour moi d'obtenir le badge ?",
-                                a: "Le badge 'Expert Vérifié' lève immédiatement le premier frein de vos prospects : la peur de se tromper d'artisan. Il prouve votre sérieux, valorise vos assurances et vous permet de signer vos devis à votre juste prix sans avoir à brader vos marges face à des poseurs sauvages non déclarés."
-                            }
-                        ].map((item, idx) => (
-                            <div key={idx} className="p-6 rounded-2xl bg-slate-50 border border-slate-200/70 space-y-2">
-                                <h4 className="font-bold text-[#1F2D3D] text-base flex items-start gap-3">
-                                    <span className="text-[#D59B2B] font-bold">Q.</span>
-                                    <span>{item.q}</span>
-                                </h4>
-                                <p className="text-slate-600 text-sm leading-relaxed pl-7 font-normal">
-                                    {item.a}
-                                </p>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </section>
-
         </div>
     );
 }
