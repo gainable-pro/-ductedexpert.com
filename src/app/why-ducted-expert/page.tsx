@@ -26,6 +26,7 @@ export async function generateMetadata(): Promise<Metadata> {
     };
 }
 
-export default function WhyDuctedExpertPage() {
-    return <WhyPageContent />;
+export default async function WhyDuctedExpertPage() {
+    const locale = await getServerLocale();
+    return <WhyPageContent initialLocale={locale} />;
 }

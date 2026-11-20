@@ -17,15 +17,35 @@ import {
 import Link from "next/link";
 import Image from "next/image";
 import { useLanguage } from "@/components/layout/language-provider";
-import { withLocalePath } from "@/lib/i18n";
+import { Locale, withLocalePath } from "@/lib/i18n";
 import { WHY_CONTENT } from "@/lib/why-content";
 
-export function WhyPageContent() {
-    const { locale } = useLanguage();
+export function WhyPageContent({ initialLocale }: { initialLocale?: Locale }) {
+    const { locale: contextLocale } = useLanguage();
+    const locale = initialLocale || contextLocale;
     const c = WHY_CONTENT[locale] || WHY_CONTENT.en;
+    const showVideo = locale === "en" || locale === "de";
 
     return (
         <div className="min-h-screen bg-white font-sans text-[#1F2D3D]">
+            {/* Presentation Video Section - English, German & Swiss versions only */}
+            {showVideo && (
+                <section className="w-full bg-black relative flex items-center justify-center overflow-hidden">
+                    <div className="w-full">
+                        <video
+                            className="w-full aspect-video max-h-[85vh] object-cover mx-auto block"
+                            controls
+                            playsInline
+                            preload="metadata"
+                            poster="/videos/ductedexpert-presentation-poster.jpg"
+                        >
+                            <source src="/videos/ductedexpert-presentation.mp4" type="video/mp4" />
+                            Your browser does not support the video tag.
+                        </video>
+                    </div>
+                </section>
+            )}
+
             {/* 1. HERO SECTION */}
             <section className="relative pt-24 pb-20 px-6 bg-slate-50 border-b border-slate-200">
                 <div className="max-w-4xl mx-auto text-center">
