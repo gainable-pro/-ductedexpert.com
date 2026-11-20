@@ -24,24 +24,6 @@ export function AirConditioningPageView({ locale }: { locale: Locale }) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      {/* Presentation Video Section - English, German & Swiss versions only */}
-      {showVideo && (
-        <section className="w-full bg-black relative flex items-center justify-center overflow-hidden">
-          <div className="w-full">
-            <video
-              className="w-full aspect-video max-h-[85vh] object-cover mx-auto block"
-              controls
-              playsInline
-              preload="metadata"
-              poster="/videos/ductedexpert-presentation-poster.jpg"
-            >
-              <source src="/videos/ductedexpert-presentation.mp4" type="video/mp4" />
-              Your browser does not support the video tag.
-            </video>
-          </div>
-        </section>
-      )}
-
       {/* BLOCK 1: Hero Section */}
       <section className="relative min-h-[600px] flex items-center justify-center py-20 px-4 transition-all duration-1000 ease-in-out">
         <HeroSlider />
@@ -72,6 +54,26 @@ export function AirConditioningPageView({ locale }: { locale: Locale }) {
           </p>
         </div>
       </section>
+
+      {/* Presentation Video Section - Placed Below Hero Banner (English, German & Swiss versions only) */}
+      {showVideo && (
+        <section className="bg-slate-950 py-12 md:py-16 px-4 border-y border-slate-800">
+          <div className="container max-w-5xl mx-auto">
+            <div className="relative aspect-video rounded-2xl overflow-hidden shadow-2xl bg-black border border-slate-800">
+              <video
+                className="w-full h-full object-contain mx-auto block"
+                controls
+                playsInline
+                preload="metadata"
+                poster="/videos/ductedexpert-presentation-poster.jpg"
+              >
+                <source src="/videos/ductedexpert-presentation.mp4" type="video/mp4" />
+                Your browser does not support the video tag.
+              </video>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* SECTEUR D'ACTIVITÉ - ICONS ROW */}
       <section className="bg-white py-12 border-b border-slate-100">

@@ -28,24 +28,6 @@ export function WhyPageContent({ initialLocale }: { initialLocale?: Locale }) {
 
     return (
         <div className="min-h-screen bg-white font-sans text-[#1F2D3D]">
-            {/* Presentation Video Section - English, German & Swiss versions only */}
-            {showVideo && (
-                <section className="w-full bg-black relative flex items-center justify-center overflow-hidden">
-                    <div className="w-full">
-                        <video
-                            className="w-full aspect-video max-h-[85vh] object-cover mx-auto block"
-                            controls
-                            playsInline
-                            preload="metadata"
-                            poster="/videos/ductedexpert-presentation-poster.jpg"
-                        >
-                            <source src="/videos/ductedexpert-presentation.mp4" type="video/mp4" />
-                            Your browser does not support the video tag.
-                        </video>
-                    </div>
-                </section>
-            )}
-
             {/* 1. HERO SECTION */}
             <section className="relative pt-24 pb-20 px-6 bg-slate-50 border-b border-slate-200">
                 <div className="max-w-4xl mx-auto text-center">
@@ -72,6 +54,26 @@ export function WhyPageContent({ initialLocale }: { initialLocale?: Locale }) {
                     </div>
                 </div>
             </section>
+
+            {/* Presentation Video Section - Placed Below Hero Banner (English, German & Swiss versions only) */}
+            {showVideo && (
+                <section className="bg-slate-950 py-12 md:py-16 px-4 border-b border-slate-800">
+                    <div className="container max-w-5xl mx-auto">
+                        <div className="relative aspect-video rounded-2xl overflow-hidden shadow-2xl bg-black border border-slate-800">
+                            <video
+                                className="w-full h-full object-contain mx-auto block"
+                                controls
+                                playsInline
+                                preload="metadata"
+                                poster="/videos/ductedexpert-presentation-poster.jpg"
+                            >
+                                <source src="/videos/ductedexpert-presentation.mp4" type="video/mp4" />
+                                Your browser does not support the video tag.
+                            </video>
+                        </div>
+                    </div>
+                </section>
+            )}
 
             {/* 2. CONSTAT TERRAIN */}
             <section className="py-20 px-6 bg-white">
