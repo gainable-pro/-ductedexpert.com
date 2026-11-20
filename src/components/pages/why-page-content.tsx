@@ -57,9 +57,9 @@ export function WhyPageContent({ initialLocale }: { initialLocale?: Locale }) {
 
             {/* Presentation Video Section - Placed Below Hero Banner (English, German & Swiss versions only) */}
             {showVideo && (
-                <section className="bg-slate-950 py-12 md:py-16 px-4 border-b border-slate-800">
+                <section className="bg-slate-50 pb-16 px-4">
                     <div className="container max-w-5xl mx-auto">
-                        <div className="relative aspect-video rounded-2xl overflow-hidden shadow-2xl bg-black border border-slate-800">
+                        <div className="relative aspect-video rounded-2xl overflow-hidden shadow-2xl bg-white border border-slate-200">
                             <video
                                 className="w-full h-full object-contain mx-auto block"
                                 controls
