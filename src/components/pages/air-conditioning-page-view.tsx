@@ -23,6 +23,22 @@ export function AirConditioningPageView({ locale }: { locale: Locale }) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
+      {/* Presentation Video Section - Same full width, between header menu and hero photo */}
+      <section className="w-full bg-black relative flex items-center justify-center overflow-hidden">
+        <div className="w-full">
+          <video
+            className="w-full aspect-video max-h-[85vh] object-cover mx-auto block"
+            controls
+            playsInline
+            preload="metadata"
+            poster="/videos/ductedexpert-presentation-poster.jpg"
+          >
+            <source src="/videos/ductedexpert-presentation.mp4" type="video/mp4" />
+            Your browser does not support the video tag.
+          </video>
+        </div>
+      </section>
+
       {/* BLOCK 1: Hero Section */}
       <section className="relative min-h-[600px] flex items-center justify-center py-20 px-4 transition-all duration-1000 ease-in-out">
         <HeroSlider />
