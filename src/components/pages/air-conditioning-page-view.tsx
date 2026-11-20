@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { MapPin } from "lucide-react";
 import Link from "next/link";
 import { HeroSlider } from "@/components/climatisation/HeroSlider";
+import { PresentationVideo } from "@/components/features/video/presentation-video";
 import { Locale, withLocalePath, getLocalizedUrl } from "@/lib/i18n";
 import { CLIMATISATION_CONTENT } from "@/lib/climatisation-content";
 
@@ -59,21 +60,7 @@ export function AirConditioningPageView({ locale }: { locale: Locale }) {
       {showVideo && (
         <section className="bg-slate-50 py-12 md:py-16 px-4 border-b border-slate-200/80">
           <div className="container max-w-5xl mx-auto">
-            <div className="relative aspect-video rounded-2xl overflow-hidden shadow-2xl bg-white border border-slate-200">
-              <video
-                className="w-full h-full object-contain mx-auto block"
-                autoPlay
-                muted
-                loop
-                playsInline
-                controls
-                preload="auto"
-                poster="/videos/ductedexpert-presentation-poster.jpg"
-              >
-                <source src="/videos/ductedexpert-presentation.mp4" type="video/mp4" />
-                Your browser does not support the video tag.
-              </video>
-            </div>
+            <PresentationVideo />
           </div>
         </section>
       )}

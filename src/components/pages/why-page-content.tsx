@@ -19,6 +19,7 @@ import Image from "next/image";
 import { useLanguage } from "@/components/layout/language-provider";
 import { Locale, withLocalePath } from "@/lib/i18n";
 import { WHY_CONTENT } from "@/lib/why-content";
+import { PresentationVideo } from "@/components/features/video/presentation-video";
 
 export function WhyPageContent({ initialLocale }: { initialLocale?: Locale }) {
     const { locale: contextLocale } = useLanguage();
@@ -59,21 +60,7 @@ export function WhyPageContent({ initialLocale }: { initialLocale?: Locale }) {
             {showVideo && (
                 <section className="bg-slate-50 pb-16 px-4">
                     <div className="container max-w-5xl mx-auto">
-                        <div className="relative aspect-video rounded-2xl overflow-hidden shadow-2xl bg-white border border-slate-200">
-                            <video
-                                className="w-full h-full object-contain mx-auto block"
-                                autoPlay
-                                muted
-                                loop
-                                playsInline
-                                controls
-                                preload="auto"
-                                poster="/videos/ductedexpert-presentation-poster.jpg"
-                            >
-                                <source src="/videos/ductedexpert-presentation.mp4" type="video/mp4" />
-                                Your browser does not support the video tag.
-                            </video>
-                        </div>
+                        <PresentationVideo />
                     </div>
                 </section>
             )}
