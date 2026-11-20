@@ -62,9 +62,12 @@ export function AirConditioningPageView({ locale }: { locale: Locale }) {
             <div className="relative aspect-video rounded-2xl overflow-hidden shadow-2xl bg-white border border-slate-200">
               <video
                 className="w-full h-full object-contain mx-auto block"
-                controls
+                autoPlay
+                muted
+                loop
                 playsInline
-                preload="metadata"
+                controls
+                preload="auto"
                 poster="/videos/ductedexpert-presentation-poster.jpg"
               >
                 <source src="/videos/ductedexpert-presentation.mp4" type="video/mp4" />
