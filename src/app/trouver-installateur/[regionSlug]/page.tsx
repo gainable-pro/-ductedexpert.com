@@ -27,7 +27,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
     return {
         title: `Trouvez votre Installateur Climatisation & Pompe à Chaleur en ${regionName}`,
-        description: `Comparez les meilleurs artisans et installateurs RGE certifiés Gainable pour votre projet de climatisation ou de chauffage en ${regionName}. Obtenez un devis local gratuit.`,
+        description: `Comparez les meilleurs artisans et installateurs certifiés DuctedExpert pour votre projet de climatisation ou de chauffage en ${regionName}. Obtenez un devis local gratuit.`,
         alternates: {
             canonical: `https://www.gainable.fr/trouver-installateur/${regionSlug}`,
         }

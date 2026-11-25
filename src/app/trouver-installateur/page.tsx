@@ -53,7 +53,7 @@ export default async function DirectoryPage() {
         <div className="bg-slate-50 min-h-screen pb-20">
             <ItemListJsonLd
                 name="Annuaire Installateurs Climatisation Gainable RGE"
-                description="Liste des installateurs certifiés RGE répertoriés sur Gainable.fr"
+                description="Liste des installateurs certifiés et qualifiés CVC répertoriés sur DuctedExpert.com"
                 items={activeExperts.map(e => ({
                     name: e.nom_entreprise,
                     slug: e.slug,

@@ -4,14 +4,14 @@ import { DemoConfirmerContent } from "./DemoConfirmerContent";
 import { MetaPixel } from "@/components/analytics/MetaPixel";
 
 export const metadata: Metadata = {
-    title: "Créneau Confirmé | Démonstration Gainable.fr",
-    description: "Votre créneau de démonstration Gainable.fr a été enregistré avec succès.",
+    title: "Créneau Confirmé | Démonstration DuctedExpert.com",
+    description: "Votre créneau de démonstration DuctedExpert.com a été enregistré avec succès.",
     robots: {
         index: false,
         follow: false,
     },
     alternates: {
-        canonical: "https://www.gainable.fr/demo-confirmer",
+        canonical: "https://www.ductedexpert.com/demo-confirmer",
     },
 };
 

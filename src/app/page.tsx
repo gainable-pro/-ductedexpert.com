@@ -22,7 +22,7 @@ export async function generateMetadata(): Promise<Metadata> {
         openGraph: {
             title: dict.home.metaTitle,
             description: dict.home.metaDesc,
-            images: ['/gainable-fr-climatisation-pompe-a-chaleur-hero.png'],
+            images: ['/ductedexpert-logo.png'],
         }
     };
 }

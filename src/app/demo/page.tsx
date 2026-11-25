@@ -20,20 +20,20 @@ import {
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { PourquoiGainableVideoPlayer } from "@/components/features/video/PourquoiGainableVideoPlayer";
+import { PresentationVideo } from "@/components/features/video/presentation-video";
 import { DemoBookingWidget } from "@/components/features/demo/DemoBookingWidget";
 import { StickyMobileCta } from "@/components/features/demo/StickyMobileCta";
 import { MetaPixel } from "@/components/analytics/MetaPixel";
 
 export const metadata: Metadata = {
-    title: "Démonstration Pro Gainable.fr | Réservez votre créneau en direct",
-    description: "Découvrez en 15 minutes comment rejoindre le réseau de référence en climatisation gainable et génie climatique. Zéro commission, contacts directs et qualifiés.",
+    title: "Démonstration Pro DuctedExpert.com | Réservez votre créneau en direct",
+    description: "Découvrez en 15 minutes comment rejoindre la plateforme internationale en climatisation gainable et génie climatique. Zéro commission, contacts directs et qualifiés.",
     robots: {
         index: false,
         follow: false,
     },
     alternates: {
-        canonical: "https://www.gainable.fr/demo",
+        canonical: "https://www.ductedexpert.com/demo",
     },
 };
 
@@ -60,13 +60,13 @@ export default function DemoPage() {
                         </h1>
                         <p className="text-lg sm:text-xl text-slate-600 max-w-3xl mx-auto font-medium leading-relaxed">
                             Fini les plateformes de devis qui revendent le même lead à 5 concurrents.
-                            Découvrez lors d'une <strong className="text-[#1F2D3D]">démonstration de 15 minutes</strong> comment Gainable.fr rétablit une relation directe et saine avec des clients qualifiés.
+                            Découvrez lors d'une <strong className="text-[#1F2D3D]">démonstration de 15 minutes</strong> comment DuctedExpert.com rétablit une relation directe et saine avec des clients qualifiés.
                         </p>
                     </div>
 
-                    {/* VIDEO EN AVANT (Grand format vertical sur mobile, 16:9 sur desktop) */}
+                    {/* VIDEO EN AVANT (S'adapte dynamiquement à la langue du visiteur) */}
                     <div className="my-6 sm:my-8 max-w-4xl mx-auto">
-                        <PourquoiGainableVideoPlayer />
+                        <PresentationVideo />
                     </div>
 
                     {/* FORMULAIRE DE DEMANDE DE DÉMO DIRECTEMENT SOUS LA VIDÉO */}

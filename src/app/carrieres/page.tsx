@@ -22,10 +22,10 @@ import Link from "next/link";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-    title: "Carrières & Recrutement | Gainable.fr",
-    description: "Rejoignez l'équipe Gainable.fr. Découvrez nos opportunités de carrière et participez au futur de la climatisation gainable.",
+    title: "Carrières & Recrutement | DuctedExpert.com",
+    description: "Rejoignez l'équipe DuctedExpert.com. Découvrez nos opportunités de carrière et participez au futur du génie climatique international.",
     alternates: {
-        canonical: "https://www.gainable.fr/carrieres",
+        canonical: "https://www.ductedexpert.com/carrieres",
     },
 };
 

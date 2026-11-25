@@ -2,9 +2,9 @@ import { MetadataRoute } from 'next'
  
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'Gainable.fr',
-    short_name: 'Gainable.fr',
-    description: 'Espace professionnel Gainable.fr pour la gestion de vos demandes et articles SEO',
+    name: 'DuctedExpert.com',
+    short_name: 'DuctedExpert',
+    description: 'The international platform for HVAC experts, ducted air conditioning and heat pumps',
     start_url: '/dashboard',
     display: 'standalone',
     background_color: '#ffffff',

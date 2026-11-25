@@ -21,7 +21,7 @@ export async function generateMetadata(): Promise<Metadata> {
       description: c.metaDesc,
       url: canonicalUrl,
       type: "website",
-      images: ["/gainable-fr-climatisation-pompe-a-chaleur-hero.png"],
+      images: ["/ductedexpert-logo.png"],
     }
   };
 }

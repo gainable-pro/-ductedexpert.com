@@ -64,23 +64,28 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     ];
 
     const descChoices = [
-        `▶ Besoin d'une climatisation à ${city.name} (${city.zip}) ? Gainable.fr est le réseau n°1. Contactez un installateur expert RGE local et obtenez un devis gratuit !`,
-        `▶ Installation de climatisation à ${city.name} (${city.zip}) : Devis gratuit en 48h. Comparez les tarifs de nos installateurs et frigoristes certifiés RGE.`,
+        `▶ Besoin d'une climatisation à ${city.name} (${city.zip}) ? DuctedExpert est la plateforme de référence des experts CVC. Contactez un installateur certifié local et obtenez un devis gratuit !`,
+        `▶ Installation de climatisation à ${city.name} (${city.zip}) : Devis gratuit en 48h. Comparez les tarifs de nos installateurs et frigoristes certifiés.`,
         `▶ Trouvez le meilleur installateur de climatisation à ${city.name} (${city.zip}). Comparez les prix de pose pour climatiseur gainable et pompe à chaleur réversible.`
     ];
+
+    const isInternationalCity = city.country && city.country !== 'FR';
+    const canonicalUrl = isInternationalCity
+        ? `https://www.ductedexpert.com/climatisation/${city.slug}`
+        : `https://www.gainable.fr/climatisation/${city.slug}`;
 
     return {
         title: pick(seed, titleChoices, 0),
         description: pick(seed, descChoices, 0),
         alternates: {
-            canonical: `https://www.gainable.fr/climatisation/${city.slug}`,
+            canonical: canonicalUrl,
         },
         openGraph: {
             title: `Installateur Climatisation à ${city.name}`,
-            description: `Le réseau national des experts du froid. Trouvez les meilleurs artisans locaux à ${city.name}.`,
-            url: `https://www.gainable.fr/climatisation/${city.slug}`,
+            description: `Le réseau des experts du froid et génie climatique. Trouvez les meilleurs artisans locaux à ${city.name}.`,
+            url: `https://www.ductedexpert.com/climatisation/${city.slug}`,
             type: 'website',
-            images: ['/gainable-fr-climatisation-villa-residentiel.png'],
+            images: ['/city-images/template-villa.jpg'],
         }
     };
 }
@@ -191,8 +196,8 @@ export default async function CityPage({ params }: PageProps) {
                 "name": `Installation Climatisation Gainable à ${city.name}`,
                 "provider": {
                     "@type": "Organization",
-                    "name": "Gainable.fr",
-                    "url": "https://www.gainable.fr"
+                    "name": "DuctedExpert",
+                    "url": "https://www.ductedexpert.com"
                 },
                 "areaServed": {
                     "@type": "City",
@@ -211,7 +216,7 @@ export default async function CityPage({ params }: PageProps) {
             },
             {
                 "@type": "FAQPage",
-                "@id": `https://www.gainable.fr/climatisation/${city.slug}#faq`,
+                "@id": `https://www.ductedexpert.com/climatisation/${city.slug}#faq`,
                 "mainEntity": [
                     {
                         "@type": "Question",
@@ -341,14 +346,39 @@ export default async function CityPage({ params }: PageProps) {
         console.warn(`City page DB query warning for ${city.name} during build:`, e);
     }
 
+    // Google DMA Structured Data Carousel (ItemList + HVACBusiness)
+    if (localExperts.length > 0) {
+        (jsonLd["@graph"] as any[]).push({
+            "@type": "ItemList",
+            "name": `Installateurs de climatisation recommandés à ${city.name}`,
+            "numberOfItems": localExperts.length,
+            "itemListElement": localExperts.map((exp, idx) => ({
+                "@type": "ListItem",
+                "position": idx + 1,
+                "name": exp.nom_entreprise,
+                "url": `https://www.ductedexpert.com/pro/${exp.slug}`,
+                "item": {
+                    "@type": "HVACBusiness",
+                    "name": exp.nom_entreprise,
+                    "url": `https://www.ductedexpert.com/pro/${exp.slug}`,
+                    "image": exp.logo_url || "https://www.ductedexpert.com/ductedexpert-logo.png",
+                    "address": {
+                        "@type": "PostalAddress",
+                        "addressLocality": exp.ville,
+                        "addressCountry": city.country || "FR"
+                    }
+                }
+            }))
+        });
+    }
 
     const breadcrumbJsonLd = {
         "@context": "https://schema.org",
         "@type": "BreadcrumbList",
         "itemListElement": [
-            { "@type": "ListItem", "position": 1, "name": "Accueil", "item": "https://www.gainable.fr" },
-            { "@type": "ListItem", "position": 2, "name": "Climatisation", "item": "https://www.gainable.fr/climatisation" },
-            { "@type": "ListItem", "position": 3, "name": `Climatisation ${city.name}`, "item": `https://www.gainable.fr/climatisation/${city.slug}` }
+            { "@type": "ListItem", "position": 1, "name": "Accueil", "item": "https://www.ductedexpert.com" },
+            { "@type": "ListItem", "position": 2, "name": "Climatisation", "item": "https://www.ductedexpert.com/climatisation" },
+            { "@type": "ListItem", "position": 3, "name": `Climatisation ${city.name}`, "item": `https://www.ductedexpert.com/climatisation/${city.slug}` }
         ]
     };
 
@@ -361,7 +391,7 @@ export default async function CityPage({ params }: PageProps) {
             city.climateZone === 'mediterranean' ? '/city-images/template-villa.jpg' :
                 city.housingType === 'historique' ? '/city-images/template-historic.jpg' :
                     city.climateZone === 'mountain' ? '/city-images/template-mountain.jpg' :
-                        '/gainable-fr-climatisation-villa-residentiel.png'
+                        '/city-images/template-villa.jpg'
     );
 
     return (

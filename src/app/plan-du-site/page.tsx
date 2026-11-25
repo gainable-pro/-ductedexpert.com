@@ -6,10 +6,10 @@ import { Metadata } from "next";
 import { slugify } from "@/lib/utils";
 
 export const metadata: Metadata = {
-    title: "Plan du site & Zones d'intervention | Gainable.fr",
-    description: "Retrouvez l'ensemble de nos zones d'intervention pour l'installation de climatisation gainable en France, Belgique, Suisse et au Maroc.",
+    title: "Plan du site & Zones d'intervention | DuctedExpert.com",
+    description: "Retrouvez l'ensemble de nos zones d'intervention pour l'installation de climatisation gainable et génie climatique à l'international.",
     alternates: {
-        canonical: "https://www.gainable.fr/plan-du-site",
+        canonical: "https://www.ductedexpert.com/plan-du-site",
     },
 };
 

@@ -3,10 +3,10 @@ import Link from 'next/link';
 import { ArrowLeft, Building2, Server, Globe2, ShieldAlert, Award, FileText, Lock, Cookie, HelpCircle, Scale } from 'lucide-react';
 
 export const metadata: Metadata = {
-    title: "Mentions Légales - Gainable.fr",
-    description: "Mentions légales officielles de la plateforme Gainable.fr éditée par EXCEED DIGITAL SAS (SIREN 101 447 944, RCS Salon-de-Provence). Marque déposée INPI.",
+    title: "Mentions Légales - DuctedExpert.com",
+    description: "Mentions légales officielles de la plateforme DuctedExpert.com éditée par EXCEED DIGITAL SAS (SIREN 101 447 944, RCS Salon-de-Provence).",
     alternates: {
-        canonical: "https://www.gainable.fr/mentions-legales",
+        canonical: "https://www.ductedexpert.com/mentions-legales",
     },
     robots: {
         index: false,

@@ -3,10 +3,10 @@ import Link from 'next/link';
 import { ArrowLeft, Cookie, ShieldCheck, Settings, Globe2, Building2 } from 'lucide-react';
 
 export const metadata: Metadata = {
-    title: "Politique de Cookies et Traceurs - Gainable.fr",
-    description: "Politique de gestion des cookies et traceurs de Gainable.fr (EXCEED DIGITAL SAS) : finalités, consentement CNIL, paramétrage et inventaire technique.",
+    title: "Politique de Cookies et Traceurs - DuctedExpert.com",
+    description: "Politique de gestion des cookies et traceurs de DuctedExpert.com (EXCEED DIGITAL SAS) : finalités, paramétrage et inventaire technique.",
     alternates: {
-        canonical: "https://www.gainable.fr/politique-cookies",
+        canonical: "https://www.ductedexpert.com/politique-cookies",
     },
     robots: {
         index: false,

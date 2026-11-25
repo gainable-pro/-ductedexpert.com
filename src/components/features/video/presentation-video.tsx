@@ -2,18 +2,37 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Volume2, VolumeX } from "lucide-react";
+import { useLanguage } from "@/components/layout/language-provider";
+import { Locale } from "@/lib/i18n";
 
 interface PresentationVideoProps {
   className?: string;
+  forceLocale?: Locale;
 }
 
-export function PresentationVideo({ className = "" }: PresentationVideoProps) {
+const VIDEO_BY_LOCALE: Record<Locale, string> = {
+  en: "/videos/ductedexpert-presentation-en.mp4",
+  de: "/videos/ductedexpert-presentation-de.mp4",
+  es: "/videos/ductedexpert-presentation-es.mp4",
+  it: "/videos/ductedexpert-presentation-it.mp4",
+  fi: "/videos/ductedexpert-presentation-fi.mp4",
+  ar: "/videos/ductedexpert-presentation-ar.mp4",
+};
+
+export function PresentationVideo({ className = "", forceLocale }: PresentationVideoProps) {
+  const { locale: contextLocale } = useLanguage();
+  const activeLocale = forceLocale || contextLocale || 'en';
+  const videoSrc = VIDEO_BY_LOCALE[activeLocale] || VIDEO_BY_LOCALE.en;
+
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isMuted, setIsMuted] = useState(true);
 
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
+
+    // Reload video when source changes
+    video.load();
 
     // 1. Try to start WITH sound immediately
     video.muted = false;
@@ -23,19 +42,15 @@ export function PresentationVideo({ className = "" }: PresentationVideoProps) {
     if (playPromise !== undefined) {
       playPromise
         .then(() => {
-          // Browser allowed unmuted autoplay!
           setIsMuted(false);
         })
         .catch(() => {
-          // Browser security policy blocked audio autoplay on cold visit:
-          // Start muted so the video still plays smoothly
           video.muted = true;
           setIsMuted(true);
           video.play().catch(() => {});
         });
     }
 
-    // 2. Automatically activate sound on the very first user interaction anywhere on the page
     const unmuteOnUserGesture = () => {
       if (video) {
         video.muted = false;
@@ -58,7 +73,7 @@ export function PresentationVideo({ className = "" }: PresentationVideoProps) {
     return () => {
       removeListeners();
     };
-  }, []);
+  }, [videoSrc]);
 
   const toggleSound = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -78,6 +93,7 @@ export function PresentationVideo({ className = "" }: PresentationVideoProps) {
   return (
     <div className={`relative aspect-video rounded-2xl overflow-hidden shadow-2xl bg-white border border-slate-200 group ${className}`}>
       <video
+        key={videoSrc}
         ref={videoRef}
         className="w-full h-full object-contain mx-auto block"
         autoPlay
@@ -87,7 +103,7 @@ export function PresentationVideo({ className = "" }: PresentationVideoProps) {
         preload="auto"
         poster="/videos/ductedexpert-presentation-poster.jpg"
       >
-        <source src="/videos/ductedexpert-presentation.mp4" type="video/mp4" />
+        <source src={videoSrc} type="video/mp4" />
         Your browser does not support the video tag.
       </video>
 

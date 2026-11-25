@@ -23,9 +23,9 @@ import { PresentationVideo } from "@/components/features/video/presentation-vide
 
 export function WhyPageContent({ initialLocale }: { initialLocale?: Locale }) {
     const { locale: contextLocale } = useLanguage();
-    const locale = initialLocale || contextLocale;
+    const locale = contextLocale || initialLocale || 'en';
     const c = WHY_CONTENT[locale] || WHY_CONTENT.en;
-    const showVideo = locale === "en" || locale === "de";
+    const showVideo = true;
 
     return (
         <div className="min-h-screen bg-white font-sans text-[#1F2D3D]">
@@ -56,11 +56,11 @@ export function WhyPageContent({ initialLocale }: { initialLocale?: Locale }) {
                 </div>
             </section>
 
-            {/* Presentation Video Section - Placed Below Hero Banner (English, German & Swiss versions only) */}
+            {/* Presentation Video Section - Multilingual (EN, DE, ES, IT, FI, AR) */}
             {showVideo && (
                 <section className="bg-slate-50 pb-16 px-4">
                     <div className="container max-w-5xl mx-auto">
-                        <PresentationVideo />
+                        <PresentationVideo forceLocale={locale} />
                     </div>
                 </section>
             )}

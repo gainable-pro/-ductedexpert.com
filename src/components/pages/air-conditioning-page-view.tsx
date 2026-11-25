@@ -1,3 +1,5 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import { MapPin } from "lucide-react";
 import Link from "next/link";
@@ -5,10 +7,13 @@ import { HeroSlider } from "@/components/climatisation/HeroSlider";
 import { PresentationVideo } from "@/components/features/video/presentation-video";
 import { Locale, withLocalePath, getLocalizedUrl } from "@/lib/i18n";
 import { CLIMATISATION_CONTENT } from "@/lib/climatisation-content";
+import { useLanguage } from "@/components/layout/language-provider";
 
-export function AirConditioningPageView({ locale }: { locale: Locale }) {
+export function AirConditioningPageView({ locale: initialLocale }: { locale: Locale }) {
+  const { locale: contextLocale } = useLanguage();
+  const locale = contextLocale || initialLocale || 'en';
   const c = CLIMATISATION_CONTENT[locale] || CLIMATISATION_CONTENT.en;
-  const showVideo = locale === "en" || locale === "de";
+  const showVideo = true;
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -56,11 +61,11 @@ export function AirConditioningPageView({ locale }: { locale: Locale }) {
         </div>
       </section>
 
-      {/* Presentation Video Section - Placed Below Hero Banner (English, German & Swiss versions only) */}
+      {/* Presentation Video Section - Multilingual (EN, DE, ES, IT, FI, AR) */}
       {showVideo && (
         <section className="bg-slate-50 py-12 md:py-16 px-4 border-b border-slate-200/80">
           <div className="container max-w-5xl mx-auto">
-            <PresentationVideo />
+            <PresentationVideo forceLocale={locale} />
           </div>
         </section>
       )}

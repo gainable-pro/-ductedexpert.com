@@ -3,10 +3,10 @@ import Link from 'next/link';
 import { ArrowLeft, ShieldCheck, Building2, Globe2, Lock, UserCheck } from 'lucide-react';
 
 export const metadata: Metadata = {
-    title: "Politique de Confidentialité & Protection des Données - Gainable.fr",
-    description: "Politique de confidentialité et de protection des données personnelles de Gainable.fr exploitée par EXCEED DIGITAL SAS (RGPD, droits d'accès, conservation, sécurité).",
+    title: "Politique de Confidentialité & Protection des Données - DuctedExpert.com",
+    description: "Politique de confidentialité et de protection des données personnelles de DuctedExpert.com exploitée par EXCEED DIGITAL SAS (droits d'accès, conservation, sécurité).",
     alternates: {
-        canonical: "https://www.gainable.fr/politique-confidentialite",
+        canonical: "https://www.ductedexpert.com/politique-confidentialite",
     },
     robots: {
         index: false,

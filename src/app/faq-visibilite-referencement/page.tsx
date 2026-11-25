@@ -3,10 +3,10 @@ import Link from "next/link";
 import { CheckCircle2, XCircle, AlertTriangle, HelpCircle } from "lucide-react";
 
 export const metadata: Metadata = {
-    title: "FAQ Visibilité & Référencement | Gainable.fr",
-    description: "Tout comprendre sur le fonctionnement de la visibilité et du référencement des professionnels sur Gainable.fr.",
+    title: "FAQ Visibilité & Référencement | DuctedExpert.com",
+    description: "Tout comprendre sur le fonctionnement de la visibilité et du référencement des professionnels sur DuctedExpert.com.",
     alternates: {
-        canonical: "https://www.gainable.fr/faq-visibilite-referencement",
+        canonical: "https://www.ductedexpert.com/faq-visibilite-referencement",
     },
 };
 
