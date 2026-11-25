@@ -28,6 +28,7 @@ import {
 import Link from "next/link";
 import Image from "next/image";
 import { VerifiedExpertBadge } from "@/components/ui/verified-expert-badge";
+import { ShortVerificationVideo } from "@/components/features/video/short-verification-video";
 import { useLanguage } from "@/components/layout/language-provider";
 import { withLocalePath } from "@/lib/i18n";
 import { LABELS_CONTENT } from "@/lib/labels-content";
@@ -98,6 +99,9 @@ export function LabelsPageContent() {
                     </div>
                 </div>
             </section>
+
+            {/* SECTION: 30s CERTIFICATION SHORT VIDEO (Multilingual EN/DE/ES/IT/FI/AR) */}
+            <ShortVerificationVideo forceLocale={locale} />
 
             {/* SECTION 2: OFFICIAL BADGE */}
             <section className="py-16 bg-gradient-to-b from-slate-100 via-white to-slate-50 border-b border-slate-200">
