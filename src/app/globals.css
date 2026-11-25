@@ -2,8 +2,8 @@
 
 @theme {
   --font-sans: var(--font-montserrat), "Inter", sans-serif;
-  --font-cairo: var(--font-cairo), "Cairo", sans-serif;
-  --font-tajawal: var(--font-tajawal), "Tajawal", sans-serif;
+  --font-cairo: "Cairo", sans-serif;
+  --font-tajawal: "Tajawal", sans-serif;
 
   /* Gainable.fr Identity Colors */
   --color-primary: #1F2D3D;
