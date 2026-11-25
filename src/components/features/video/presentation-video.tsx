@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Volume2, VolumeX, Play } from "lucide-react";
+import { Volume2, VolumeX } from "lucide-react";
 import { useLanguage } from "@/components/layout/language-provider";
 import { Locale } from "@/lib/i18n";
 
@@ -19,6 +19,45 @@ const VIDEO_BY_LOCALE: Record<Locale, string> = {
   ar: "/videos/ductedexpert-presentation-ar.mp4",
 };
 
+interface VideoMetadata {
+  name: string;
+  description: string;
+  duration: string;
+}
+
+const VIDEO_METADATA: Record<Locale, VideoMetadata> = {
+  en: {
+    name: "DuctedExpert.com - The Global Network for Certified Ducted HVAC Experts",
+    description: "Discover how DuctedExpert connects homeowners and commercial clients with verified ducted air conditioning and heat pump specialists worldwide.",
+    duration: "PT1M17S",
+  },
+  de: {
+    name: "DuctedExpert.com - Das Netzwerk für zertifizierte Kanalklimaanlagen-Experten",
+    description: "Erfahren Sie, wie DuctedExpert Bauherren und Unternehmen mit geprüften Experten für Kanalklimaanlagen und Wärmepumpen verbindet.",
+    duration: "PT1M33S",
+  },
+  es: {
+    name: "DuctedExpert.com - La red global de instaladores certificados de climatización por conductos",
+    description: "Descubre cómo DuctedExpert conecta a particulares y empresas con especialistas certificados en aire acondicionado por conductos.",
+    duration: "PT1M26S",
+  },
+  it: {
+    name: "DuctedExpert.com - La rete di esperti certificati in climatizzazione canalizzata",
+    description: "Scopri come DuctedExpert mette in contatto clienti e aziende con specialisti certificati in aria condizionata canalizzata e pompe di calore.",
+    duration: "PT1M27S",
+  },
+  fi: {
+    name: "DuctedExpert.com - Sertifioidut kanavailmalämpöpumppujen ja ilmastoinnin asiantuntijat",
+    description: "Katso, miten DuctedExpert yhdistää asiakkaat ja yritykset tarkastettujen kanavailmastoinnin ja lämpöpumppujen ammattilaisten kanssa.",
+    duration: "PT1M33S",
+  },
+  ar: {
+    name: "DuctedExpert.com - الشبكة العالمية لخبراء التكييف المركزي المعتمدين",
+    description: "اكتشف كيف تربط منصة DuctedExpert أصحاب المشاريع والفلل بأفضل مقاولي ومكاتب دراسات التكييف المركزي المعتمدين.",
+    duration: "PT1M29S",
+  },
+};
+
 const SOUND_LABELS: Record<Locale, { unmute: string; on: string }> = {
   en: { unmute: "Click for sound 🔊", on: "Sound ON" },
   de: { unmute: "Ton aktivieren 🔊", on: "Ton AN" },
@@ -33,9 +72,26 @@ export function PresentationVideo({ className = "", forceLocale }: PresentationV
   const activeLocale = forceLocale || contextLocale || 'en';
   const videoSrc = VIDEO_BY_LOCALE[activeLocale] || VIDEO_BY_LOCALE.en;
   const labels = SOUND_LABELS[activeLocale] || SOUND_LABELS.en;
+  const meta = VIDEO_METADATA[activeLocale] || VIDEO_METADATA.en;
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isMuted, setIsMuted] = useState(false);
+
+  // Schema.org VideoObject for Google Search & Google Videos indexation
+  const videoSchema = {
+    "@context": "https://schema.org",
+    "@type": "VideoObject",
+    "name": meta.name,
+    "description": meta.description,
+    "thumbnailUrl": [
+      "https://www.ductedexpert.com/videos/ductedexpert-presentation-poster.jpg"
+    ],
+    "uploadDate": "2026-11-25T12:00:00+01:00",
+    "duration": meta.duration,
+    "contentUrl": `https://www.ductedexpert.com${videoSrc}`,
+    "embedUrl": `https://www.ductedexpert.com${videoSrc}`,
+    "inLanguage": activeLocale,
+  };
 
   useEffect(() => {
     const video = videoRef.current;
@@ -131,54 +187,63 @@ export function PresentationVideo({ className = "", forceLocale }: PresentationV
   };
 
   return (
-    <div 
-      onClick={handleContainerClick}
-      className={`relative aspect-video rounded-2xl overflow-hidden shadow-2xl bg-white border border-slate-200 group cursor-pointer ${className}`}
-    >
-      <video
-        key={videoSrc}
-        ref={videoRef}
-        className="w-full h-full object-contain mx-auto block"
-        autoPlay
-        loop
-        playsInline
-        controls
-        preload="auto"
-        poster="/videos/ductedexpert-presentation-poster.jpg"
-      >
-        <source src={videoSrc} type="video/mp4" />
-        Your browser does not support the video tag.
-      </video>
+    <>
+      {/* Google Video SEO Structured Data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(videoSchema) }}
+      />
 
-      {/* Floating Sound Toggle Pill */}
-      <button
-        onClick={toggleSound}
-        type="button"
-        aria-label={isMuted ? labels.unmute : labels.on}
-        className="absolute top-4 right-4 z-20 flex items-center gap-2 bg-[#1F2D3D]/90 hover:bg-[#1F2D3D] text-white text-xs sm:text-sm font-semibold px-3 py-2 sm:px-4 sm:py-2 rounded-full shadow-xl backdrop-blur-md transition-all duration-300 transform hover:scale-105 border border-white/20 cursor-pointer"
+      <div 
+        onClick={handleContainerClick}
+        className={`relative aspect-video rounded-2xl overflow-hidden shadow-2xl bg-white border border-slate-200 group cursor-pointer ${className}`}
       >
-        {isMuted ? (
-          <>
-            <VolumeX className="w-4 h-4 text-[#D59B2B] animate-pulse" />
-            <span>{labels.unmute}</span>
-          </>
-        ) : (
-          <>
-            <Volume2 className="w-4 h-4 text-emerald-400" />
-            <span>{labels.on}</span>
-          </>
-        )}
-      </button>
+        <video
+          key={videoSrc}
+          ref={videoRef}
+          title={meta.name}
+          className="w-full h-full object-contain mx-auto block"
+          autoPlay
+          loop
+          playsInline
+          controls
+          preload="auto"
+          poster="/videos/ductedexpert-presentation-poster.jpg"
+        >
+          <source src={videoSrc} type="video/mp4" />
+          Your browser does not support the video tag.
+        </video>
 
-      {/* Center Unmute Banner if Browser Blocked Sound on Cold Start */}
-      {isMuted && (
-        <div className="absolute inset-x-0 bottom-16 sm:bottom-20 z-20 flex justify-center pointer-events-none px-4">
-          <div className="bg-[#1F2D3D]/95 text-white px-5 py-2.5 rounded-full shadow-2xl backdrop-blur-md border border-[#D59B2B]/40 flex items-center gap-3 animate-bounce">
-            <Volume2 className="w-5 h-5 text-[#D59B2B]" />
-            <span className="text-sm font-semibold">{labels.unmute}</span>
+        {/* Floating Sound Toggle Pill */}
+        <button
+          onClick={toggleSound}
+          type="button"
+          aria-label={isMuted ? labels.unmute : labels.on}
+          className="absolute top-4 right-4 z-20 flex items-center gap-2 bg-[#1F2D3D]/90 hover:bg-[#1F2D3D] text-white text-xs sm:text-sm font-semibold px-3 py-2 sm:px-4 sm:py-2 rounded-full shadow-xl backdrop-blur-md transition-all duration-300 transform hover:scale-105 border border-white/20 cursor-pointer"
+        >
+          {isMuted ? (
+            <>
+              <VolumeX className="w-4 h-4 text-[#D59B2B] animate-pulse" />
+              <span>{labels.unmute}</span>
+            </>
+          ) : (
+            <>
+              <Volume2 className="w-4 h-4 text-emerald-400" />
+              <span>{labels.on}</span>
+            </>
+          )}
+        </button>
+
+        {/* Center Unmute Banner if Browser Blocked Sound on Cold Start */}
+        {isMuted && (
+          <div className="absolute inset-x-0 bottom-16 sm:bottom-20 z-20 flex justify-center pointer-events-none px-4">
+            <div className="bg-[#1F2D3D]/95 text-white px-5 py-2.5 rounded-full shadow-2xl backdrop-blur-md border border-[#D59B2B]/40 flex items-center gap-3 animate-bounce">
+              <Volume2 className="w-5 h-5 text-[#D59B2B]" />
+              <span className="text-sm font-semibold">{labels.unmute}</span>
+            </div>
           </div>
-        </div>
-      )}
-    </div>
+        )}
+      </div>
+    </>
   );
 }
