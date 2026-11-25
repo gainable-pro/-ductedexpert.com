@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Globe, Menu, ChevronDown } from "lucide-react";
+import { Globe, Menu, ChevronDown, ExternalLink } from "lucide-react";
 import Image from "next/image";
 import { LoginDropdown } from "@/components/layout/login-dropdown";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from "@/components/ui/sheet";
@@ -9,7 +9,6 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import * as React from "react";
 import { useLanguage } from "@/components/layout/language-provider";
 import { LOCALE_LABELS, Locale, SUPPORTED_LOCALES, stripLocalePrefix, withLocalePath, findRouteByPath, getLocalizedUrl } from "@/lib/i18n";
-import { CountryFlag } from "@/components/ui/country-flag";
 
 function LanguageSelector({ mobile = false }: { mobile?: boolean }) {
     const { locale, setLocale } = useLanguage();
@@ -88,16 +87,13 @@ function LanguageSelector({ mobile = false }: { mobile?: boolean }) {
                 aria-label="Select Language"
             >
                 <Globe className="w-3.5 h-3.5 text-[#D59B2B]" />
-                <span className="hidden md:inline-flex items-center">
-                    <CountryFlag code={LOCALE_LABELS[locale].flagCode} alt={locale} className="w-4 h-3" />
-                </span>
-                <span className="uppercase">{locale}</span>
+                <span className="uppercase tracking-wider">{locale}</span>
                 <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
             </button>
             {open && (
                 <>
                     <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
-                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-xl border border-slate-100 py-1.5 z-50">
+                    <div className="absolute right-0 mt-2 w-52 bg-white rounded-xl shadow-xl border border-slate-100 py-1.5 z-50">
                         <div className="px-3.5 py-1 text-[10px] uppercase font-bold text-slate-400 tracking-wider">
                             Language
                         </div>
@@ -112,13 +108,8 @@ function LanguageSelector({ mobile = false }: { mobile?: boolean }) {
                                         : "text-slate-700 hover:bg-slate-50"
                                 }`}
                             >
-                                <span className="flex items-center gap-2">
-                                    <span className="hidden md:inline-flex items-center">
-                                        <CountryFlag code={LOCALE_LABELS[loc].flagCode} alt={LOCALE_LABELS[loc].name} className="w-4 h-3" />
-                                    </span>
-                                    <span>{LOCALE_LABELS[loc].name}</span>
-                                </span>
-                                <span className="uppercase text-[10px] text-slate-400">{loc}</span>
+                                <span className="font-medium">{LOCALE_LABELS[loc].name}</span>
+                                <span className="uppercase text-[10px] font-bold text-slate-400">{loc}</span>
                             </button>
                         ))}
 
@@ -130,12 +121,7 @@ function LanguageSelector({ mobile = false }: { mobile?: boolean }) {
                             onClick={handleFrRedirect}
                             className="w-full flex items-center justify-between px-3.5 py-2 text-xs font-semibold text-slate-700 hover:bg-amber-50/70 hover:text-[#D59B2B] transition-colors"
                         >
-                            <span className="flex items-center gap-2">
-                                <span className="hidden md:inline-flex items-center">
-                                    <CountryFlag code="fr" alt="France" className="w-4 h-3" />
-                                </span>
-                                <span>Français</span>
-                            </span>
+                            <span>Français</span>
                             <span className="inline-flex items-center gap-1 text-[10px] text-amber-700 font-bold uppercase">
                                 gainable.fr ↗
                             </span>
